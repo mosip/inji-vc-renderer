@@ -29,7 +29,7 @@ const VC = {
       "policyExpiresOn": "2033-04-20"
     },
     "renderMethod": [{
-      "id": "https://<svg-host-url>/insurance_svg_template.svg",
+      "id": "https://<svg-template-host-url>_svg_template.svg",
       "type": "SvgRenderingTemplate",
       "name": "Portrait Mode",
       "css3MediaQuery": "@media (orientation: portrait)",

@@ -1,8 +1,8 @@
-const { fetchTemplate } = require('./Utils.js');
+const { fetchTemplate } = require('./Utils'); 
 
 class VCRenderer {
     static renderSVG = async (data) => {
-        if (!data.renderMethod) return ""; 
+        if (!data.renderMethod) return "";
 
         try {
             const templateUrl = data.renderMethod[0].id;
@@ -22,7 +22,7 @@ class VCRenderer {
             });
         } catch (error) {
             console.error('Failed to generate the SVG image:', error);
-            return ""; // Return an empty string if an exception occurs
+            return ""; 
         }
     };
 }

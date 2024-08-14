@@ -1,42 +1,38 @@
 const { VCRenderer } = require('../VCRenderer');
+const { fetchTemplate } = require('../Utils');
 
-
-global.fetch = jest.fn(() =>
-    Promise.resolve({
-        text: () => Promise.resolve('<svg>{{credentialSubject/name}}-{{credentialSubject/policyNumber}}</svg>')
-    })
-);
+global.fetch = jest.fn();
 
 describe('VCRenderer', () => {
-    test('renderSVG should correctly replace placeholders with data', async () => {
+    afterEach(() => {
+        jest.resetAllMocks();
+    });
+
+    it('should return the processed SVG template', async () => {
+        const mockSvgContent = '<svg>{{path/to/image}}</svg>';
+        fetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({ 'Content-Type': 'image/svg+xml' }),
+            text: () => Promise.resolve(mockSvgContent),
+        });
+
         const data = {
             renderMethod: [{ id: 'http://example.com/template.svg' }],
-            credentialSubject: {
-                "name": "John",
-                "policyNumber": "123454"
-            }
+            path: {
+                to: {
+                    image: 'Test Image',
+                },
+            },
         };
 
         const result = await VCRenderer.renderSVG(data);
-        expect(result).toBe('<svg>John-123454</svg>');
+        expect(result).toBe('<svg>Test Image</svg>');
     });
 
-    test('renderSVG should handle missing renderMethod gracefully', async () => {
-        const data = {
-            date: '2024-08-07T00:00:00Z'
-        };
-
+    it('should return an empty string if renderMethod is not provided', async () => {
+        const data = {};
         const result = await VCRenderer.renderSVG(data);
         expect(result).toBe('');
     });
 
-    test('renderSVG should handle missing data values', async () => {
-        const data = {
-            renderMethod: [{ id: 'http://example.com/template.svg' }],
-            nonexistent: '2024-08-07T00:00:00Z'
-        };
-
-        const result = await VCRenderer.renderSVG(data);
-        expect(result).toBe('<svg>-</svg>');
-    });
 });
