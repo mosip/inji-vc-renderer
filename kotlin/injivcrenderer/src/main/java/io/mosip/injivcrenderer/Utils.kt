@@ -4,7 +4,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.IOException
 
-object NetworkHelper {
+object Utils {
     fun fetchSvgAsText(url: String): String {
         val client = OkHttpClient()
         val request = Request.Builder()

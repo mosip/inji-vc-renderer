@@ -1,7 +1,5 @@
 package io.mosip.injivcrenderer
-import io.mosip.injivcrenderer.DateUtils.formatDate
-import io.mosip.injivcrenderer.DateUtils.isValidDateTime
-import io.mosip.injivcrenderer.NetworkHelper.fetchSvgAsText
+import io.mosip.injivcrenderer.Utils.fetchSvgAsText
 import okio.IOException
 import org.json.JSONObject
 
@@ -37,11 +35,7 @@ class InjiVcRenderer {
             return regex.replace(svgTemplate) { match ->
                 val key = match.groups[1]?.value?.trim() ?: ""
                 val value = getValueFromData(key, jsonObject)
-                when {
-                    value is String && isValidDateTime(value) -> formatDate(value)
-                    value != null -> value.toString()
-                    else -> ""
-                }
+                value?.toString() ?: ""
             }
         } catch (e: IOException) {
             e.printStackTrace()
