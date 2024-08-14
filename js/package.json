@@ -8,7 +8,8 @@
   "main": "VCRenderer.js",
   "scripts": {
     "example": "cd example && node example-app.js && cd ..",
-    "test": "jest"
+    "test": "jest",
+    "verify": "npm test"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

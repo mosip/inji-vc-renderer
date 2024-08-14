@@ -4,7 +4,7 @@ const VC = {
       "VerifiableCredential",
       "InsuranceCredential"
     ],
-    "issuer": "did:web:holashchand.github.io:test_project:32b08ca7-9979-4f42-aacc-1d73f3ac5322",
+    "issuer": "did:web:tester.github.io:test_project:1234567",
     "@context": [
       "https://www.w3.org/ns/credentials/v2",
       "https://www.w3.org/ns/credentials/examples/v2",
@@ -29,7 +29,7 @@ const VC = {
       "policyExpiresOn": "2033-04-20"
     },
     "renderMethod": [{
-      "id": "https://<svg-template-host-url>_svg_template.svg",
+      "id": "https://<svg-host-url>/insurance_svg_template.svg",
       "type": "SvgRenderingTemplate",
       "name": "Portrait Mode",
       "css3MediaQuery": "@media (orientation: portrait)",
@@ -37,8 +37,4 @@ const VC = {
     }]
   }
 
-const svgTemplate = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"250\" height=\"400\" viewBox=\"0 0 250 400\">\n" +
-    "<text x=\"20\" y=\"60\" fill = \"#0000ff\" font-size=\"18\" font-weight=\"bold\">Hi {{credentialSubject/name}}</text>\n" +
-    "</svg>";
-
-module.exports = {VC, svgTemplate};
+module.exports = {VC};
