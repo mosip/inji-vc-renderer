@@ -34,6 +34,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.pixelpass)
     implementation(libs.squareup.okhttp)
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
