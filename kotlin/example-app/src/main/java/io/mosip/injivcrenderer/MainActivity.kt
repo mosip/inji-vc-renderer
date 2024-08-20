@@ -47,7 +47,11 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             "policyName": "Sunbird Insurenc Policy",
             "policyNumber": "55555",
             "policyIssuedOn": "2023-04-20",
-            "policyExpiresOn": "2033-04-20"
+            "policyExpiresOn": "2033-04-20",
+            "benefits": [
+                "Critical Surgery",
+                "Full body checkup"
+            ]
         },
         "renderMethod" : [
                 {
