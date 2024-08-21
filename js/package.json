@@ -1,0 +1,25 @@
+{
+  "name": "@mosip/svg-renderer",
+  "version": "0.1.0",
+  "repository": "https://github.com/mosip/inji-vc-renderer",
+  "author": "MOSIP",
+  "license": "MIT",
+  "description": "JS library to render VC with SVG template support",
+  "main": "VCRenderer.js",
+  "scripts": {
+    "example": "cd example && node example-app.js && cd ..",
+    "test": "jest",
+    "verify": "npm test"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "@mosip/pixelpass": "^0.2.1",
+    "expect": "^29.7.0",
+    "node-fetch": "^3.3.2"
+  }
+}
