@@ -45,6 +45,7 @@ dependencies {
 tasks {
     register<Wrapper>("wrapper") {
         gradleVersion = "8.5"
+        validateDistributionUrl = true
     }
 }
 
