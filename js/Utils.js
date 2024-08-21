@@ -1,4 +1,10 @@
 
+const { generateQRCode } = require('@mosip/pixelpass'); 
+
+
+const QRCODE_PLACEHOLDER = "{{qrCodeImage}}"
+
+
 function fetchTemplate(url) {
     return fetch(url)
         .then(response => {
@@ -22,4 +28,15 @@ function fetchTemplate(url) {
         });
 }
 
-module.exports = { fetchTemplate };
+async function replaceQrCode(data, templateString) {
+    try{
+        const qrCode = await generateQRCode(data);
+        return templateString.replace(QRCODE_PLACEHOLDER, qrCode)
+    } catch(error){
+        console.error("Error while Generating Qr code::",error)
+        return templateString
+    }
+    
+}
+
+module.exports = { fetchTemplate, replaceQrCode };

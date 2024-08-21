@@ -1,4 +1,4 @@
-const { fetchTemplate } = require('./Utils'); 
+const { fetchTemplate, replaceQrCode } = require('./Utils'); 
 
 class VCRenderer {
     static renderSVG = async (data) => {
@@ -6,9 +6,9 @@ class VCRenderer {
 
         try {
             const templateUrl = data.renderMethod[0].id;
-            const templateString = await fetchTemplate(templateUrl);
-
-            // Process the templateString as needed
+            var templateString = await fetchTemplate(templateUrl);
+           templateString = await replaceQrCode(JSON.stringify(data), templateString)
+        
             return templateString.replace(/{{(.*?)}}/g, (match, key) => {
                 key = key.replace(/^\//, '').replace(/\/$/, '');
                 const keys = key.split('/');
