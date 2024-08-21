@@ -1,6 +1,8 @@
 name: Kotlin Artifacts Build
 
 on:
+  pull_request:
+    types: [ opened, reopened, synchronize ]
   workflow_dispatch:
     inputs:
       message:
@@ -8,10 +10,14 @@ on:
         required: false
         default: 'Triggered for Inji VC Renderer Updates'
         type: string
+  push:
+    branches:
+      - release*
+      - master
+      - develop*
 
 jobs:
   maven-publish:
-    if: "${{ !contains(github.ref, 'master') }}"
     uses: mosip/kattu/.github/workflows/maven-publish-android.yml@master
     with:
       SERVICE_LOCATION: 'kotlin'
