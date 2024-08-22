@@ -22,9 +22,8 @@ jobs:
     with:
       SERVICE_LOCATION: './js'
       BUILD_ARTIFACT: inji-vc-renderer
-      NPM_BUILD_TYPE: 'BOB'
-      secrets:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
   publish-injivcrenderer-to-npm-registry:
     if: "${{ !contains(github.ref, 'master') && github.event_name != 'pull_request' &&  github.event_name == 'workflow_dispatch' }}"
