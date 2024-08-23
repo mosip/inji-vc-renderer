@@ -1,4 +1,5 @@
 const { fetchTemplate } = require('../Utils');
+
 global.fetch = jest.fn();
 
 describe('fetchTemplate', () => {
@@ -10,7 +11,9 @@ describe('fetchTemplate', () => {
         const mockSvgContent = '<svg></svg>';
         fetch.mockResolvedValueOnce({
             ok: true,
-            headers: new Headers({ 'Content-Type': 'image/svg+xml' }),
+            headers: {
+                get: (name) => (name === 'Content-Type' ? 'image/svg+xml' : null),
+            },
             text: () => Promise.resolve(mockSvgContent),
         });
 
@@ -21,7 +24,9 @@ describe('fetchTemplate', () => {
     it('should handle non-SVG content types', async () => {
         fetch.mockResolvedValueOnce({
             ok: true,
-            headers: new Headers({ 'Content-Type': 'text/html' }),
+            headers: {
+                get: (name) => (name === 'Content-Type' ? 'text/html' : null),
+            },
             text: () => Promise.resolve('<html></html>'),
         });
 
@@ -43,7 +48,9 @@ describe('fetchTemplate', () => {
     it('should handle empty response body', async () => {
         fetch.mockResolvedValueOnce({
             ok: true,
-            headers: new Headers({ 'Content-Type': 'image/svg+xml' }),
+            headers: {
+                get: (name) => (name === 'Content-Type' ? 'image/svg+xml' : null),
+            },
             text: () => Promise.resolve(''),
         });
 
@@ -52,12 +59,19 @@ describe('fetchTemplate', () => {
     });
 
     it('should log errors', async () => {
-        console.error = jest.fn(); // Mock console.error
+        console.error = jest.fn();
 
         fetch.mockRejectedValueOnce(new Error('Network error'));
-
         const result = await fetchTemplate('http://example.com/error');
         expect(result).toBe('');
-        expect(console.error).toHaveBeenCalledWith('Error fetching SVG:', expect.any(Error));
+    
+        const errorCalls = console.error.mock.calls;
+        console.log('Console Error Calls:', console.error.mock.calls);
+        expect(errorCalls.length).toBe(1);
+    
+        expect(errorCalls[0][0]).toBe('Error fetching SVG:');
+        expect(errorCalls[0][1]).toBeInstanceOf(Error);
+        expect(errorCalls[0][1].message).toBe('Network error');
     });
+    
 });

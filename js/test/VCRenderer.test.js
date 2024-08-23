@@ -12,7 +12,9 @@ describe('VCRenderer', () => {
         const mockSvgContent = '<svg>{{path/to/image}}</svg>';
         fetch.mockResolvedValueOnce({
             ok: true,
-            headers: new Headers({ 'Content-Type': 'image/svg+xml' }),
+            headers: {
+                get: (name) => (name === 'Content-Type' ? 'image/svg+xml' : null),
+            },
             text: () => Promise.resolve(mockSvgContent),
         });
 

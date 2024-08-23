@@ -9,6 +9,7 @@
   "scripts": {
     "example": "cd example && node example-app.js && cd ..",
     "test": "jest",
+    "build": "npm test",
     "verify": "npm test"
   },
   "devDependencies": {
