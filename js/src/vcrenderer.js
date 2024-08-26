@@ -1,4 +1,4 @@
-const { fetchTemplate, replaceQrCode } = require('./Utils'); 
+const { fetchTemplate, replaceQrCode } = require('../src/utils.js'); 
 
 class VCRenderer {
     static renderSVG = async (data) => {

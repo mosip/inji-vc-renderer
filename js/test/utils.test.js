@@ -1,4 +1,4 @@
-const { fetchTemplate } = require('../Utils');
+const { fetchTemplate } = require('../src/utils');
 
 global.fetch = jest.fn();
 

@@ -1,5 +1,4 @@
-
-const { generateQRCode } = require('@mosip/pixelpass'); 
+const { generateQRCode } = require('@mosip/pixelpass');
 
 
 const QRCODE_PLACEHOLDER = "{{qrCodeImage}}"
