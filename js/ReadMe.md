@@ -15,7 +15,7 @@
 
 ### VC rendering Methods
 
-- **VCRenderer.renderSVG(vcData)** 
+- **Vcrenderer.renderSVG(vcData)** 
   - This method takes entire VC data as input.
   - Extracts the svg template url from the render method
   - Downloads the SVG XML string.

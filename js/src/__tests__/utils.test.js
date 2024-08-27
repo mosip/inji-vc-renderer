@@ -1,4 +1,4 @@
-const { fetchTemplate } = require('../src/utils');
+const { fetchTemplate } = require('../utils.ts');
 
 global.fetch = jest.fn();
 
@@ -64,14 +64,14 @@ describe('fetchTemplate', () => {
         fetch.mockRejectedValueOnce(new Error('Network error'));
         const result = await fetchTemplate('http://example.com/error');
         expect(result).toBe('');
-    
+
         const errorCalls = console.error.mock.calls;
         console.log('Console Error Calls:', console.error.mock.calls);
         expect(errorCalls.length).toBe(1);
-    
+
         expect(errorCalls[0][0]).toBe('Error fetching SVG:');
         expect(errorCalls[0][1]).toBeInstanceOf(Error);
         expect(errorCalls[0][1].message).toBe('Network error');
     });
-    
+
 });

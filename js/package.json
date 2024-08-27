@@ -5,12 +5,14 @@
   "author": "MOSIP",
   "license": "MIT",
   "description": "JS library to render VC with SVG template support",
-  "main": "dist/injivcrenderer.bundle.js",
+  "main": "lib/commonjs/vcrenderer",
+  "module": "lib/module/vcrenderer",
   "scripts": {
-    "example": "npm run build && cd example && node example-app.js && cd ..",
-    "test": "jest",
-    "build": "webpack",
-    "verify": "npm test"
+    "build": "bob build",
+    "clean": "rm -rf lib",
+    "test": "jest --coverage",
+    "verify": "npm run test && bob build",
+    "example": "npm run build && node example/example-app.js"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -18,12 +20,29 @@
     "babel-jest": "^29.7.0",
     "babel-loader": "^9.1.3",
     "jest": "^29.7.0",
-    "webpack": "^5.94.0",
-    "webpack-cli": "^5.1.4"
+    "@types/jest": "^29.5.12",
+    "react-native-builder-bob": "^0.20.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^4.9.5"
   },
   "dependencies": {
     "@mosip/pixelpass": "^0.2.1",
     "expect": "^29.7.0",
     "node-fetch": "^3.3.2"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "module",
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json",
+          "tsc": "./node_modules/.bin/tsc"
+        }
+      ]
+    ]
   }
 }
