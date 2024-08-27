@@ -1,5 +1,5 @@
-const { VCRenderer } = require('../VCRenderer');
-const { fetchTemplate } = require('../Utils');
+const { VCRenderer } = require('../vcrenderer.ts');
+const { fetchTemplate } = require('../utils.ts');
 
 global.fetch = jest.fn();
 

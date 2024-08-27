@@ -22,6 +22,7 @@ jobs:
     with:
       SERVICE_LOCATION: './js'
       BUILD_ARTIFACT: inji-vc-renderer
+      NPM_BUILD_TYPE: 'BOB'
     secrets:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
 

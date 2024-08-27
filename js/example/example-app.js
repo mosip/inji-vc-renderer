@@ -1,5 +1,5 @@
-const {VCRenderer} = require("../VCRenderer.js")
-const {VC} = require('./VCData.js')
- VCRenderer.renderSVG(VC).then(
-    (response) => console.log("SVG Image-->",response)
+const {VCRenderer} = require("../lib/commonJs/vcrenderer.js")
+const {VC} = require('./sample-vc.js')
+VCRenderer.renderSVG(VC).then(
+    (response) => console.log("SVG Image->",response)
 );

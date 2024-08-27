@@ -1,11 +1,8 @@
+import { generateQRCode } from '@mosip/pixelpass'; // Ensure @mosip/pixelpass provides TypeScript definitions
 
-const { generateQRCode } = require('@mosip/pixelpass'); 
+const QRCODE_PLACEHOLDER = "{{qrCodeImage}}";
 
-
-const QRCODE_PLACEHOLDER = "{{qrCodeImage}}"
-
-
-function fetchTemplate(url) {
+export function fetchTemplate(url: string): Promise<string> {
     return fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -24,19 +21,16 @@ function fetchTemplate(url) {
         })
         .catch(error => {
             console.error('Error fetching SVG:', error);
-            return ''; 
+            return '';
         });
 }
 
-async function replaceQrCode(data, templateString) {
-    try{
+export async function replaceQrCode(data: string, templateString: string): Promise<string> {
+    try {
         const qrCode = await generateQRCode(data);
-        return templateString.replace(QRCODE_PLACEHOLDER, qrCode)
-    } catch(error){
-        console.error("Error while Generating Qr code::",error)
-        return templateString
+        return templateString.replace(QRCODE_PLACEHOLDER, qrCode);
+    } catch (error) {
+        console.error("Error while generating QR code:", error);
+        return templateString;
     }
-    
 }
-
-module.exports = { fetchTemplate, replaceQrCode };
