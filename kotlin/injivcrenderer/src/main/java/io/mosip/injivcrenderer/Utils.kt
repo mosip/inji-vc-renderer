@@ -15,14 +15,10 @@ object Utils {
             if (!response.isSuccessful) {
                 throw IOException("Unexpected code $response")
             }
-
-            // Check Content-Type
             val contentType = response.header("Content-Type")
             if (contentType != "image/svg+xml") {
                 throw IOException("Expected image/svg+xml but received $contentType")
             }
-
-            // Return SVG as text
             return response.body?.string() ?: throw IOException("Empty response body")
         }
     }

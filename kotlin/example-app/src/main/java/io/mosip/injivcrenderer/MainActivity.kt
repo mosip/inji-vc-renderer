@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
 
-    val sampleJson = """
+    val insuranceVcJson = """
     {
         "credentialSubject": {
             "id": "",
@@ -62,6 +62,71 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
               ]
     }
     """.trimIndent()
+
+    val nationalIDVcJson = """
+    {
+        "@context": [
+            "https://credentials/v1",
+            "https:///.well-known/ida.json",
+            {
+                "sec": "https://security#"
+            }
+        ],
+        "credentialSubject": {
+            "VID": "6532781704389407",
+            "face": "data:image/jpeg;base64,/9j/4",
+            "gender": [
+                {
+                    "language": "eng",
+                    "value": "MLE"
+                }
+            ],
+            "phone": "+++7765837077",
+            "city": [
+                {
+                    "language": "eng",
+                    "value": "TEST_CITYeng"
+                }
+            ],
+            "fullName": [
+                {
+                    "language": "eng",
+                    "value": "TEST_FULLNAMEeng"
+                }
+            ],
+            "addressLine1": [
+                {
+                    "language": "eng",
+                    "value": "TEST_ADDRESSLINE1eng"
+                }
+            ],
+            "dateOfBirth": "1992/04/15",
+            "id": "did:jwk:eyJrdHkiOiJSU0EiL",
+            "email": "mosipuser123@mailinator.com"
+        },
+        "id": "https://test.net/credentials/abcdefgh-a",
+        "issuanceDate": "2024-09-02T17:36:13.644Z",
+        "issuer": "https://test.netf/.well-known/controller.json",
+        "proof": {
+            "created": "2024-09-02T17:36:13Z",
+            "jws": "eyJiNj",
+            "proofPurpose": "assertionMethod",
+            "type": "RsaSignature2018",
+            "verificationMethod": "https://test/.well-known/public-key.json"
+        },
+        "type": [
+            "VerifiableCredential",
+            "TestVerifiableCredential"
+        ],
+        "renderMethod": [
+            {
+                "id": "https://<local-host>/insurance_svg_template.svg",
+                "type": "SvgRenderingTemplate",
+                "name": "Portrait Mode"
+            }
+        ]
+    }
+    """.trimIndent()
     Column() {
         Text(
             text = "Hello World!",
@@ -70,7 +135,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         Button(onClick = {
             val thread = Thread {
                 try {
-                    val replacedTemplate = InjiVcRenderer().renderSvg(sampleJson)
+                    val replacedTemplate = InjiVcRenderer().renderSvg(nationalIDVcJson)
                     System.out.println("Replaced Template-->$replacedTemplate")
                 } catch (e: Exception) {
                     e.printStackTrace()
