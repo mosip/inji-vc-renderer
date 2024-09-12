@@ -12,10 +12,12 @@ class VCRenderer {
       const templateUrl = data.renderMethod[0].id;
       let templateString = await (0, _utils.fetchTemplate)(templateUrl);
       templateString = await (0, _utils.replaceQrCode)(JSON.stringify(data), templateString);
+      templateString = (0, _utils.replaceBenefits)(data, templateString);
+      templateString = await (0, _utils.replaceAddress)(data, templateString);
       return templateString.replace(/{{(.*?)}}/g, (match, key) => {
         key = key.replace(/^\//, '').replace(/\/$/, '');
         const keys = key.split('/');
-        let value = data; // Type as any for dynamic property access
+        let value = data;
         keys.forEach(k => {
           if (value) {
             value = value[k];

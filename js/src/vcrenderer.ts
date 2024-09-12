@@ -1,4 +1,4 @@
-import { fetchTemplate, replaceQrCode } from './utils';
+import { fetchTemplate, replaceAddress, replaceBenefits, replaceQrCode } from './utils';
 
 interface RenderMethod {
     id: string;
@@ -17,6 +17,10 @@ export class VCRenderer {
             const templateUrl = data.renderMethod[0].id;
             let templateString = await fetchTemplate(templateUrl);
             templateString = await replaceQrCode(JSON.stringify(data), templateString);
+            
+            templateString = replaceBenefits(data, templateString)
+            templateString = await replaceAddress(data, templateString);
+
             return templateString.replace(/{{(.*?)}}/g, (match: string, key: string) => {
                 key = key.replace(/^\//, '').replace(/\/$/, '');
                 const keys = key.split('/');

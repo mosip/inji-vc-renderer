@@ -1,4 +1,4 @@
-import { fetchTemplate, replaceQrCode } from './utils';
+import { fetchTemplate, replaceAddress, replaceBenefits, replaceQrCode } from './utils';
 export class VCRenderer {
   static async renderSVG(data) {
     if (!data.renderMethod) return "";
@@ -6,10 +6,12 @@ export class VCRenderer {
       const templateUrl = data.renderMethod[0].id;
       let templateString = await fetchTemplate(templateUrl);
       templateString = await replaceQrCode(JSON.stringify(data), templateString);
+      templateString = replaceBenefits(data, templateString);
+      templateString = await replaceAddress(data, templateString);
       return templateString.replace(/{{(.*?)}}/g, (match, key) => {
         key = key.replace(/^\//, '').replace(/\/$/, '');
         const keys = key.split('/');
-        let value = data; // Type as any for dynamic property access
+        let value = data;
         keys.forEach(k => {
           if (value) {
             value = value[k];
