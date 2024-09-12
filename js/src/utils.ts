@@ -82,7 +82,7 @@ export function replaceAddress(jsonObject: any, svgTemplate: string): string {
     }
   }
 
-function replaceMultiLinePlaceholders(
+export function replaceMultiLinePlaceholders(
     svgTemplate: string,
     dataToSplit: string,
     maxLength: number,
