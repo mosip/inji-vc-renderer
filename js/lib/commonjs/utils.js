@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.fetchTemplate = fetchTemplate;
 exports.replaceAddress = replaceAddress;
 exports.replaceBenefits = replaceBenefits;
+exports.replaceMultiLinePlaceholders = replaceMultiLinePlaceholders;
 exports.replaceQrCode = replaceQrCode;
 var _pixelpass = require("@mosip/pixelpass");
 const QRCODE_PLACEHOLDER = "{{qrCodeImage}}";

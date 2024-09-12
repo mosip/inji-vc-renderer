@@ -71,7 +71,7 @@ export function replaceAddress(jsonObject, svgTemplate) {
     return svgTemplate;
   }
 }
-function replaceMultiLinePlaceholders(svgTemplate, dataToSplit, maxLength, placeholdersList) {
+export function replaceMultiLinePlaceholders(svgTemplate, dataToSplit, maxLength, placeholdersList) {
   try {
     var _dataToSplit$match;
     const segments = ((_dataToSplit$match = dataToSplit.match(new RegExp(`.{1,${maxLength}}`, 'g'))) === null || _dataToSplit$match === void 0 ? void 0 : _dataToSplit$match.slice(0, 2)) || [];
