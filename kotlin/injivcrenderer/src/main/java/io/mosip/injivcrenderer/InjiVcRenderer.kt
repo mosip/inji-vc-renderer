@@ -58,7 +58,7 @@ class InjiVcRenderer {
         }
     }
 
-    private fun replaceQRCode(vcJson: String, svgTemplate: String): String {
+    fun replaceQRCode(vcJson: String, svgTemplate: String): String {
         try {
             val pixelPass = PixelPass()
             val qrCode: Bitmap = pixelPass.generateQRCode(vcJson)
@@ -77,51 +77,59 @@ class InjiVcRenderer {
 
     }
 
-    private fun replaceBenefits(jsonObject: JSONObject, svgTemplate: String): String {
-        try {
-            val credentialSubject = jsonObject.getJSONObject("credentialSubject")
-            val benefitsArray = credentialSubject.getJSONArray("benefits")
-            val benefitsString = (0 until benefitsArray.length())
-                .map { benefitsArray.getString(it) }
-                .joinToString(",")
-            val benefitsPlaceholderList = listOf(BENEFITS_PLACEHOLDER_1, BENEFITS_PLACEHOLDER_2)
-            val replacedSvgWithBenefits = wrapBasedOnCharacterLength(svgTemplate, benefitsString, 55, benefitsPlaceholderList)
+    fun replaceBenefits(jsonObject: JSONObject, svgTemplate: String): String {
+        return try {
+            val credentialSubject = jsonObject.optJSONObject("credentialSubject") ?: return svgTemplate
 
-            return replacedSvgWithBenefits
-        } catch (e: Exception){
+            val benefitsArray = credentialSubject.optJSONArray("benefits") ?: return svgTemplate
+
+            val benefitsString = (0 until benefitsArray.length())
+                .mapNotNull { benefitsArray.optString(it).takeIf { it.isNotEmpty() } }
+                .joinToString(",")
+
+            val benefitsPlaceholderList = listOf(BENEFITS_PLACEHOLDER_1, BENEFITS_PLACEHOLDER_2)
+
+            wrapBasedOnCharacterLength(svgTemplate, benefitsString, 55, benefitsPlaceholderList)
+        } catch (e: Exception) {
             e.printStackTrace()
-            return svgTemplate
+            svgTemplate
         }
     }
 
-    private fun replaceAddress(jsonObject: JSONObject, svgTemplate: String): String {
-        try {
-            val credentialSubject = jsonObject.getJSONObject("credentialSubject")
-            val fields = listOf(ADDRESS_LINE_1, ADDRESS_LINE_2, ADDRESS_LINE_3, CITY, PROVINCE, REGION, POSTAL_CODE)
+
+    fun replaceAddress(jsonObject: JSONObject, svgTemplate: String): String {
+        return try {
+
+            val credentialSubject = jsonObject.optJSONObject("credentialSubject") ?: return svgTemplate
+
+            val fields = listOf(ADDRESS_LINE_1, ADDRESS_LINE_2, CITY, PROVINCE, POSTAL_CODE, REGION)
             val values = mutableListOf<String>()
 
             for (field in fields) {
-                if (credentialSubject.has(field)) {
-                    val array = credentialSubject.getJSONArray(field)
-                    if (array.length() > 0) {
-                        val value = array.getJSONObject(0).optString("value", "").trim()
+                val array = credentialSubject.optJSONArray(field)
+                if (array != null && array.length() > 0) {
+                    val value = array.optJSONObject(0)?.optString("value", "")?.trim()
+                    if (value != null) {
                         if (value.isNotEmpty()) {
                             values.add(value)
                         }
                     }
                 }
             }
-            val fullAddress = values.joinToString(separator = ",")
-            val addressPlacholderList = listOf(FULL_ADDRESS_PLACEHOLDER_1, FULL_ADDRESS_PLACEHOLDER_2)
-            val replacedSvgWithFullAddress = wrapBasedOnCharacterLength(svgTemplate, fullAddress, 55, addressPlacholderList)
-            return replacedSvgWithFullAddress
+
+            val fullAddress = values.joinToString(separator = ", ")
+
+            val addressPlaceholderList = listOf(FULL_ADDRESS_PLACEHOLDER_1, FULL_ADDRESS_PLACEHOLDER_2)
+
+            wrapBasedOnCharacterLength(svgTemplate, fullAddress, 55, addressPlaceholderList)
         } catch (e: Exception) {
             e.printStackTrace()
-            return svgTemplate
+            svgTemplate
         }
     }
 
-    private fun wrapBasedOnCharacterLength(svgTemplate: String,
+
+    fun wrapBasedOnCharacterLength(svgTemplate: String,
                                              dataToSplit: String,
                                              maxLength: Int,
                                              placeholdersList: List<String>): String{
