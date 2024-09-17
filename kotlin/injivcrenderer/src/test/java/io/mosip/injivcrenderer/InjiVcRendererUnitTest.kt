@@ -152,6 +152,25 @@ class InjiVcRendererTest {
     }
 
     @Test
+    fun testInvalidLocaledBasedValue() {
+        val jsonObject = mock(JSONObject::class.java)
+        val credentialSubject = mock(JSONObject::class.java)
+        val genderArray = mock(JSONArray::class.java)
+
+        `when`(jsonObject.optJSONObject("credentialSubject")).thenReturn(credentialSubject)
+        `when`(credentialSubject.optJSONArray("gender")).thenReturn(genderArray)
+        `when`(genderArray.length()).thenReturn(2)
+
+        val genderEngObject = mock(JSONObject::class.java)
+        `when`(genderEngObject.optString("value", "")).thenReturn("MLE")
+        `when`(genderEngObject.optString("language", "")).thenReturn("eng")
+        `when`(genderArray.optJSONObject(0)).thenReturn(genderEngObject)
+
+        val result = renderer.replaceLocaleBasedValue("credentialSubject/gender_tam", jsonObject)
+        assertNull(result)
+    }
+
+    @Test
     fun testReplaceBenefitsWithLongText() {
 
         val jsonObject = mock<JSONObject>()
@@ -172,6 +191,7 @@ class InjiVcRendererTest {
         assertEquals(expectedOutput, result)
     }
 
+
     @Test
     fun testWrapBasedOnCharacterLength() {
 
@@ -185,6 +205,8 @@ class InjiVcRendererTest {
 
         assertEquals(expectedOutput, result)
     }
+
+
 
     @Test
     fun testWrapBasedOnCharacterLengthWithLongText() {
@@ -289,4 +311,6 @@ class InjiVcRendererTest {
         val result = renderer.getValueFromData("any/path", jsonObject)
         assertNull(result)
     }
+
+
 }

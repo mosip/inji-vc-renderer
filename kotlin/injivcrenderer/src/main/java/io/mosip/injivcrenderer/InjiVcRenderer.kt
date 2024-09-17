@@ -48,8 +48,14 @@ class InjiVcRenderer {
             val regex = Regex(PLACEHOLDER_REGEX_PATTERN)
             var result = regex.replace(svgTemplate) { match ->
                 val key = match.groups[1]?.value?.trim() ?: ""
-                val value = getValueFromData(key, jsonObject)
-                value?.toString() ?: ""
+                if(key.contains("_")){
+                    val value = replaceLocaleBasedValue(key, jsonObject)
+                    value ?: ""
+                } else {
+                    val value = getValueFromData(key, jsonObject)
+                    value?.toString() ?: ""
+                }
+
             }
             return result
         } catch (e: Exception) {
@@ -102,7 +108,8 @@ class InjiVcRenderer {
 
             val credentialSubject = jsonObject.optJSONObject("credentialSubject") ?: return svgTemplate
 
-            val fields = listOf(ADDRESS_LINE_1, ADDRESS_LINE_2, CITY, PROVINCE, POSTAL_CODE, REGION)
+            val fields = listOf(ADDRESS_LINE_1, ADDRESS_LINE_2,
+                ADDRESS_LINE_3, CITY, PROVINCE, POSTAL_CODE, REGION)
             val values = mutableListOf<String>()
 
             for (field in fields) {
@@ -146,6 +153,29 @@ class InjiVcRenderer {
             e.printStackTrace()
             return svgTemplate
         }
+    }
+
+    fun replaceLocaleBasedValue(placeholderKey: String, vcJSONObject: JSONObject): String? {
+        try {
+            val jsonPath = placeholderKey.substringBefore('_')
+            val language = placeholderKey.substringAfter('_')
+
+            val value = getValueFromData(jsonPath, vcJSONObject) as? JSONArray
+                ?: return null
+
+            for (i in 0 until value.length()) {
+                val jsonObject = value.optJSONObject(i) ?: continue
+                if (jsonObject.optString("language") == language) {
+                    return jsonObject.optString("value", null)
+                }
+            }
+            return null;
+        } catch (e: Exception){
+            e.printStackTrace()
+            return null;
+
+        }
+
     }
 
     companion object{
