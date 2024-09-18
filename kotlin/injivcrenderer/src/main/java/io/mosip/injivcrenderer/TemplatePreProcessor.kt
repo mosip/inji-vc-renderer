@@ -33,7 +33,7 @@ class TemplatePreProcessor {
         val fullAddressRegexPattern = Regex(FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN)
         if(fullAddressRegexPattern.containsMatchIn(svgTemplate)) {
             val fullAddressPlaceholders = getPlaceholdersList(fullAddressRegexPattern, preProcessedSvgTemplate);
-            preProcessedSvgTemplate =  replaceAddress(
+            preProcessedSvgTemplate =  transformAddressFieldsIntoMultiline(
                     JSONObject(vcJsonString),
                     preProcessedSvgTemplate,
                     MultiLineProperties(fullAddressPlaceholders, 55))
@@ -91,7 +91,7 @@ class TemplatePreProcessor {
     }
 
 
-    fun replaceAddress(
+    fun transformAddressFieldsIntoMultiline(
         jsonObject: JSONObject,
         svgTemplate: String,
         multiLineProperties: MultiLineProperties
@@ -104,13 +104,13 @@ class TemplatePreProcessor {
             )
             val values = mutableListOf<String>()
             val fullAddressRegexToExtractLanguage = "\\{\\{fullAddress1_(\\w+)\\}\\}".toRegex()
-            val language =  fullAddressRegexToExtractLanguage.find(svgTemplate)?.groupValues?.get(1)
+            val language = fullAddressRegexToExtractLanguage.find(svgTemplate)?.groupValues?.get(1)
 
             for (field in fields) {
                 val array = credentialSubject.optJSONArray(field)
                 if (array != null && array.length() > 0) {
                     val value = getValueBasedOnLanguage(array, language.orEmpty())
-                    if(value.isNotEmpty()){
+                    if (value.isNotEmpty()) {
                         values.add(value)
                     }
                 }

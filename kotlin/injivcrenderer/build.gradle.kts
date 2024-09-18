@@ -42,6 +42,7 @@ dependencies {
     testImplementation(libs.mockito.inline)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.robolectric)
 
 }
 
