@@ -3,6 +3,7 @@ package io.mosip.injivcrenderer
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.IOException
+import org.json.JSONArray
 
 object Utils {
 
@@ -28,5 +29,15 @@ object Utils {
         } catch (e: Exception) {
             throw IOException("Unexpected error", e)
         }
+    }
+
+    fun getValueBasedOnLanguage(arrayOfObjects: JSONArray, language: String): String{
+        for (i in 0 until arrayOfObjects.length()) {
+            val jsonObject = arrayOfObjects.optJSONObject(i) ?: continue
+            if (jsonObject.optString("language") == language) {
+                return jsonObject.optString("value", "")
+            }
+        }
+        return "";
     }
 }
