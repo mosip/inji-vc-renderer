@@ -103,3 +103,12 @@ export function replaceMultiLinePlaceholders(
       return svgTemplate;
     }
   }
+
+  export function getValueBasedOnLanguage(arrayOfObjects: any[], language: string): string {
+    for (const jsonObject of arrayOfObjects) {
+        if (jsonObject.language === language) {
+            return jsonObject.value || ""; 
+        }
+    }
+    return "";
+}

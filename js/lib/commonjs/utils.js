@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.fetchTemplate = fetchTemplate;
+exports.getValueBasedOnLanguage = getValueBasedOnLanguage;
 exports.replaceAddress = replaceAddress;
 exports.replaceBenefits = replaceBenefits;
 exports.replaceMultiLinePlaceholders = replaceMultiLinePlaceholders;
@@ -96,5 +97,13 @@ function replaceMultiLinePlaceholders(svgTemplate, dataToSplit, maxLength, place
     console.error(e);
     return svgTemplate;
   }
+}
+function getValueBasedOnLanguage(arrayOfObjects, language) {
+  for (const jsonObject of arrayOfObjects) {
+    if (jsonObject.language === language) {
+      return jsonObject.value || "";
+    }
+  }
+  return "";
 }
 //# sourceMappingURL=utils.js.map

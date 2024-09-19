@@ -87,4 +87,12 @@ export function replaceMultiLinePlaceholders(svgTemplate, dataToSplit, maxLength
     return svgTemplate;
   }
 }
+export function getValueBasedOnLanguage(arrayOfObjects, language) {
+  for (const jsonObject of arrayOfObjects) {
+    if (jsonObject.language === language) {
+      return jsonObject.value || "";
+    }
+  }
+  return "";
+}
 //# sourceMappingURL=utils.js.map

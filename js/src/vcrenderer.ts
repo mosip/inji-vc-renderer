@@ -1,3 +1,4 @@
+import { preProcessTemplate } from './preprocessor';
 import { fetchTemplate, replaceAddress, replaceBenefits, replaceQrCode } from './utils';
 
 interface RenderMethod {
@@ -15,19 +16,23 @@ export class VCRenderer {
 
         try {
             const templateUrl = data.renderMethod[0].id;
-            let templateString = await fetchTemplate(templateUrl);
-            templateString = await replaceQrCode(JSON.stringify(data), templateString);
-            
-            templateString = replaceBenefits(data, templateString)
-            templateString = await replaceAddress(data, templateString);
+            let svgTemplate = await fetchTemplate(templateUrl);
 
-            return templateString.replace(/{{(.*?)}}/g, (match: string, key: string) => {
+            svgTemplate = await preProcessTemplate(JSON.stringify(data), svgTemplate)
+
+            return svgTemplate.replace(/{{(.*?)}}/g, (match: string, key: string) => {
                 key = key.replace(/^\//, '').replace(/\/$/, '');
                 const keys = key.split('/');
                 let value: any = data;
                 keys.forEach((k: string) => {
                     if (value) {
-                        value = value[k];
+                                if (k.includes('_')) {
+                                    const jsonPath = k.split('_')[0];
+                                    const language = k.split('_')[1];
+                                    value = value[jsonPath].find((g: any) => g.language === language)?.value;
+                                } else {
+                                    value = value[k];
+                                }
                     }
                 });
                 return value !== undefined ? String(value) : '';

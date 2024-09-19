@@ -66,7 +66,6 @@ describe('fetchTemplate', () => {
         expect(result).toBe('');
 
         const errorCalls = console.error.mock.calls;
-        console.log('Console Error Calls:', console.error.mock.calls);
         expect(errorCalls.length).toBe(1);
 
         expect(errorCalls[0][0]).toBe('Error fetching SVG:');
