@@ -65,7 +65,7 @@ export function transformArrayFieldsIntoMultiline(jsonObject, svgTemplate, multi
     return svgTemplate;
   }
 }
-function transformAddressFieldsIntoMultiline(jsonObject, svgTemplate, multiLineProperties) {
+export function transformAddressFieldsIntoMultiline(jsonObject, svgTemplate, multiLineProperties) {
   try {
     const credentialSubject = jsonObject.credentialSubject || {};
     const fields = [ADDRESS_LINE_1, ADDRESS_LINE_2, ADDRESS_LINE_3, CITY, PROVINCE, POSTAL_CODE, REGION];

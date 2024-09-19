@@ -68,7 +68,6 @@ import { getValueBasedOnLanguage } from "./utils";
             const fieldName = multiLineProperties.fieldName;
             if(!fieldName){
                 return svgTemplate
-            
             }
             const fieldArray = credentialSubject[fieldName] as string[];
             const commaSeparatedFieldElements = fieldArray.join(',');
@@ -83,7 +82,7 @@ import { getValueBasedOnLanguage } from "./utils";
         }
     }
     
-    function transformAddressFieldsIntoMultiline(
+export function transformAddressFieldsIntoMultiline(
         jsonObject: any,
         svgTemplate: string,
         multiLineProperties: MultiLineProperties
@@ -98,7 +97,7 @@ import { getValueBasedOnLanguage } from "./utils";
             const languageRegex = /{{fullAddress1_(\w+)}}/;
             const languageMatch = svgTemplate.match(languageRegex);
             const language = languageMatch ? languageMatch[1] : '';
-
+            
             fields.forEach(field => {
               if (Array.isArray(credentialSubject[field])) {
                 const array = credentialSubject[field] as { value?: string }[];

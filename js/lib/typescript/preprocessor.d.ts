@@ -2,6 +2,7 @@ export declare function preProcessTemplate(vcJsonString: string, svgTemplate: st
 export declare function getPlaceholdersList(placeholderRegexPattern: RegExp, svgTemplate: string): string[];
 export declare function replaceQrCode(data: string, templateString: string): Promise<string>;
 export declare function transformArrayFieldsIntoMultiline(jsonObject: any, svgTemplate: string, multiLineProperties: MultiLineProperties): string;
+export declare function transformAddressFieldsIntoMultiline(jsonObject: any, svgTemplate: string, multiLineProperties: MultiLineProperties): string;
 export declare function wrapBasedOnCharacterLength(svgTemplate: string, dataToSplit: string, maxLength: number, placeholdersList: string[]): string;
 interface MultiLineProperties {
     placeholders: string[];

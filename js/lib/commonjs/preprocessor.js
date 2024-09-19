@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.getPlaceholdersList = getPlaceholdersList;
 exports.preProcessTemplate = preProcessTemplate;
 exports.replaceQrCode = replaceQrCode;
+exports.transformAddressFieldsIntoMultiline = transformAddressFieldsIntoMultiline;
 exports.transformArrayFieldsIntoMultiline = transformArrayFieldsIntoMultiline;
 exports.wrapBasedOnCharacterLength = wrapBasedOnCharacterLength;
 var _constants = require("./constants");
