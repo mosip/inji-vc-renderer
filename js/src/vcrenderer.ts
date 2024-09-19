@@ -1,5 +1,5 @@
 import { preProcessTemplate } from './preprocessor';
-import { fetchTemplate, replaceAddress, replaceBenefits, replaceQrCode } from './utils';
+import { fetchTemplate } from './utils';
 
 interface RenderMethod {
     id: string;
