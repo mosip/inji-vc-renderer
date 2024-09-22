@@ -2,43 +2,118 @@ package io.mosip.injivcrenderer
 
 import android.graphics.Bitmap
 import android.util.Base64
-import io.mosip.injivcrenderer.Utils.getValueBasedOnLanguage
 import io.mosip.pixelpass.PixelPass
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 
 class TemplatePreProcessor {
 
-    fun preProcessSvgTemplate(vcJsonString: String, svgTemplate: String): String {
+    fun preProcessSvgTemplate(vcJsonString: String, svgTemplate: String): JSONObject {
 
-        var preProcessedSvgTemplate = svgTemplate
+        var vcJsonObject = JSONObject(vcJsonString)
+        var credentialSubject = vcJsonObject.getJSONObject("credentialSubject")
+        credentialSubject = replaceFieldsWithLanguage(credentialSubject)
 
-        //Checks for {{qrCodeImage}} for Qr Code Replacement
+
+      // Checks for {{qrCodeImage}} for Qr Code Replacement
         if(svgTemplate.contains(QR_CODE_PLACEHOLDER)){
-            preProcessedSvgTemplate =  replaceQRCode(vcJsonString, svgTemplate)
+            credentialSubject = credentialSubject.put(getFieldNameFromPlaceholder(QR_CODE_PLACEHOLDER), replaceQRCode(vcJsonString)) ?: return credentialSubject
         }
 
-        //Checks for {{benefits1}} or {{benefits2}} for Benefits Replacement
+      //  Checks for {{benefitsLine1}} or {{benefitsLine2}} for Benefits Replacement
         val benefitsPlaceholderRegexPattern = Regex(BENEFITS_PLACEHOLDER_REGEX_PATTERN)
         if(benefitsPlaceholderRegexPattern.containsMatchIn(svgTemplate)) {
-            val benefitsPlaceholders = getPlaceholdersList(benefitsPlaceholderRegexPattern, preProcessedSvgTemplate)
-            preProcessedSvgTemplate =  transformArrayFieldsIntoMultiline(
-                JSONObject(vcJsonString),
-                preProcessedSvgTemplate,
-                MultiLineProperties(benefitsPlaceholders, 55, BENEFITS_FIELD_NAME)
+            val benefitsPlaceholders = getPlaceholdersList(benefitsPlaceholderRegexPattern, svgTemplate)
+            val language = extractLanguageFromPlaceholder(benefitsPlaceholders.first())
+            val commaSeparatedBenefitsElements = generateCommaSeparatedString(credentialSubject,
+                listOf(BENEFITS_FIELD_NAME), language)
+
+            credentialSubject =  constructObjectBasedOnCharacterLengthChunks(
+                MultiLineProperties(dataToSplit = commaSeparatedBenefitsElements, placeholderList = benefitsPlaceholders, maxCharacterLength = 55),
+                credentialSubject,
+                language
             )
+
+            listOf(BENEFITS_FIELD_NAME).forEach { fieldName ->
+                credentialSubject.remove(fieldName)
+            }
+
         }
 
-        //Checks for {{fullAddress1_locale}} or {{fullAddress2_locale}} for Address Fields Replacement
+        //Checks for {{fullAddressLine1/locale}} or {{fullAddressLine1/locale}} for Address Fields Replacement
         val fullAddressRegexPattern = Regex(FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN)
         if(fullAddressRegexPattern.containsMatchIn(svgTemplate)) {
-            val fullAddressPlaceholders = getPlaceholdersList(fullAddressRegexPattern, preProcessedSvgTemplate);
-            preProcessedSvgTemplate =  transformAddressFieldsIntoMultiline(
-                    JSONObject(vcJsonString),
-                    preProcessedSvgTemplate,
-                    MultiLineProperties(fullAddressPlaceholders, 55))
+            val addressFields = listOf(
+                ADDRESS_LINE_1, ADDRESS_LINE_2,
+                ADDRESS_LINE_3, CITY, PROVINCE, POSTAL_CODE, REGION
+            )
+            val fullAddressPlaceholders = getPlaceholdersList(fullAddressRegexPattern, svgTemplate)
+            val language = extractLanguageFromPlaceholder(fullAddressPlaceholders.first())
+            val commaSeparatedAddressFields = generateCommaSeparatedString(credentialSubject,
+                addressFields, language)
+
+            credentialSubject =  constructObjectBasedOnCharacterLengthChunks(
+                MultiLineProperties(dataToSplit = commaSeparatedAddressFields, placeholderList = fullAddressPlaceholders, maxCharacterLength = 55),
+                credentialSubject, language)
+
+            addressFields.forEach { fieldName ->
+                credentialSubject.remove(fieldName)
+            }
+
         }
-        return preProcessedSvgTemplate
+        vcJsonObject.put(CREDENTIAL_SUBJECT_FIELD, credentialSubject)
+        return vcJsonObject
+    }
+
+
+
+    private fun replaceFieldsWithLanguage(jsonObject: JSONObject): JSONObject {
+        val keys = jsonObject.keys().asSequence().toList()
+
+        for (key in keys) {
+            val value = jsonObject[key]
+
+            when (value) {
+                is JSONArray -> {
+                    val languageMap = JSONObject()
+                    var hasLanguage = false
+                    for (i in 0 until value.length()) {
+                        val item = value.get(i)
+                        if (item is JSONObject) {
+                            if (item.has("language")) {
+                                hasLanguage = true
+                                val newValue = item.getString("value")
+                                val newKey = item.getString("language")
+                                languageMap.put(newKey, newValue)
+                            }
+                        }
+                    }
+
+                    if (hasLanguage) {
+                        jsonObject.put(key, languageMap)
+                    }
+                }
+                is JSONObject -> {
+                    replaceFieldsWithLanguage(value)
+                }
+            }
+        }
+
+        return jsonObject
+    }
+
+    fun getFieldNameFromPlaceholder(placeholder: String): String {
+        val regex = Regex(GET_PLACEHOLDER_REGEX)
+        val matchResult = regex.find(placeholder)
+        val enclosedValue = matchResult?.groups?.get(1)?.value
+        return enclosedValue?.split("/")?.last().orEmpty()
+    }
+
+    fun extractLanguageFromPlaceholder(placeholder: String): String {
+        val regex = Regex(GET_LANGUAGE_FORM_PLACEHOLDER_REGEX)
+        val matchResult = regex.find(placeholder)
+        return matchResult?.groups?.get(1)?.value ?: ""
     }
 
     fun getPlaceholdersList(placeholderRegexPattern: Regex, svgTemplate: String): List<String> {
@@ -50,108 +125,88 @@ class TemplatePreProcessor {
         return placeholders
     }
 
-    fun replaceQRCode(vcJson: String, svgTemplate: String): String {
+    private fun replaceQRCode(vcJson: String): String {
         try {
             val pixelPass = PixelPass()
             val qrCode: Bitmap = pixelPass.generateQRCode(vcJson)
             val byteArrayOutputStream = ByteArrayOutputStream()
             qrCode.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
             val byteArray = byteArrayOutputStream.toByteArray()
-            val base64String: String = Base64.encodeToString(byteArray, Base64.DEFAULT)
-            if (base64String.isNotEmpty()) {
-                return svgTemplate.replace(QR_CODE_PLACEHOLDER, "$BASE64_IMAGE_TYPE$base64String");
-            }
-            return svgTemplate;
+            val base64String: String = Base64.encodeToString(byteArray, Base64.DEFAULT);
+            return base64String;
         } catch (e: Exception){
             e.printStackTrace()
-            return svgTemplate;
+            return "";
         }
 
     }
 
-
-    fun transformArrayFieldsIntoMultiline(
-        jsonObject: JSONObject,
-        svgTemplate: String,
-        multiLineProperties: MultiLineProperties
-    ): String {
-        return try {
-            val credentialSubject = jsonObject.optJSONObject("credentialSubject") ?: return svgTemplate
-            val fieldArray = credentialSubject.optJSONArray(multiLineProperties.fieldName) ?: return svgTemplate
-
-            val commaSeparatedFieldElements = (0 until fieldArray.length())
-                .mapNotNull { fieldArray.optString(it).takeIf { it.isNotEmpty() } }
-                .joinToString(",")
-
-            wrapBasedOnCharacterLength(svgTemplate, commaSeparatedFieldElements, multiLineProperties.maxCharacterLength, multiLineProperties.placeholders)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            svgTemplate
-        }
-    }
-
-
-    fun transformAddressFieldsIntoMultiline(
-        jsonObject: JSONObject,
-        svgTemplate: String,
-        multiLineProperties: MultiLineProperties
-    ): String {
-        return try {
-            val credentialSubject = jsonObject.optJSONObject("credentialSubject") ?: return svgTemplate
-            val fields = listOf(
-                ADDRESS_LINE_1, ADDRESS_LINE_2,
-                ADDRESS_LINE_3, CITY, PROVINCE, POSTAL_CODE, REGION
-            )
-            val values = mutableListOf<String>()
-            val fullAddressRegexToExtractLanguage = "\\{\\{fullAddress1_(\\w+)\\}\\}".toRegex()
-            val language = fullAddressRegexToExtractLanguage.find(svgTemplate)?.groupValues?.get(1)
-
-            for (field in fields) {
-                val array = credentialSubject.optJSONArray(field)
-                if (array != null && array.length() > 0) {
-                    val value = getValueBasedOnLanguage(array, language.orEmpty())
-                    if (value.isNotEmpty()) {
-                        values.add(value)
+    private fun generateCommaSeparatedString(jsonObject: JSONObject, fieldsToBeCombined: List<String>, language: String): String {
+        return fieldsToBeCombined
+            .flatMap { field ->
+                when {
+                    jsonObject.optJSONArray(field) != null -> {
+                        val arrayField = jsonObject.optJSONArray(field)!!
+                        (0 until arrayField.length()).flatMap { index ->
+                            val item = arrayField.opt(index)
+                            when {
+                                item is String -> listOf(item.takeIf { it.isNotEmpty() })
+                                item is JSONObject -> listOf(item.optString("value").takeIf { it.isNotEmpty() })
+                                else -> emptyList() // Skip if neither
+                            }
+                        }
                     }
+                    jsonObject.optJSONObject(field) != null -> {
+                        val langValue = jsonObject.optJSONObject(field)?.optString(language).takeIf { !it.isNullOrEmpty() }
+                        listOf(langValue)
+                    }
+                    else -> emptyList()
                 }
             }
-
-            val fullAddress = values.joinToString(separator = ", ")
-            wrapBasedOnCharacterLength(svgTemplate, fullAddress, multiLineProperties.maxCharacterLength, multiLineProperties.placeholders)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            svgTemplate
-        }
+            .filterNotNull()
+            .joinToString(", ")
     }
 
-    fun wrapBasedOnCharacterLength(svgTemplate: String,
-                                   dataToSplit: String,
-                                   maxLength: Int,
-                                   placeholdersList: List<String>): String{
+
+
+    private fun constructObjectBasedOnCharacterLengthChunks(
+        multiLineProperties: MultiLineProperties,
+        jsonObject: JSONObject,
+        language: String,
+
+        ): JSONObject{
         try {
-            val segments = dataToSplit.chunked(maxLength).take(2)
-            var replacedSvg = svgTemplate
-            placeholdersList.forEachIndexed { index, placeholder ->
+            val segments = multiLineProperties.dataToSplit.chunked(multiLineProperties.maxCharacterLength).take(multiLineProperties.placeholderList.size)
+            multiLineProperties.placeholderList.forEachIndexed { index, placeholder ->
                 if (index < segments.size) {
-                    replacedSvg = replacedSvg.replaceFirst(placeholder, segments[index])
+                    val languageSpecificData = if(language.isNotEmpty()){
+                        JSONObject().apply {
+                            put(language, segments[index]) }
+                    } else {
+                        segments[index]
+                    }
+                    jsonObject.put(getFieldNameFromPlaceholder(placeholder), languageSpecificData)
                 }
             }
-            return replacedSvg
+            return jsonObject
         } catch (e: Exception){
             e.printStackTrace()
-            return svgTemplate
+            return jsonObject
         }
     }
+
     companion object{
-        const val BASE64_IMAGE_TYPE= "data:image/png;base64,"
-        const val QR_CODE_PLACEHOLDER="{{qrCodeImage}}"
+        const val CREDENTIAL_SUBJECT_FIELD = "credentialSubject"
+
+
+        const val QR_CODE_PLACEHOLDER="{{credentialSubject/qrCodeImage}}"
 
 
         const val BENEFITS_FIELD_NAME = "benefits"
-        const val BENEFITS_PLACEHOLDER_REGEX_PATTERN = "\\{\\{benefits\\d+\\}\\}"
+        const val BENEFITS_PLACEHOLDER_REGEX_PATTERN = "\\{\\{credentialSubject/benefitsLine\\d+\\}\\}"
 
 
-        const val FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN = "\\{\\{fullAddress\\d*_\\w+\\}\\}"
+        const val FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN = "\\{\\{credentialSubject/fullAddressLine\\d+/[a-zA-Z]+\\}\\}"
         const val ADDRESS_LINE_1 = "addressLine1"
         const val ADDRESS_LINE_2 = "addressLine2"
         const val ADDRESS_LINE_3 = "addressLine3"
@@ -160,11 +215,15 @@ class TemplatePreProcessor {
         const val REGION = "region"
         const val POSTAL_CODE = "postalCode"
 
+
+        const val GET_PLACEHOLDER_REGEX = "\\{\\{credentialSubject/([^/]+)(?:/[^}]+)?\\}\\}"
+        const val GET_LANGUAGE_FORM_PLACEHOLDER_REGEX = """credentialSubject/[^/]+/(\w+)"""
+
     }
 }
 
 data class MultiLineProperties(
-    val placeholders: List<String>,
-    val maxCharacterLength: Int,
-    val fieldName: String? = "",
+    var dataToSplit: String,
+    val placeholderList: List<String>,
+    val maxCharacterLength: Int
 )

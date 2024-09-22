@@ -55,7 +55,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         },
         "renderMethod" : [
                 {
-                  "id": "https://<local-host>/insurance_svg_template.svg",
+                  "id": "https://<svg-host-url>/assets/templates/insurance_template.svg",
                   "type": "SvgRenderingTemplate",
                   "name": "Portrait Mode"
                 }
@@ -75,12 +75,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         "credentialSubject": {
             "VID": "6532781704389407",
             "face": "data:image/jpeg;base64,/9j/4",
-            "gender": [
-                {
-                    "language": "eng",
-                    "value": "MLE"
-                }
-            ],
+
             "phone": "+++7765837077",
             "city": [
                 {
@@ -92,8 +87,23 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                 {
                     "language": "eng",
                     "value": "TEST_FULLNAMEeng"
+                },
+                {
+                    "language": "tam",
+                    "value": "Tamil TEST_FULLNAMEeng"
                 }
             ],
+                        "gender": [
+                                        {
+                                            "language": "tam",
+                                            "value": "TAM MLE"
+                                        },
+                            {
+                                "language": "eng",
+                                "value": "MLE"
+                            }
+
+                        ],
             "addressLine1": [
                 {
                     "language": "eng",
@@ -120,7 +130,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         ],
         "renderMethod": [
             {
-                "id": "https://<local-host>/insurance_svg_template.svg",
+                "id": "https://<svg-host-url>/assets/templates/national_id_template_without_qr.svg",
                 "type": "SvgRenderingTemplate",
                 "name": "Portrait Mode"
             }
@@ -135,15 +145,29 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         Button(onClick = {
             val thread = Thread {
                 try {
-                    val replacedTemplate = InjiVcRenderer().renderSvg(nationalIDVcJson)
-                    System.out.println("Replaced Template-->$replacedTemplate")
+                    val replacedTemplate = InjiVcRenderer().renderSvg(insuranceVcJson)
+                    System.out.println("Replaced Template MOSIP-->$replacedTemplate")
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
             thread.start()
         }) {
-            Text(text = "Replace")
+            Text(text = "Insurance Vc")
+
+        }
+        Button(onClick = {
+            val thread = Thread {
+                try {
+                    val replacedTemplate = InjiVcRenderer().renderSvg(nationalIDVcJson)
+                    System.out.println("Replaced Template Insurance-->$replacedTemplate")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            thread.start()
+        }) {
+            Text(text = "National ID Vc")
 
         }
     }

@@ -1,7 +1,6 @@
 package io.mosip.injivcrenderer
 
 import io.mosip.injivcrenderer.Utils.fetchSvgAsText
-import io.mosip.injivcrenderer.Utils.getValueBasedOnLanguage
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -12,34 +11,32 @@ class InjiVcRenderer {
 
 
     fun renderSvg(vcJsonString: String): String {
-        try {
+        return try {
             val jsonObject = JSONObject(vcJsonString)
             val renderMethodArray = jsonObject.getJSONArray("renderMethod")
-            val firstRenderMethod = renderMethodArray.getJSONObject(0)
-            val svgUrl = firstRenderMethod.getString("id")
+            val svgUrl = renderMethodArray.getJSONObject(0).getString("id")
 
             var svgTemplate = fetchSvgAsText(svgUrl)
-            svgTemplate = templatePreProcessor.preProcessSvgTemplate(vcJsonString, svgTemplate)
+            val processedJson = templatePreProcessor.preProcessSvgTemplate(vcJsonString, svgTemplate)
 
-            val regex = Regex(PLACEHOLDER_REGEX_PATTERN)
-            var result = regex.replace(svgTemplate) { match ->
-                val key = match.groups[1]?.value?.trim() ?: ""
-                if(key.contains("_")){
-                    val value = replaceLocaleBasedValue(key, jsonObject)
-                    value ?: ""
-                } else {
-                    val value = getValueFromData(key, jsonObject)
-                    value?.toString() ?: ""
-                }
-            }
-            return result
+            replacePlaceholders(svgTemplate, processedJson)
+
         } catch (e: Exception) {
             e.printStackTrace()
-            return ""
+            ""
         }
     }
 
-    fun getValueFromData(key: String, jsonObject: JSONObject): Any? {
+    fun replacePlaceholders(svgTemplate: String, processedJson: JSONObject): String {
+        val regex = Regex(PLACEHOLDER_REGEX_PATTERN)
+        return regex.replace(svgTemplate) { match ->
+            val key = match.groups[1]?.value?.trim() ?: ""
+            val value = getValueFromData(key, processedJson)
+            value?.toString() ?: ""
+        }
+    }
+
+    fun getValueFromData(key: String, jsonObject: JSONObject, isDefaultLanguageHandle: Boolean = false): Any? {
         val keys = key.split("/")
         var currentValue: Any? = jsonObject
 
@@ -57,27 +54,21 @@ class InjiVcRenderer {
                 else -> return null
             }
         }
-        return currentValue
-    }
 
-    fun replaceLocaleBasedValue(placeholderKey: String, vcJSONObject: JSONObject): String? {
-        try {
-            val jsonPath = placeholderKey.substringBefore('_')
-            val language = placeholderKey.substringAfter('_')
-            val arrayOfObjects = getValueFromData(jsonPath, vcJSONObject) as? JSONArray
-                ?: return null
-            return getValueBasedOnLanguage(arrayOfObjects, language)
-
-        } catch (e: Exception){
-            e.printStackTrace()
-            return null;
+        //Setting Default Language to English
+        return when {
+            currentValue is JSONObject -> currentValue.opt(DEFAULT_ENG) ?: null
+            currentValue == null && keys.isNotEmpty() && !isDefaultLanguageHandle -> {
+                    val updatedKey = keys.dropLast(1).joinToString("/") + "/${DEFAULT_ENG}"
+                    getValueFromData(updatedKey, jsonObject, true)
+            }
+            else -> currentValue
         }
     }
 
-
-
     companion object{
         const val PLACEHOLDER_REGEX_PATTERN = "\\{\\{([^}]+)\\}\\}"
+        const val DEFAULT_ENG = "eng"
 
     }
 }
