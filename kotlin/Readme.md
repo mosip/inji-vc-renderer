@@ -27,60 +27,67 @@
 - **Fetch SVG Template**
     - Extracts the svg template url from the render method
         - Downloads the SVG XML string.
-- **PreProcess Template**
+- **PreProcess Credential Subject in VC**
   Preprocess SVG template for the Placeholders which needs some processing before replacing the placeholders.
 
-    - **Replace QR Code**
-        - Generates the QR code using Pixelpass library and replaces the `qrCodeImage` placeholder
+    - **Update Locale Based Field for proper replacement**
+      -  In SvgTemplate, the fields which requires translation should have the placeholders end with `/locale`.
+      Example: {{crendetialSubject/gender/eng}}
+      - Update the locale based fields to replace the svg template placeholder directly.
+      - If locales are not provided, defaults it to English language.
+      - Example
 
-    - **Transform Benefits Array to Multi line text**
-        - Replace the benefits value placeholder with comma separated elements of Benefits array,
-        -  We are splitting the whole comma separate benefits string into two lines through code to accommodate in the svg template design and replacing two placeholders {{benefits1}} and {{benefits2}}.
-        - SVG Template must have the placeholders like {{benefits1}}, {{benefits2}} and so on as many as the number of lines they want to split the comma separated benefits string.
+          ```
+          val vcJson = {"credentialSubject" : "gender": [{"value": "Male", "language":"eng"},
+          {"value": "mâle", "language":"fr"}
+          ]
+          //After updating the locale based fields
+          val updatedVcJson = {"credentialSubject" : "gender": {"eng": "Male", "fr":"mâle"}}
+        ```
+    - **Update QR Code**
+        - Generates the QR code using Pixelpass library and add the `qrCodeImage` field in credentialSubject
+
+    - **Update Benefits Array Field for Multi line text**
+        -  We are splitting the whole comma separate benefits string into two lines through code to accommodate in the svg template design and replacing two placeholders {{benefitsLine1}} and {{benefitsLine2}}.
+        - SVG Template must have the placeholders like {{benefitsLine1}}, {{benefitsLine1}} and so on as many as the number of lines they want to split the comma separated benefits string.
+        - Update the benefits value field in CredentialSubject,
         - Example
 
       ```
       val vcJson = {"credentialSubject" : "benefits": ["Critical Surgery", "Full Health Checkup", "Testing"]}
       
-      val svgTempalte = "<svg>{{benefits1}} {{benfits2}}</svg>"
+      val svgTempalte = "<svg>{{benefitsLine1}} {{benefitsLine2}}</svg>"
       
-      val result = transformArrayFieldsIntoMultiline(vcJson, svgTemplate, MultiLineProperties(10, listOf("{{benefits1}}", "{{benfits2}}")))
-      //result => "<svg>Critical Surgery", "Full Health Checkup", "Testing</svg>"
+      // Above VC will be converted into below
+      val updatedVcJson = {"credentialSubject" : "benefitsLine1": "Critical Surgery, Full Health Checkup, Testing}
   
       ```
 
-     - **Transform Address Fields  into Multi line text**
+    - **Update Address Fields for Multi line text**
         - Check for the address fields and create comma separated full Address String.
-        - Replace the fullAddress value placeholder with separated elements of full Address String
         - We are splitting the whole comma separate full Address string into two lines through code to accommodate in the svg template design and replacing two placeholders with locales {{fullAddress1_eng}} and {{fullAddress1_eng}}.
         - SVG Template must have the placeholders like {{fullAddress1_eng}}, {{fullAddress1_eng}} and so on as many as the number of lines they want to split the comma separated address string.
+        - Update the fullAddress value field in CredentialSubject,
     - Example
 
       ```
       val vcJson = {      "credentialSubject": {          "addressLine1": [{"value": "No 123, Test Address line1", "language": "eng"}],          "addressLine2": [{"value": "Test Address line", "language": "eng"}],          "city": [{"value": "TestCITY", "language": "eng"}],          "province": [{"value": "TESTProvince", "language": "eng"}],      }  }
       
-      val svgTempalte = "<svg>{{fullAddress1_eng}} {{fullAddress2_eng}}</svg>"
+      val svgTemplate = "<svg>{{fullAddressLine1/eng}} {{fullAddressLine2/eng}}</svg>"
       
-      val result = transformAddressFieldsIntoMultiline(vcJson, svgTemplate, MultiLineProperties(10, listOf("{{fullAddress1_eng}}", "{{fullAddress2_eng}}")))
-      //result => <svg>No 123, Test Address line1,Test Address line, TestCITY, TESTProvince  </svg>
+      // Above VC will be converted into below
+      val updatedVcJson = {"credentialSubject" : "fullAddressLine1": { "eng": "No 123, Test Address line1,Test Address line, TestCITY, TESTProvince "}}
       ```
 
-    - **Replacing other placeholders with VC Data**
-        - When the placeholder has locale like "{{credentialSubject/gender_eng}}", Replace the placeholders with appropriate locale value.
-          ```
-          val vcJson = {      "credentialSubject": {          "gender": [{"value": Male", "language": "eng"}]}
-          
-          val svgTempalte = "<svg>{{credentialSubject/gender_eng}}</svg>"
-          
-          //result => <svg>Male</svg>
-          ```
-        - Placeholders without locale will be directly replaced with Vc Data Json Path following the JSON Pointer Algorithm.
-          ```
-          val vcJson = {      "credentialSubject": {          "fullName": "Tester"}
-          
-          val svgTempalte = "<svg>{{credentialSubject/fullName}}</svg>"
-          
-          //result => <svg>Tester</svg>
-          ```
+- **Replacing placeholders with PreProcessed Vc Data**
+  - When the placeholder has locale like "{{credentialSubject/gender_eng}}", Replace the placeholders with appropriate locale value.
 
-    - **Returns the final replaced SVG Image**
+       ```
+       val vcJson = {      "credentialSubject": { "fullName": "Tester", "gender": [{"value": Male", "language": "eng"}]}
+         
+         val svgTempalte = "<svg>{{credentialSubject/fullName}} - {{credentialSubject/gender/eng}}</svg>"
+         
+         //result => <svg>Tester - Male</svg>
+         ```
+
+- **Returns the final replaced SVG Image**

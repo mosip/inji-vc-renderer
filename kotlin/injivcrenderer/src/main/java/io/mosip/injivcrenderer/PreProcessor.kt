@@ -7,7 +7,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 
-class TemplatePreProcessor {
+class PreProcessor {
 
     fun preProcessSvgTemplate(vcJsonString: String, svgTemplate: String): JSONObject {
 
