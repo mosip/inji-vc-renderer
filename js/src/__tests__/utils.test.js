@@ -1,4 +1,4 @@
-const { fetchTemplate, replaceAddress, replaceBenefits, replaceQrCode, replaceMultiLinePlaceholders } = require('../utils.ts');
+const { fetchTemplate} = require('../utils.ts');
 
 global.fetch = jest.fn();
 

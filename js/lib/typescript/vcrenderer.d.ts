@@ -6,7 +6,7 @@ interface Data {
     [key: string]: any;
 }
 export declare class VCRenderer {
-    static renderSVG(data: Data): Promise<string>;
+    static renderSVG(vcJsonData: Data): Promise<string>;
 }
 export {};
 //# sourceMappingURL=vcrenderer.d.ts.map

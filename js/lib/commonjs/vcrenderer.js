@@ -6,29 +6,44 @@ Object.defineProperty(exports, "__esModule", {
 exports.VCRenderer = void 0;
 var _preprocessor = require("./preprocessor");
 var _utils = require("./utils");
+const PLACEHOLDER_REGEX_PATTERN = /{{(.*?)}}/g;
+const DEFAULT_ENG = "eng";
+function getValueFromData(key, jsonObject, isDefaultLanguageHandle = false) {
+  const keys = key.split('/');
+  let currentValue = jsonObject;
+  for (const k of keys) {
+    if (typeof currentValue === 'object' && currentValue !== null) {
+      if (Array.isArray(currentValue)) {
+        const index = parseInt(k, 10);
+        currentValue = index >= 0 && index < currentValue.length ? currentValue[index] : null;
+      } else {
+        currentValue = currentValue[k];
+      }
+    } else {
+      return null;
+    }
+  }
+
+  // Setting Default Language to English
+  if (typeof currentValue === 'object' && currentValue !== null) {
+    return currentValue[DEFAULT_ENG] || null;
+  }
+  if (currentValue == null && keys.length && !isDefaultLanguageHandle) {
+    const updatedKey = keys.slice(0, -1).join('/') + `/${DEFAULT_ENG}`;
+    return getValueFromData(updatedKey, jsonObject, true);
+  }
+  return currentValue;
+}
 class VCRenderer {
-  static async renderSVG(data) {
-    if (!data.renderMethod) return "";
+  static async renderSVG(vcJsonData) {
+    if (!vcJsonData.renderMethod) return "";
     try {
-      const templateUrl = data.renderMethod[0].id;
+      const templateUrl = vcJsonData.renderMethod[0].id;
       let svgTemplate = await (0, _utils.fetchTemplate)(templateUrl);
-      svgTemplate = await (0, _preprocessor.preProcessTemplate)(JSON.stringify(data), svgTemplate);
-      return svgTemplate.replace(/{{(.*?)}}/g, (match, key) => {
-        key = key.replace(/^\//, '').replace(/\/$/, '');
-        const keys = key.split('/');
-        let value = data;
-        keys.forEach(k => {
-          if (value) {
-            if (k.includes('_')) {
-              var _value$jsonPath$find;
-              const jsonPath = k.split('_')[0];
-              const language = k.split('_')[1];
-              value = (_value$jsonPath$find = value[jsonPath].find(g => g.language === language)) === null || _value$jsonPath$find === void 0 ? void 0 : _value$jsonPath$find.value;
-            } else {
-              value = value[k];
-            }
-          }
-        });
+      vcJsonData = await (0, _preprocessor.preProcessVcJson)(JSON.stringify(vcJsonData), svgTemplate);
+      return svgTemplate.replace(PLACEHOLDER_REGEX_PATTERN, (match, key) => {
+        key = key.trim();
+        const value = getValueFromData(key, vcJsonData);
         return value !== undefined ? String(value) : '';
       });
     } catch (error) {

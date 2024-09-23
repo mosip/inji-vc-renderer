@@ -4,7 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.fetchTemplate = fetchTemplate;
-exports.getValueBasedOnLanguage = getValueBasedOnLanguage;
 function fetchTemplate(url) {
   return fetch(url).then(response => {
     if (!response.ok) {
@@ -24,13 +23,5 @@ function fetchTemplate(url) {
     console.error('Error fetching SVG:', error);
     return '';
   });
-}
-function getValueBasedOnLanguage(arrayOfObjects, language) {
-  for (const jsonObject of arrayOfObjects) {
-    if (jsonObject.language === language) {
-      return jsonObject.value || "";
-    }
-  }
-  return "";
 }
 //# sourceMappingURL=utils.js.map

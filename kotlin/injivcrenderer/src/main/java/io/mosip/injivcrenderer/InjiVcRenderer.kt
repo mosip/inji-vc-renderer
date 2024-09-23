@@ -36,7 +36,7 @@ class InjiVcRenderer {
         }
     }
 
-    fun getValueFromData(key: String, jsonObject: JSONObject, isDefaultLanguageHandle: Boolean = false): Any? {
+    private fun getValueFromData(key: String, jsonObject: JSONObject, isDefaultLanguageHandle: Boolean = false): Any? {
         val keys = key.split("/")
         var currentValue: Any? = jsonObject
 

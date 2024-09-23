@@ -20,12 +20,3 @@ export function fetchTemplate(url: string): Promise<string> {
             return '';
         });
 }
-
-  export function getValueBasedOnLanguage(arrayOfObjects: any[], language: string): string {
-    for (const jsonObject of arrayOfObjects) {
-        if (jsonObject.language === language) {
-            return jsonObject.value || ""; 
-        }
-    }
-    return ""; 
-}
