@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "repository": "https://github.com/mosip/inji-vc-renderer",
   "author": "MOSIP",
-  "license": "MIT",
+  "license": "MPL-2.0",
   "description": "JS library to render VC with SVG template support",
   "main": "lib/commonjs/vcrenderer",
   "module": "lib/module/vcrenderer",

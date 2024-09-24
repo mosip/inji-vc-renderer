@@ -7,7 +7,7 @@
 #### Running the Example App
 
 **Steps to run example app**
-- Run `cd js`and go into js folder
+- Run `cd js`
 
 - Run below command to run the example application
 	`npm run example
