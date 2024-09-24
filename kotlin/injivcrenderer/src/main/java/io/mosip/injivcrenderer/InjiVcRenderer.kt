@@ -7,7 +7,7 @@ import org.json.JSONObject
 
 class InjiVcRenderer {
 
-    private val templatePreProcessor = TemplatePreProcessor()
+    private val preProcessor = PreProcessor()
 
 
     fun renderSvg(vcJsonString: String): String {
@@ -17,7 +17,7 @@ class InjiVcRenderer {
             val svgUrl = renderMethodArray.getJSONObject(0).getString("id")
 
             var svgTemplate = fetchSvgAsText(svgUrl)
-            val processedJson = templatePreProcessor.preProcessSvgTemplate(vcJsonString, svgTemplate)
+            val processedJson = preProcessor.preProcessSvgTemplate(vcJsonString, svgTemplate)
 
             replacePlaceholders(svgTemplate, processedJson)
 

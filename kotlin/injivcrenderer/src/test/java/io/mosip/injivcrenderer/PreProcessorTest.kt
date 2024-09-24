@@ -1,7 +1,7 @@
 package io.mosip.injivcrenderer
 
-import io.mosip.injivcrenderer.TemplatePreProcessor.Companion.BENEFITS_PLACEHOLDER_REGEX_PATTERN
-import io.mosip.injivcrenderer.TemplatePreProcessor.Companion.FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN
+import io.mosip.injivcrenderer.PreProcessor.Companion.BENEFITS_PLACEHOLDER_REGEX_PATTERN
+import io.mosip.injivcrenderer.PreProcessor.Companion.FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -9,8 +9,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class TemplatePreProcessorTest {
-    private val templatePreProcessor = TemplatePreProcessor()
+class PreProcessorTest {
+    private val templatePreProcessor = PreProcessor()
 
 
     @Test
