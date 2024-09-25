@@ -1,58 +1,136 @@
-import io.mosip.injivcrenderer.InjiVcRenderer
-import org.json.JSONObject
-import org.junit.Before
-import org.junit.Test
-import org.mockito.Mockito.*
-import org.mockito.junit.MockitoJUnitRunner
-import org.junit.runner.RunWith
-import org.junit.Assert.*
+package io.mosip.injivcrenderer
 
-@RunWith(MockitoJUnitRunner::class)
+import org.json.JSONObject
+import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
 class InjiVcRendererTest {
 
-    private lateinit var renderer: InjiVcRenderer
-    private lateinit var mockJsonObject: JSONObject
+    private val injivcRenderer = InjiVcRenderer()
 
-    @Before
-    fun setUp() {
-        renderer = InjiVcRenderer()
-        mockJsonObject = mock(JSONObject::class.java)
+
+    @Test
+    fun `replace Locale Based Fields`() {
+
+        val svgTemplateWithLocale = "<svg>{{credentialSubject/gender/eng}}</svg>"
+        val svgTemplateWithoutLocale = "<svg>{{credentialSubject/gender}}</svg>"
+        val svgTemplateWithUnavailableLocale = "<svg>{{credentialSubject/gender}}</svg>"
+        val svgTemplateWithInvalidKey = "<svg>{{credentialSubject/genders}}</svg>"
+
+        val processedJson = JSONObject("""{
+            "credentialSubject": {
+                "gender": 
+                    {
+                        "eng": "English Male",
+                        "tam": "Tamil Male"
+                    }
+            }
+        }""")
+
+        val expected = "<svg>English Male</svg>"
+
+        val result1 = injivcRenderer.replacePlaceholders(svgTemplateWithLocale, processedJson);
+        assertEquals(expected, result1)
+
+        val result2 = injivcRenderer.replacePlaceholders(svgTemplateWithoutLocale, processedJson);
+        assertEquals(expected, result2)
+
+        val result3 = injivcRenderer.replacePlaceholders(svgTemplateWithUnavailableLocale, processedJson);
+        assertEquals(expected, result3)
+
+        val result4 = injivcRenderer.replacePlaceholders(svgTemplateWithInvalidKey, processedJson);
+        assertEquals("<svg></svg>", result4)
     }
 
     @Test
-    fun testGetValueFromData_ValidKeyPath() {
-        val profileObject = mock(JSONObject::class.java)
-        val userObject = mock(JSONObject::class.java)
+    fun `replace addressFields`() {
+        val svgTemplateWithLocale = "<svg>{{credentialSubject/fullAddressLine1/eng}}</svg>"
+        val svgTemplateWithoutLocale = "<svg>{{credentialSubject/fullAddressLine1}}</svg>"
+        val svgTemplateWithUnavailableLocale = "<svg>{{credentialSubject/fullAddressLine1/fr}}</svg>"
 
-        `when`(mockJsonObject.opt("user")).thenReturn(userObject)
-        `when`(userObject.opt("profile")).thenReturn(profileObject)
-        `when`(profileObject.opt("name")).thenReturn("John")
+        val processedJson = JSONObject("""{
+            "credentialSubject": {
+                "fullAddressLine1": {"eng":"Address Line 1, City"}
+            }
+        }""")
 
-        val result = renderer.getValueFromData("user/profile/name", mockJsonObject)
-        assertEquals("John", result)
+        val result1 = injivcRenderer.replacePlaceholders(svgTemplateWithLocale, processedJson)
+        assertEquals("<svg>Address Line 1, City</svg>", result1)
+
+        val result2 = injivcRenderer.replacePlaceholders(svgTemplateWithoutLocale, processedJson)
+        assertEquals("<svg>Address Line 1, City</svg>", result2)
+
+        val result3 = injivcRenderer.replacePlaceholders(svgTemplateWithUnavailableLocale, processedJson)
+        assertEquals("<svg>Address Line 1, City</svg>", result3)
+
     }
 
     @Test
-    fun testGetValueFromData_NestedKeyPath() {
-        val addressObject = mock(JSONObject::class.java)
-        val userObject = mock(JSONObject::class.java)
+    fun `replace addressFields with empty fullAddress`() {
+        val svgTemplate = "<svg>{{credentialSubject/fullAddressLine1/eng}}</svg>"
 
-        `when`(mockJsonObject.opt("user")).thenReturn(userObject)
-        `when`(userObject.opt("address")).thenReturn(addressObject)
-        `when`(addressObject.opt("city")).thenReturn("New York")
+        val processedJson = JSONObject("""{
+            "credentialSubject": {
+                "fullAddressLine1": {}
+            }
+        }""")
 
-        val result = renderer.getValueFromData("user/address/city", mockJsonObject)
-        assertEquals("New York", result)
+        val result = injivcRenderer.replacePlaceholders(svgTemplate, processedJson)
+        assertEquals("<svg></svg>", result)
+
     }
 
     @Test
-    fun testGetValueFromData_InvalidKeyPath() {
-        `when`(mockJsonObject.opt("user")).thenReturn(null)
+    fun `replace benefits`() {
+        val svgTemplateWithLocale = "<svg>{{credentialSubject/benefitsLine1}}</svg>"
 
-        val result = renderer.getValueFromData("user/age", mockJsonObject)
-        assertNull(result)
+        val processedJson = JSONObject("""{
+            "credentialSubject": {
+                "benefitsLine1":"Benefits one, Benefits two"
+            }
+        }""")
+
+        val result = injivcRenderer.replacePlaceholders(svgTemplateWithLocale, processedJson)
+        assertEquals("<svg>Benefits one, Benefits two</svg>", result)
+
     }
 
+    @Test
+    fun `replace addressFields with empty benefits`() {
+        val svgTemplate = "<svg>{{credentialSubject/benefitsLine1}}</svg>"
+
+        val processedJson = JSONObject("""{
+            "credentialSubject": {
+                "benenfitsLine1": []
+            }
+        }""")
+
+        val result = injivcRenderer.replacePlaceholders(svgTemplate, processedJson)
+        assertEquals("<svg></svg>", result)
+
+    }
+
+
+    @Test
+    fun `renderSvg handles missing renderMethod`() {
+        val vcJsonString = """{}"""
+
+        val result = injivcRenderer.renderSvg(vcJsonString)
+
+        assertEquals("", result)
+    }
+
+    @Test
+    fun `renderSvg handles invalid JSON input`() {
+        val vcJsonString = """{ "renderMethod": [ "invalid" ] }"""
+
+        val result = injivcRenderer.renderSvg(vcJsonString)
+
+        assertEquals("", result)
+    }
 
 
 }

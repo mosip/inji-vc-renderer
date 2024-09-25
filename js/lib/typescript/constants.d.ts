@@ -1,0 +1,12 @@
+export declare const QRCODE_PLACEHOLDER = "{{credentialSubject/qrCodeImage}}";
+export declare const BENEFITS_PLACEHOLDER_REGEX_PATTERN = "\\{\\{credentialSubject/benefitsLine\\d+\\}\\}";
+export declare const BENEFITS_FIELD_NAME = "benefits";
+export declare const FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN = "\\{\\{credentialSubject/fullAddressLine\\d+/[a-zA-Z]+\\}\\}";
+export declare const ADDRESS_LINE_1 = "addressLine1";
+export declare const ADDRESS_LINE_2 = "addressLine2";
+export declare const ADDRESS_LINE_3 = "addressLine3";
+export declare const CITY = "city";
+export declare const PROVINCE = "province";
+export declare const REGION = "region";
+export declare const POSTAL_CODE = "postalCode";
+//# sourceMappingURL=constants.d.ts.map
