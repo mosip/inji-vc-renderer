@@ -18,8 +18,8 @@ publishing {
                     asNode().appendNode('description', "Android Library to transform SVG Template into SVG Image by replacing the placeholders with VC data")
 
                     asNode().appendNode('licenses').appendNode('license').with {
-                        appendNode('name', 'MIT')
-                        appendNode('url', 'https://www.mit.edu/~amini/LICENSE.md')
+                        appendNode('name', 'MPL-2.0')
+                        appendNode('url', 'https://www.mozilla.org/en-US/MPL/2.0/')
                     }
 
                     asNode().appendNode('scm').with {
@@ -112,8 +112,8 @@ publishing {
                     asNode().appendNode('description', "Java library to transform SVG Template into SVG Image by replacing the placeholders with VC data")
 
                     asNode().appendNode('licenses').appendNode('license').with {
-                        appendNode('name', 'MIT')
-                        appendNode('url', 'https://www.mit.edu/~amini/LICENSE.md')
+                        appendNode('name', 'MPL-2.0')
+                        appendNode('url', 'https://www.mozilla.org/en-US/MPL/2.0/')
                     }
 
                     asNode().appendNode('developers').appendNode('developer').with {

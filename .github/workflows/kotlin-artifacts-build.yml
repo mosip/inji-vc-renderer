@@ -23,6 +23,7 @@ jobs:
       SERVICE_LOCATION: 'kotlin'
       ANDROID_SERVICE_LOCATION: 'injivcrenderer'
       JAVA_VERSION: 21
+      LICENSE_NAME: 'MPL-2.0'
     secrets:
       OSSRH_USER: ${{ secrets.OSSRH_USER }}
       OSSRH_URL: ${{secrets.OSSRH_SNAPSHOT_URL }}
