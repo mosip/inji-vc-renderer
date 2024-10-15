@@ -14,6 +14,7 @@ okhttp= "4.10.0"
 pixelpass="0.2.1"
 junitJupiter = "5.8.1"
 robolectric = "4.8.1"
+dokka = "1.9.20"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,4 +44,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
