@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.dokka)
     `maven-publish`
     `signing`
 }
@@ -57,6 +58,7 @@ tasks {
 tasks.register<Jar>("jarRelease") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn("assembleRelease")
+    dependsOn("dokkaJavadoc")
     from("build/intermediates/javac/release/classes") {
         include("**/*.class")
     }
@@ -71,6 +73,17 @@ tasks.register<Jar>("jarRelease") {
     archiveVersion.set("0.1.0-SNAPSHOT")
     destinationDirectory.set(layout.buildDirectory.dir("libs"))
 }
+
+tasks.register<Jar>("javadocJar") {
+    dependsOn("dokkaJavadoc")
+    archiveClassifier.set("javadoc")
+    from(tasks.named("dokkaHtml").get().outputs.files)
+}
+tasks.register<Jar>("sourcesJar") {
+    archiveClassifier.set("sources")
+    from(android.sourceSets["main"].java.srcDirs)
+}
+
 apply(from = "publish-artifact.gradle")
 tasks.register("generatePom") {
     dependsOn("generatePomFileForAarPublication", "generatePomFileForJarReleasePublication")
