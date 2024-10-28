@@ -17,7 +17,7 @@ on:
       - master
       - develop*
 jobs:
-  build-gradle:
+  build-kotlin:
     uses: mosip/kattu/.github/workflows/gradle-build.yml@master
     with:
       SERVICE_LOCATION: kotlin
