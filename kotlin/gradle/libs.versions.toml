@@ -11,7 +11,7 @@ composeBom = "2024.04.01"
 mockito = "4.8.1"
 mockitoKotlin = "5.0.0"
 okhttp= "4.10.0"
-pixelpass="0.2.1"
+pixelpass="0.5.0"
 junitJupiter = "5.8.1"
 robolectric = "4.8.1"
 dokka = "1.9.20"
@@ -35,7 +35,7 @@ mockito-core = { group = "org.mockito", name="mockito-core", version.ref= "mocki
 mockito-inline = { group = "org.mockito", name="mockito-inline", version.ref= "mockito"}
 mockito-kotlin = { group = "org.mockito.kotlin", name="mockito-kotlin", version.ref= "mockitoKotlin"}
 squareup-okhttp= { group = "com.squareup.okhttp3", name="okhttp", version.ref= "okhttp"}
-pixelpass= { group = "io.mosip", name="pixelpass", version.ref= "pixelpass"}
+pixelpass= { group = "io.mosip", name="pixelpass-aar", version.ref= "pixelpass"}
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
