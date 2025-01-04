@@ -128,7 +128,7 @@ class PreProcessor {
             val qrData: String = pixelPass.generateQRData(vcJson)
 
             if (qrData.length <= 10000) {
-                return convertQrDataIntoBase64(qrData)
+                return BASE64_PNG_IMAGE_PREFIX+convertQrDataIntoBase64(qrData)
             }
             return ""
         } catch (e: Exception){
@@ -215,6 +215,8 @@ class PreProcessor {
 
         const val GET_PLACEHOLDER_REGEX = "\\{\\{credentialSubject/([^/]+)(?:/[^}]+)?\\}\\}"
         const val GET_LANGUAGE_FORM_PLACEHOLDER_REGEX = """credentialSubject/[^/]+/(\w+)"""
+
+        const val BASE64_PNG_IMAGE_PREFIX= "data:image/png;base64,"
 
     }
 }
