@@ -1,10 +1,51 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("multiplatform")
     alias(libs.plugins.dokka)
     `maven-publish`
-    `signing`
+    signing
 }
+
+kotlin {
+    jvmToolchain(17)
+
+    androidTarget()
+
+    jvm {
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
+    }
+
+    applyDefaultHierarchyTemplate()
+
+
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(libs.pixelpass)
+                implementation(libs.squareup.okhttp)
+                implementation(libs.google.zxing.javase)
+                implementation(libs.org.json)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.mockito.core)
+                implementation(libs.mockito.inline)
+                implementation(libs.mockito.kotlin)
+                implementation(libs.junit.jupiter)
+                implementation(libs.robolectric)
+            }
+        }
+        val jvmMain by getting
+        val androidMain by getting
+
+    }
+}
+
 
 android {
     namespace = "io.mosip.injivcrenderer"
@@ -30,62 +71,20 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }
-
-dependencies {
-    implementation(libs.pixelpass)
-    implementation(libs.squareup.okhttp)
-    testImplementation(libs.junit)
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.inline)
-    testImplementation(libs.mockito.kotlin)
-    testImplementation(libs.junit.jupiter)
-    testImplementation(libs.robolectric)
-
-}
-
 
 tasks {
     register<Wrapper>("wrapper") {
-        gradleVersion = "8.5"
+        gradleVersion = "8.7"
         validateDistributionUrl = true
     }
 }
 
-tasks.register<Jar>("jarRelease") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    dependsOn("assembleRelease")
-    dependsOn("dokkaJavadoc")
-    from("build/intermediates/javac/release/classes") {
-        include("**/*.class")
-    }
-    from("build/tmp/kotlin-classes/release") {
-        include("**/*.class")
-    }
-    manifest {
-        attributes["Implementation-Title"] = project.name
-        attributes["Implementation-Version"] = "0.1.0-SNAPSHOT"
-    }
-    archiveBaseName.set("${project.name}-release")
-    archiveVersion.set("0.1.0-SNAPSHOT")
-    destinationDirectory.set(layout.buildDirectory.dir("libs"))
-}
-
-tasks.register<Jar>("javadocJar") {
-    dependsOn("dokkaJavadoc")
-    archiveClassifier.set("javadoc")
-    from(tasks.named("dokkaHtml").get().outputs.files)
-}
-tasks.register<Jar>("sourcesJar") {
-    archiveClassifier.set("sources")
-    from(android.sourceSets["main"].java.srcDirs)
-}
-
 apply(from = "publish-artifact.gradle")
-tasks.register("generatePom") {
-    dependsOn("generatePomFileForAarPublication", "generatePomFileForJarReleasePublication")
-}
 
+tasks.register("generateJar") {
+    dependsOn("jvmJar")  // Make sure jvmJar task is included
+    doLast {
+        println("JAR created at: ${buildDir}/libs/your-library-name-${version}.jar")
+    }
+}

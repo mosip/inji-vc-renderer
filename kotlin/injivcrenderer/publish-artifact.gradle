@@ -101,12 +101,10 @@ publishing {
             artifact("build/outputs/aar/${artifactId}-${version}-release.aar")
         }
         jarRelease(MavenPublication) {
-            artifact(tasks.named("jarRelease").get())
             groupId = "io.mosip"
             artifactId = "injivcrenderer-jar"
             version = "0.1.0-SNAPSHOT"
-            artifact(tasks.named("javadocJar").get())
-            artifact(tasks.named("sourcesJar").get())
+            artifact(tasks.named("jvmJar").get())
             pom {
                 withXml {
                     asNode().appendNode('name', "Inji-Vc-Renderer")
