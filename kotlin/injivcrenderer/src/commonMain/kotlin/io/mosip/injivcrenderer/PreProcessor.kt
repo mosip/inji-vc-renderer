@@ -1,11 +1,8 @@
 package io.mosip.injivcrenderer
 
-import android.graphics.Bitmap
-import android.util.Base64
 import io.mosip.pixelpass.PixelPass
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.ByteArrayOutputStream
 
 class PreProcessor {
 
@@ -128,12 +125,12 @@ class PreProcessor {
     private fun replaceQRCode(vcJson: String): String {
         try {
             val pixelPass = PixelPass()
-            val qrCode: Bitmap = pixelPass.generateQRCode(vcJson)
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            qrCode.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-            val byteArray = byteArrayOutputStream.toByteArray()
-            val base64String: String = Base64.encodeToString(byteArray, Base64.DEFAULT);
-            return base64String;
+            val qrData: String = pixelPass.generateQRData(vcJson)
+
+            if (qrData.length <= 10000) {
+                return BASE64_PNG_IMAGE_PREFIX+convertQrDataIntoBase64(qrData)
+            }
+            return ""
         } catch (e: Exception){
             e.printStackTrace()
             return "";
@@ -218,6 +215,8 @@ class PreProcessor {
 
         const val GET_PLACEHOLDER_REGEX = "\\{\\{credentialSubject/([^/]+)(?:/[^}]+)?\\}\\}"
         const val GET_LANGUAGE_FORM_PLACEHOLDER_REGEX = """credentialSubject/[^/]+/(\w+)"""
+
+        const val BASE64_PNG_IMAGE_PREFIX= "data:image/png;base64,"
 
     }
 }

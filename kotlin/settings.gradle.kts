@@ -26,5 +26,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "InjiVcRenderer"
-include(":example-app")
+include(":example-android-app")
 include(":injivcrenderer")
+include("example-java-app")

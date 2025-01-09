@@ -7,14 +7,19 @@
 
 #### Build
 - Modules in the Kotlin Project
-    1. example-app
-        - Application that Uses **injivcrenderer** library project to print Updated SVG Template.
-        - Run using  `./gradlew :app:build`
-2. injivcrenderer
-    - Library to replace the placeholders in the Svg Template received from the renderMethod with the actual Verifable Credential
-    - Run using `./gradlew :injivcrenderer:build` to generate the aar
-    - Gradle task is registered to generate jar by running the command `./gradlew jarRelease` which creates jar in the `build/libs` folder
-    - Run Tests using `./gradlew testDebugUnitTest` or `./gradlew testReleaseUnitTest` based on the build type.
+1. example-android-app
+    - Application that uses **injivcrenderer** library project to print Updated SVG Template.
+    - Update the test data of VC with valid SVG Host URL.
+    - Run using  `./gradlew :example-android-app:build`
+2. example-java-app
+    - Application that uses **injivcrenderer** library project to print Updated SVG Template.
+    - Update the test data of VC with valid SVG Host URL.
+    - Run using  `./gradlew :example-java-app:build`
+3. injivcrenderer
+       - Library to replace the placeholders in the Svg Template received from the renderMethod with the actual Verifable Credential
+       - Run using `./gradlew :injivcrenderer:build` to generate the aar
+       - Gradle task is registered to generate jar by running the command `./gradlew jarRelease` which creates jar in the `build/libs` folder
+       - Run Tests using `./gradlew testDebugUnitTest` or `./gradlew testReleaseUnitTest` based on the build type.
 #### API
 - `renderSvg(vcJsonData: String)` - expects the Verifiable Credential as parameter and returns the replaced SVG Template.
     - `vcJsonData` - VC Downloaded in stringified format.
