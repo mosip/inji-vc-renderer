@@ -83,8 +83,9 @@ tasks {
 apply(from = "publish-artifact.gradle")
 
 tasks.register("generateJar") {
-    dependsOn("jvmJar")  // Make sure jvmJar task is included
-    doLast {
-        println("JAR created at: ${buildDir}/libs/your-library-name-${version}.jar")
-    }
+    dependsOn("jvmJar")
 }
+tasks.register("generatePom") {
+    dependsOn("generatePomFileForAarPublication", "generatePomFileForJarReleasePublication")
+}
+
