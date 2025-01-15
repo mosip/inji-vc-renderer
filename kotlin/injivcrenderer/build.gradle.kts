@@ -80,12 +80,19 @@ tasks {
     }
 }
 
-apply(from = "publish-artifact.gradle")
 
-tasks.register("generateJar") {
+tasks.register<Jar>("jarRelease") {
     dependsOn("jvmJar")
+    manifest {
+        attributes["Implementation-Title"] = project.name
+        attributes["Implementation-Version"] = "0.1.0-SNAPSHOT"
+    }
+    archiveBaseName.set("${project.name}-release")
+    archiveVersion.set("0.1.0-SNAPSHOT")
+    destinationDirectory.set(layout.buildDirectory.dir("libs"))
 }
 tasks.register("generatePom") {
     dependsOn("generatePomFileForAarPublication", "generatePomFileForJarReleasePublication")
 }
+apply(from = "publish-artifact.gradle")
 
