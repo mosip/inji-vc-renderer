@@ -104,7 +104,7 @@ publishing {
             groupId = "io.mosip"
             artifactId = "injivcrenderer-jar"
             version = "0.1.0-SNAPSHOT"
-            artifact(tasks.named("jvmJar").get())
+            artifact(tasks.named("jarRelease").get())
             pom {
                 withXml {
                     asNode().appendNode('name', "Inji-Vc-Renderer")
