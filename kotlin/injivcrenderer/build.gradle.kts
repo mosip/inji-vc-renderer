@@ -24,7 +24,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(libs.pixelpass)
                 implementation(libs.squareup.okhttp)
                 implementation(libs.google.zxing.javase)
                 implementation(libs.org.json)
@@ -40,8 +39,16 @@ kotlin {
                 implementation(libs.robolectric)
             }
         }
-        val jvmMain by getting
-        val androidMain by getting
+        val jvmMain by getting{
+            dependencies {
+                implementation(libs.pixelpass.jar)
+            }
+        }
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.pixelpass.aar)
+            }
+        }
 
     }
 }
@@ -79,14 +86,10 @@ tasks {
         validateDistributionUrl = true
     }
 }
-
-
 tasks.register<Jar>("jarRelease") {
     dependsOn("jvmJar")
-    manifest {
-        attributes["Implementation-Title"] = project.name
-        attributes["Implementation-Version"] = "0.1.0-SNAPSHOT"
-    }
+}
+tasks.named<Jar>("jvmJar") {
     archiveBaseName.set("${project.name}-release")
     archiveVersion.set("0.1.0-SNAPSHOT")
     destinationDirectory.set(layout.buildDirectory.dir("libs"))

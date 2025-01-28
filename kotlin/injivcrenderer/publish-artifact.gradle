@@ -38,11 +38,25 @@ publishing {
                     }
 
                     def dependenciesNode = asNode().appendNode('dependencies')
-                    project.configurations.implementation.allDependencies.each {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
+
+                    def commonMainDependencies = configurations["commonMainImplementation"].dependencies
+                    commonMainDependencies.forEach { dep ->
+                        if (dep instanceof org.gradle.api.artifacts.ExternalDependency) {
+                            def dependencyNode = dependenciesNode.appendNode("dependency")
+                            dependencyNode.appendNode("groupId", dep.group)
+                            dependencyNode.appendNode("artifactId", dep.name)
+                            dependencyNode.appendNode("version", dep.version)
+                        }
+                    }
+
+                    def androidMainDependencies = configurations["androidMainImplementation"].dependencies
+                    androidMainDependencies.forEach { dep ->
+                        if (dep instanceof org.gradle.api.artifacts.ExternalDependency) {
+                            def dependencyNode = dependenciesNode.appendNode("dependency")
+                            dependencyNode.appendNode("groupId", dep.group)
+                            dependencyNode.appendNode("artifactId", dep.name)
+                            dependencyNode.appendNode("version", dep.version)
+                        }
                     }
 
                     def pluginsNode = asNode().appendNode('build').appendNode('plugins')
@@ -125,11 +139,25 @@ publishing {
                     }
 
                     def dependenciesNode = asNode().appendNode('dependencies')
-                    project.configurations.implementation.allDependencies.each {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
+
+                    def commonMainDependencies = configurations["commonMainImplementation"].dependencies
+                    commonMainDependencies.forEach { dep ->
+                        if (dep instanceof org.gradle.api.artifacts.ExternalDependency) {
+                            def dependencyNode = dependenciesNode.appendNode("dependency")
+                            dependencyNode.appendNode("groupId", dep.group)
+                            dependencyNode.appendNode("artifactId", dep.name)
+                            dependencyNode.appendNode("version", dep.version)
+                        }
+                    }
+
+                    def jvmMainDependencies = configurations["jvmMainImplementation"].dependencies
+                    jvmMainDependencies.forEach { dep ->
+                        if (dep instanceof org.gradle.api.artifacts.ExternalDependency) {
+                            def dependencyNode = dependenciesNode.appendNode("dependency")
+                            dependencyNode.appendNode("groupId", dep.group)
+                            dependencyNode.appendNode("artifactId", dep.name)
+                            dependencyNode.appendNode("version", dep.version)
+                        }
                     }
 
                     def pluginsNode = asNode().appendNode('build').appendNode('plugins')
