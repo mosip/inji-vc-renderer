@@ -1,3 +1,6 @@
+group = "io.mosip"
+version = "0.1.0-SNAPSHOT"
+
 publishing {
     repositories {
         maven {
@@ -102,9 +105,7 @@ publishing {
                     gpgArgumentsNode.appendNode('arg', 'loopback')
                 }
             }
-            groupId = "io.mosip"
             artifactId = "injivcrenderer-aar"
-            version = "0.1.0-SNAPSHOT"
             if (project.gradle.startParameter.taskNames.any { it.contains('assembleRelease') }) {
                 artifacts {
                     aar {
@@ -115,9 +116,7 @@ publishing {
             artifact("build/outputs/aar/${artifactId}-${version}-release.aar")
         }
         jarRelease(MavenPublication) {
-            groupId = "io.mosip"
             artifactId = "injivcrenderer-jar"
-            version = "0.1.0-SNAPSHOT"
             artifact(tasks.named("jarRelease").get())
             pom {
                 withXml {

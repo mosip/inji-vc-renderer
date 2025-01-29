@@ -89,11 +89,7 @@ tasks {
 tasks.register<Jar>("jarRelease") {
     dependsOn("jvmJar")
 }
-tasks.named<Jar>("jvmJar") {
-    archiveBaseName.set("${project.name}-release")
-    archiveVersion.set("0.1.0-SNAPSHOT")
-    destinationDirectory.set(layout.buildDirectory.dir("libs"))
-}
+
 tasks.register("generatePom") {
     dependsOn("generatePomFileForAarPublication", "generatePomFileForJarReleasePublication")
 }
