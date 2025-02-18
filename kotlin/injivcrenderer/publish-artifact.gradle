@@ -116,8 +116,12 @@ publishing {
             artifact("build/outputs/aar/${artifactId}-${version}-release.aar")
         }
         jarRelease(MavenPublication) {
+
+            artifact(tasks.named("jvmJar").get())
             artifactId = "injivcrenderer-jar"
-            artifact(tasks.named("jarRelease").get())
+            artifact(tasks.named("javadocJar").get())
+            artifact(tasks.named("sourcesJar").get())
+
             pom {
                 withXml {
                     asNode().appendNode('name', "Inji-Vc-Renderer")

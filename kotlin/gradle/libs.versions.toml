@@ -11,12 +11,13 @@ composeBom = "2024.04.01"
 mockito = "4.8.1"
 mockitoKotlin = "5.0.0"
 okhttp= "4.10.0"
-pixelpass="0.6.0-SNAPSHOT"
+pixelpass="0.7.0-SNAPSHOT"
 junitJupiter = "5.8.1"
 robolectric = "4.8.1"
 dokka = "1.9.20"
 zxing="3.5.3"
 json="20240303"
+sonarqube = "5.1.0.4872"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,3 +52,4 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
