@@ -4,6 +4,12 @@ plugins {
     alias(libs.plugins.dokka)
     `maven-publish`
     signing
+    alias(libs.plugins.sonarqube)
+    jacoco
+}
+jacoco {
+    toolVersion = "0.8.11"
+    reportsDirectory = layout.buildDirectory.dir("reports/jacoco")
 }
 
 kotlin {
@@ -17,14 +23,9 @@ kotlin {
         }
     }
 
-    applyDefaultHierarchyTemplate()
-
-
-
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(libs.pixelpass)
                 implementation(libs.squareup.okhttp)
                 implementation(libs.google.zxing.javase)
                 implementation(libs.org.json)
@@ -32,6 +33,7 @@ kotlin {
         }
         val commonTest by getting {
             dependencies {
+                implementation(kotlin("test"))
                 implementation(libs.junit)
                 implementation(libs.mockito.core)
                 implementation(libs.mockito.inline)
@@ -40,8 +42,16 @@ kotlin {
                 implementation(libs.robolectric)
             }
         }
-        val jvmMain by getting
-        val androidMain by getting
+        val jvmMain by getting{
+            dependencies {
+                implementation(libs.pixelpass.jar)
+            }
+        }
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.pixelpass.aar)
+            }
+        }
 
     }
 }
@@ -73,26 +83,84 @@ android {
     }
 }
 
+
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    onlyIf {
+        publication.name in listOf("aar", "jarRelease")
+
+    }
+}
+
+tasks.register("jacocoTestReportJvm", JacocoReport::class) {
+    dependsOn("jvmTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    classDirectories.setFrom(fileTree(layout.buildDirectory.file("classes/kotlin/jvm/main")))
+    sourceDirectories.setFrom(files("src/commonMain/kotlin", "src/jvmMain/kotlin"))
+    executionData.setFrom(files("${layout.buildDirectory.get()}/jacoco/jvmTest.exec"))
+}
+
+tasks.register("jacocoTestReportAndroid", JacocoReport::class) {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    classDirectories.setFrom(fileTree(layout.buildDirectory.file("tmp/kotlin-classes/debug")))
+    sourceDirectories.setFrom(files("src/commonMain/kotlin", "src/androidMain/kotlin"))
+    executionData.setFrom(files("${layout.buildDirectory.get()}/jacoco/testDebugUnitTest.exec"))
+}
+
+tasks.withType<Test> {
+    jacoco {
+        isEnabled = true
+    }
+    if (name.contains("jvm", ignoreCase = true)) {
+        finalizedBy(tasks.named("jacocoTestReportJvm"))
+    } else if (name.contains("android", ignoreCase = true)) {
+        finalizedBy(tasks.named("jacocoTestReportAndroid"))
+    }
+}
+
 tasks {
     register<Wrapper>("wrapper") {
         gradleVersion = "8.7"
         validateDistributionUrl = true
     }
 }
-
-
+tasks.register("prepareKotlinBuildScriptModel"){}
 tasks.register<Jar>("jarRelease") {
+    dependsOn("dokkaJavadoc")
+    dependsOn("assembleRelease")
     dependsOn("jvmJar")
-    manifest {
-        attributes["Implementation-Title"] = project.name
-        attributes["Implementation-Version"] = "0.1.0-SNAPSHOT"
-    }
-    archiveBaseName.set("${project.name}-release")
-    archiveVersion.set("0.1.0-SNAPSHOT")
-    destinationDirectory.set(layout.buildDirectory.dir("libs"))
+}
+
+tasks.register<Jar>("javadocJar") {
+    dependsOn("dokkaJavadoc")
+    archiveClassifier.set("javadoc")
+    from(tasks.named("dokkaHtml").get().outputs.files)
 }
 tasks.register("generatePom") {
     dependsOn("generatePomFileForAarPublication", "generatePomFileForJarReleasePublication")
 }
 apply(from = "publish-artifact.gradle")
+var buildDir = project.layout.buildDirectory.get()
+sonarqube {
+    properties {
+        property("sonar.java.binaries", "$buildDir/classes/kotlin/jvm/main, $buildDir/tmp/kotlin-classes/debug")
+        property("sonar.language", "kotlin")
+        property("sonar.exclusions", "**/build/**, **/*.kt.generated, **/R.java, **/BuildConfig.java")
+        property("sonar.scm.disabled", "true")
+        property("sonar.coverage.jacoco.xmlReportPaths",
+            "$buildDir/reports/jacoco/jacocoTestReportJvm/jacocoTestReportJvm.xml," +
+                    "$buildDir/reports/jacoco/jacocoTestReportAndroid/jacocoTestReportAndroid.xml"
+        )
+    }
+}
 

@@ -11,12 +11,13 @@ composeBom = "2024.04.01"
 mockito = "4.8.1"
 mockitoKotlin = "5.0.0"
 okhttp= "4.10.0"
-pixelpass="0.5.0"
+pixelpass="0.7.0-SNAPSHOT"
 junitJupiter = "5.8.1"
 robolectric = "4.8.1"
 dokka = "1.9.20"
 zxing="3.5.3"
 json="20240303"
+sonarqube = "5.1.0.4872"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,7 +38,8 @@ mockito-core = { group = "org.mockito", name="mockito-core", version.ref= "mocki
 mockito-inline = { group = "org.mockito", name="mockito-inline", version.ref= "mockito"}
 mockito-kotlin = { group = "org.mockito.kotlin", name="mockito-kotlin", version.ref= "mockitoKotlin"}
 squareup-okhttp= { group = "com.squareup.okhttp3", name="okhttp", version.ref= "okhttp"}
-pixelpass= { group = "io.mosip", name="pixelpass-jar", version.ref= "pixelpass"}
+pixelpass-jar= { group = "io.mosip", name="pixelpass-jar", version.ref= "pixelpass"}
+pixelpass-aar= { group = "io.mosip", name="pixelpass-aar", version.ref= "pixelpass"}
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 google-zxing-javase = { group = "com.google.zxing", name = "javase", version.ref = "zxing" }
@@ -50,3 +52,4 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
