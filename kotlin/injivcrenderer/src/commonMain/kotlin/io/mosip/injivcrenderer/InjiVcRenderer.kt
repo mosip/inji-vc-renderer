@@ -1,74 +1,54 @@
 package io.mosip.injivcrenderer
 
-import io.mosip.injivcrenderer.Utils.fetchSvgAsText
+import io.mosip.injivcrenderer.Constants.RENDER_METHOD
+import io.mosip.injivcrenderer.svg.SvgHelper.extractSvgTemplate
+import io.mosip.injivcrenderer.svg.SvgPlaceholderHelper.replacePlaceholders
 import org.json.JSONArray
 import org.json.JSONObject
 
 
 class InjiVcRenderer {
 
-    private val preProcessor = PreProcessor()
-
-
-    fun renderSvg(vcJsonString: String): String {
+    /**
+     * Renders SVG templates defined in the VC's renderMethod section.
+     * Supports fetching templates from URLs and data URIs.
+     * Replaces placeholders in the templates with values from the VC JSON.
+     *
+     * @param vcJsonString The Verifiable Credential as a JSON string.
+     * @return A list of rendered SVG strings. Empty list if no valid render methods found or on error.
+     */
+    fun renderSvg(vcJsonString: String): List<String> {
         return try {
             val jsonObject = JSONObject(vcJsonString)
-            val renderMethodArray = jsonObject.getJSONArray("renderMethod")
-            val svgUrl = renderMethodArray.getJSONObject(0).getString("id")
 
-            var svgTemplate = fetchSvgAsText(svgUrl)
-            val processedJson = preProcessor.preProcessSvgTemplate(vcJsonString, svgTemplate)
+            if(jsonObject.has(RENDER_METHOD).not()) {
+                return emptyList()
+            }
 
-            replacePlaceholders(svgTemplate, processedJson)
+            val renderMethodArray = when (val renderMethodValue = jsonObject.get(RENDER_METHOD)) {
+                is JSONArray -> renderMethodValue
+                is JSONObject -> {
+                    if (renderMethodValue.length() == 0) return emptyList()
+                    JSONArray().put(renderMethodValue)
+                }
+                else -> JSONArray()
+            }
 
+            val results = mutableListOf<String>()
+            for (i in 0 until renderMethodArray.length()) {
+                val renderMethod = renderMethodArray.getJSONObject(i)
+
+                val svgTemplate = extractSvgTemplate(renderMethod)
+                if (svgTemplate != null) {
+                    val renderedSvg = replacePlaceholders(svgTemplate, jsonObject)
+                    results.add(renderedSvg)
+                }
+            }
+            results
         } catch (e: Exception) {
             e.printStackTrace()
-            ""
+            emptyList()
         }
     }
 
-    fun replacePlaceholders(svgTemplate: String, processedJson: JSONObject): String {
-        val regex = Regex(PLACEHOLDER_REGEX_PATTERN)
-        return regex.replace(svgTemplate) { match ->
-            val key = match.groups[1]?.value?.trim() ?: ""
-            val value = getValueFromData(key, processedJson)
-            value?.toString() ?: ""
-        }
-    }
-
-    private fun getValueFromData(key: String, jsonObject: JSONObject, isDefaultLanguageHandle: Boolean = false): Any? {
-        val keys = key.split("/")
-        var currentValue: Any? = jsonObject
-
-        for (k in keys) {
-            when (currentValue) {
-                is JSONObject -> currentValue = currentValue.opt(k)
-                is JSONArray -> {
-                    val index = k.toIntOrNull()
-                    currentValue = if (index != null && index < currentValue.length()) {
-                        currentValue.opt(index)
-                    } else {
-                        null
-                    }
-                }
-                else -> return null
-            }
-        }
-
-        //Setting Default Language to English
-        return when {
-            currentValue is JSONObject -> currentValue.opt(DEFAULT_ENG) ?: null
-            currentValue == null && keys.isNotEmpty() && !isDefaultLanguageHandle -> {
-                    val updatedKey = keys.dropLast(1).joinToString("/") + "/${DEFAULT_ENG}"
-                    getValueFromData(updatedKey, jsonObject, true)
-            }
-            else -> currentValue
-        }
-    }
-
-    companion object{
-        const val PLACEHOLDER_REGEX_PATTERN = "\\{\\{([^}]+)\\}\\}"
-        const val DEFAULT_ENG = "eng"
-
-    }
 }

@@ -37,7 +37,7 @@
 
     - **Update Locale Based Field for proper replacement**
       -  In SvgTemplate, the fields which requires translation should have the placeholders end with `/locale`.
-      Example: {{crendetialSubject/gender/eng}}
+      Example: {{/crendetialSubject/gender/eng}}
       - Update the locale based fields to replace the svg template placeholder directly.
       - If locales are not provided, defaults it to English language.
       - Example
@@ -53,15 +53,15 @@
         - Generates the QR code using Pixelpass library and add the `qrCodeImage` field in credentialSubject
 
     - **Update Benefits Array Field for Multi line text**
-        -  We are splitting the whole comma separate benefits string into two lines through code to accommodate in the svg template design and replacing two placeholders {{benefitsLine1}} and {{benefitsLine2}}.
-        - SVG Template must have the placeholders like {{benefitsLine1}}, {{benefitsLine1}} and so on as many as the number of lines they want to split the comma separated benefits string.
+        -  We are splitting the whole comma separate benefits string into two lines through code to accommodate in the svg template design and replacing two placeholders {{/benefitsLine1}} and {{/benefitsLine2}}.
+        - SVG Template must have the placeholders like {{/benefitsLine1}}, {{/benefitsLine1}} and so on as many as the number of lines they want to split the comma separated benefits string.
         - Update the benefits value field in CredentialSubject,
         - Example
 
       ```
       val vcJson = {"credentialSubject" : "benefits": ["Critical Surgery", "Full Health Checkup", "Testing"]}
       
-      val svgTempalte = "<svg>{{benefitsLine1}} {{benefitsLine2}}</svg>"
+      val svgTempalte = "<svg>{{/benefitsLine1}} {{/benefitsLine2}}</svg>"
       
       // Above VC will be converted into below
       val updatedVcJson = {"credentialSubject" : "benefitsLine1": "Critical Surgery, Full Health Checkup, Testing}
@@ -70,27 +70,27 @@
 
     - **Update Address Fields for Multi line text**
         - Check for the address fields and create comma separated full Address String.
-        - We are splitting the whole comma separate full Address string into two lines through code to accommodate in the svg template design and replacing two placeholders with locales {{fullAddress1_eng}} and {{fullAddress1_eng}}.
-        - SVG Template must have the placeholders like {{fullAddress1_eng}}, {{fullAddress1_eng}} and so on as many as the number of lines they want to split the comma separated address string.
+        - We are splitting the whole comma separate full Address string into two lines through code to accommodate in the svg template design and replacing two placeholders with locales {{/fullAddress1_eng}} and {{/fullAddress1_eng}}.
+        - SVG Template must have the placeholders like {{/fullAddress1_eng}}, {{/fullAddress1_eng}} and so on as many as the number of lines they want to split the comma separated address string.
         - Update the fullAddress value field in CredentialSubject,
     - Example
 
       ```
       val vcJson = {      "credentialSubject": {          "addressLine1": [{"value": "No 123, Test Address line1", "language": "eng"}],          "addressLine2": [{"value": "Test Address line", "language": "eng"}],          "city": [{"value": "TestCITY", "language": "eng"}],          "province": [{"value": "TESTProvince", "language": "eng"}],      }  }
       
-      val svgTemplate = "<svg>{{fullAddressLine1/eng}} {{fullAddressLine2/eng}}</svg>"
+      val svgTemplate = "<svg>{{/fullAddressLine1/eng}} {{/fullAddressLine2/eng}}</svg>"
       
       // Above VC will be converted into below
       val updatedVcJson = {"credentialSubject" : "fullAddressLine1": { "eng": "No 123, Test Address line1,Test Address line, TestCITY, TESTProvince "}}
       ```
 
 - **Replacing placeholders with PreProcessed Vc Data**
-  - When the placeholder has locale like "{{credentialSubject/gender_eng}}", Replace the placeholders with appropriate locale value.
+  - When the placeholder has locale like "{{/credentialSubject/gender_eng}}", Replace the placeholders with appropriate locale value.
 
        ```
        val vcJson = {      "credentialSubject": { "fullName": "Tester", "gender": [{"value": Male", "language": "eng"}]}
          
-         val svgTempalte = "<svg>{{credentialSubject/fullName}} - {{credentialSubject/gender/eng}}</svg>"
+         val svgTempalte = "<svg>{{/credentialSubject/fullName}} - {{/credentialSubject/gender/eng}}</svg>"
          
          //result => <svg>Tester - Male</svg>
          ```

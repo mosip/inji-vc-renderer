@@ -1,12 +1,14 @@
 package io.mosip;
 
+import java.util.List;
+
 import io.mosip.injivcrenderer.InjiVcRenderer;
 
 public class Main {
     public static void main(String[] args) {
 
         InjiVcRenderer injiVcRenderer = new InjiVcRenderer();
-        String svgImage = injiVcRenderer.renderSvg(insuranceVc);
+        List<String> svgImage = injiVcRenderer.renderSvg(insuranceVc);
         System.out.println(":::::Replaced Template-->"+svgImage);
 
     }

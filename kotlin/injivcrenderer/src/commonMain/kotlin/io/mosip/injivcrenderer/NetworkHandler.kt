@@ -2,10 +2,9 @@ package io.mosip.injivcrenderer
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okio.IOException
-import org.json.JSONArray
+import java.io.IOException
 
-object Utils {
+class NetworkHandler {
 
     fun fetchSvgAsText(url: String): String {
         val client = OkHttpClient()
@@ -29,15 +28,5 @@ object Utils {
         } catch (e: Exception) {
             throw IOException("Unexpected error", e)
         }
-    }
-
-    fun getValueBasedOnLanguage(arrayOfObjects: JSONArray, language: String): String{
-        for (i in 0 until arrayOfObjects.length()) {
-            val jsonObject = arrayOfObjects.optJSONObject(i) ?: continue
-            if (jsonObject.optString("language") == language) {
-                return jsonObject.optString("value", "")
-            }
-        }
-        return "";
     }
 }
