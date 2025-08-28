@@ -3,17 +3,26 @@ version = "0.1.0-SNAPSHOT"
 
 publishing {
     repositories {
-        maven {
-            url = System.getenv("OSSRH_URL")
-            name = "inji-vcrenderer"
-            credentials {
-                username = System.getenv("OSSRH_USER")
-                password = System.getenv("OSSRH_SECRET")
+        if (System.getenv("RELEASE_TYPE") == "release") {
+            maven {
+                name = "LocalMavenWithChecksums"
+                url = uri(layout.buildDirectory.dir("staging"))
+            }
+        } else {
+            maven {
+                url = System.getenv("OSSRH_URL")
+                name = "inji-vcrenderer"
+                credentials {
+                    username = System.getenv("OSSRH_USER")
+                    password = System.getenv("OSSRH_SECRET")
+                }
             }
         }
     }
     publications {
         aar(MavenPublication) {
+            artifact(tasks.named("javadocJar").get())
+            artifact(tasks.named("sourcesJar").get())
             pom {
                 withXml {
                     asNode().appendNode('name', "Inji-Vc-Renderer")
@@ -44,16 +53,6 @@ publishing {
 
                     def commonMainDependencies = configurations["commonMainImplementation"].dependencies
                     commonMainDependencies.forEach { dep ->
-                        if (dep instanceof org.gradle.api.artifacts.ExternalDependency) {
-                            def dependencyNode = dependenciesNode.appendNode("dependency")
-                            dependencyNode.appendNode("groupId", dep.group)
-                            dependencyNode.appendNode("artifactId", dep.name)
-                            dependencyNode.appendNode("version", dep.version)
-                        }
-                    }
-
-                    def androidMainDependencies = configurations["androidMainImplementation"].dependencies
-                    androidMainDependencies.forEach { dep ->
                         if (dep instanceof org.gradle.api.artifacts.ExternalDependency) {
                             def dependencyNode = dependenciesNode.appendNode("dependency")
                             dependencyNode.appendNode("groupId", dep.group)
@@ -145,16 +144,6 @@ publishing {
 
                     def commonMainDependencies = configurations["commonMainImplementation"].dependencies
                     commonMainDependencies.forEach { dep ->
-                        if (dep instanceof org.gradle.api.artifacts.ExternalDependency) {
-                            def dependencyNode = dependenciesNode.appendNode("dependency")
-                            dependencyNode.appendNode("groupId", dep.group)
-                            dependencyNode.appendNode("artifactId", dep.name)
-                            dependencyNode.appendNode("version", dep.version)
-                        }
-                    }
-
-                    def jvmMainDependencies = configurations["jvmMainImplementation"].dependencies
-                    jvmMainDependencies.forEach { dep ->
                         if (dep instanceof org.gradle.api.artifacts.ExternalDependency) {
                             def dependencyNode = dependenciesNode.appendNode("dependency")
                             dependencyNode.appendNode("groupId", dep.group)
