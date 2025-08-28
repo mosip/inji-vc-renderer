@@ -23,4 +23,9 @@ object Constants {
     const val REGION = "region"
     const val POSTAL_CODE = "postalCode"
 
+    const val QR_CODE_PLACEHOLDER = "{{/qrCodeImage}}"
+    const val CONCATENATED_ADDRESS = "concatenatedAddress"
+    const val CONCATENATED_ADDRESS_PLACEHOLDER = "{{/$CONCATENATED_ADDRESS}}"
+
+
 }

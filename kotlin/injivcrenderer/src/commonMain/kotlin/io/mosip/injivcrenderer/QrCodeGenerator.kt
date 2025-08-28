@@ -3,7 +3,7 @@ package io.mosip.injivcrenderer
 import io.mosip.pixelpass.PixelPass
 
 class QrCodeGenerator {
-    private fun generateQRCodeImage(vcJson: String): String {
+    fun generateQRCodeImage(vcJson: String): String {
         try {
             val pixelPass = PixelPass()
             val qrData: String = pixelPass.generateQRData(vcJson)

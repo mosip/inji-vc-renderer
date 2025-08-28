@@ -38,7 +38,7 @@ class InjiVcRenderer {
             for (i in 0 until renderMethodArray.length()) {
                 val renderMethod = renderMethodArray.getJSONObject(i)
 
-                val svgTemplate = extractSvgTemplate(renderMethod)
+                val svgTemplate = extractSvgTemplate(renderMethod, vcJsonString)
                 if (svgTemplate != null) {
                     val renderedSvg = replacePlaceholders(svgTemplate, jsonObject)
                     results.add(renderedSvg)

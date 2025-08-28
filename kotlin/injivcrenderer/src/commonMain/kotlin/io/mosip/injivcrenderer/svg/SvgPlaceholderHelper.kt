@@ -4,6 +4,7 @@ import io.mosip.injivcrenderer.Constants.ADDRESS_LINE_1
 import io.mosip.injivcrenderer.Constants.ADDRESS_LINE_2
 import io.mosip.injivcrenderer.Constants.ADDRESS_LINE_3
 import io.mosip.injivcrenderer.Constants.CITY
+import io.mosip.injivcrenderer.Constants.CONCATENATED_ADDRESS
 import io.mosip.injivcrenderer.Constants.CREDENTIAL_SUBJECT
 import io.mosip.injivcrenderer.Constants.DEFAULT_LOCALE
 import io.mosip.injivcrenderer.Constants.POSTAL_CODE
@@ -22,7 +23,7 @@ object SvgPlaceholderHelper {
 
     fun replacePlaceholders(svgTemplate: String, jsonObject: JSONObject): String {
         val regex = Regex(PLACEHOLDER_REGEX_PATTERN)
-        val svgWidth = extractSvgWidth(svgTemplate) ?: 100 // fallback
+        val svgWidth = extractSvgWidth(svgTemplate) ?: 100
         val locale = extractSvgLocale(svgTemplate)
 
 
@@ -34,11 +35,11 @@ object SvgPlaceholderHelper {
     }
 
     fun preserveRenderProperty(svgTemplate: String, renderProperties: List<String>): String {
-        // Regex to match placeholders like {{/something}}
+
         val regex = Regex("""\{\{[^}]+}}""")
 
         return regex.replace(svgTemplate) { match ->
-            val placeholder = match.value // e.g. {{/credentialSubject/fullName}}
+            val placeholder = match.value
             val path = placeholder.removePrefix("{{").removeSuffix("}}").trim()
 
             // keep if it's in renderProperties, else replace with "-"
@@ -95,8 +96,7 @@ object SvgPlaceholderHelper {
     ): Any? {
         val keys = path.trimStart('/').split("/")
 
-        // Special handling for concatenatedAddress
-        if (keys.last() == "concatenatedAddress") {
+        if (keys.last() == CONCATENATED_ADDRESS) {
             val subject = jsonObject.optJSONObject(CREDENTIAL_SUBJECT) ?: return null
             val address = getConcatenatedAddress(subject, locale)
             return chunkAddressFields(address, svgWidth)
