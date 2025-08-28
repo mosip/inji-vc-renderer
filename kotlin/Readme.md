@@ -26,6 +26,30 @@
 - `renderSvg(vcJsonData: String)` - expects the Verifiable Credential as parameter and returns the replaced SVG Template.
     - `vcJsonData` - VC Downloaded in stringified format.
 - This method takes entire VC data as input.
+- Example :
+```
+        val vcJson = """{
+            "credentialSubject": {
+                "fullName": "John",
+                "gender": [
+                    "language": "eng",
+                    "value": "Male"
+                ] 
+            },
+            "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/sample.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
+                  }
+              }
+        }"""
+        // Assume SVG Template hosted is "<svg lang="eng">{{/credentialSubject/gender}}##{{/credentialSubject/fullName}}</svg>"
+    Result will be => [<svg lang="eng">Male##John</svg>]
+```
 - Returns the Replaced svg template to render proper SVG Image. It list of SVG Template if multiple render methods are present in the VC.
 
 
@@ -91,17 +115,36 @@
   - If `renderProperty` is not present, all the fields in the VC will be considered for replacing the placeholders in the SVG Template.
 
 ##### Locale Handling
-- If the placeholder has locale like "{{/credentialSubject/city/eng}}", Replace the placeholders with appropriate locale value.
+- If the template has locale like `<svg lang="eng">{{/credentialSubject/city}}</svg>`, extract the language from template, check for the locale object that has the language and then replace the placeholders with appropriate locale value.
 - Example:
     ```
     val vcJson = {      "credentialSubject": { "fullName": "Tester", "city": [{"value": "TestCITY", "language": "eng"},{"value": "VilleTest", "language": "fr"}]}
           
-      val svgTempalte = "<svg>{{/credentialSubject/fullName}} - {{/credentialSubject/city/eng}}</svg>"
+      val svgTempalte = "<svg>{{/credentialSubject/fullName}} - {{/credentialSubject/city}}</svg>"
           
       //result => <svg>Tester - TestCITY</svg>
   ```
   
-- If no locale is provided in the placeholder, it will look for the value from `<svg land="eng">` .If no language specified, it will the default locale as `eng`.
+- If no language is provided in the SVG Template, it will look for the value from `eng` locale object and use it as default language .
+- Example:
+    ```
+    val template = <svg>{{/credentialSubject/city}}</svg>
+    val vcJson = {      "credentialSubject": { "city": [{"value": "Hindi City", "language": "hin"}, {"value": "English City", "language": "eng"},{"value": "French City", "language": "fr"}]}
+          
+      val svgTempalte = "<svg>{{/credentialSubject/city}}</svg>"
+          
+      //result => <svg>English City</svg>
+  ```
+-  If `eng` also not available , it will pick the first item from the language array.
+- Example:
+    ```
+    val template = <svg>{{/credentialSubject/city}}</svg>
+    val vcJson = {      "credentialSubject": { "city": [{"value": "Hindi City", "language": "hin"},{"value": "French City", "language": "fr"}]}
+          
+      val svgTempalte = "<svg>{{/credentialSubject/city}}</svg>"
+          
+      //result => <svg>Hindi City</svg>
+  ```
 
 ##### Array Fields Handling
 - For array fields in the VC, below approach will be followed.
@@ -116,7 +159,6 @@
     //result => <svg><text><tspan>Critical Surgery, Full</tspan><tspan>Health Checkup, Testing</tspan></text></svg>
     ```
 
-
 ##### Concatenated Address Field Handling
 - For svg Template with `{{/concatenatedAddress}}, below approach will be followed.
 - **chunkAddressFields**: Wraps a single address string into multiple lines for SVG.
@@ -129,6 +171,11 @@
     
     //result => <svg><text><tspan>No 123, Test Address line1,</tspan><tspan>Test Address line, TestCITY, TESTProvince</tspan></text></svg>
     ```
+- Here are the list of fields considered for concatenating address - `addressLine1`, `addressLine2`, `addressLine3`, `city`, `province`, `region` and `postalCode`
+
+Note : For Array Fields and Concatenated Address , better to have the fields at the end of template or give enough height for the fields in the design. Because it will be wrapped based on the VC data for those fields. Because in SVG Template , there is limitation to do wrapping based on the content, so we are manually wrapping based the SVG Width
+
+
 
 #### Replacing Placeholders in SVG Template
 - Replaces the placeholders in the SVG Template with actual VC Json Data using JSON Pointer Algorithm.
