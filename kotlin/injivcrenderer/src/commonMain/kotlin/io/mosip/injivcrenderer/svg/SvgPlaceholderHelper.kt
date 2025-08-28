@@ -51,7 +51,7 @@ object SvgPlaceholderHelper {
         }
     }
 
-    private fun getConcatenatedAddress(credentialSubject: JSONObject, lang: String = "eng"): String {
+    private fun getConcatenatedAddress(credentialSubject: JSONObject, lang: String = DEFAULT_LOCALE): String {
         val addressFields = listOf(
             ADDRESS_LINE_1, ADDRESS_LINE_2,
             ADDRESS_LINE_3, CITY, PROVINCE, REGION, POSTAL_CODE
@@ -77,15 +77,26 @@ object SvgPlaceholderHelper {
     }
 
     private fun extractFromLangArray(array: JSONArray, lang: String): String? {
+
         for (i in 0 until array.length()) {
             val obj = array.optJSONObject(i) ?: continue
             if (obj.optString("language") == lang) {
                 return obj.optString("value", null)
             }
         }
-        // fallback: return first "value" if no match
+
+        // Fallback to English if available
+        for (i in 0 until array.length()) {
+            val obj = array.optJSONObject(i) ?: continue
+            if (obj.optString("language") == "eng") {
+                return obj.optString("value", null)
+            }
+        }
+
+        // Fallback to first value
         return array.optJSONObject(0)?.optString("value")
     }
+
 
     fun getValueFromJsonPath(
         jsonObject: JSONObject,
@@ -104,12 +115,19 @@ object SvgPlaceholderHelper {
 
         var current: Any? = jsonObject
 
-        for (k in keys) {
+        for ((i, k) in keys.withIndex()) {
             current = when (current) {
                 is JSONObject -> current.opt(k)
                 is JSONArray -> {
                     val index = k.toIntOrNull()
-                    if (index != null && index < current.length()) current.opt(index) else null
+                    if (index != null && index < current.length()) {
+                        current.opt(index)
+                    } else {
+                        // 👉 If this is the last key and it's not an index → treat as language lookup
+                        if (i == keys.lastIndex) {
+                            extractFromLangArray(current, k)
+                        } else null
+                    }
                 }
                 else -> null
             }
@@ -126,8 +144,25 @@ object SvgPlaceholderHelper {
                 val lastKey = keys.last()
                 current.opt(lastKey) ?: current.opt(DEFAULT_LOCALE)
             }
-            is JSONArray -> chunkArrayFields(current, svgWidth)
+            is JSONArray -> {
+                if (isLanguageArray(current)) {
+
+                    extractFromLangArray(current, locale)
+                } else {
+
+                    chunkArrayFields(current, svgWidth)
+                }
+            }
+
             else -> current
         }
     }
+
+    private fun isLanguageArray(array: JSONArray): Boolean {
+        if (array.length() == 0) return false
+        val firstObj = array.optJSONObject(0) ?: return false
+        return firstObj.has("language") && firstObj.has("value")
+    }
+
+
 }

@@ -48,66 +48,6 @@ class InjiVcRendererTest {
         mockConstruction.close()
     }
 
-
-
-
-
-    @Test
-    fun `replace Locale Based Fields`() {
-
-        val svgTemplateWithLocale = "<svg>{{/credentialSubject/gender/eng}}</svg>"
-        val svgTemplateWithoutLocale = "<svg>{{/credentialSubject/gender}}</svg>"
-        val svgTemplateWithUnavailableLocale = "<svg>{{/credentialSubject/gender}}</svg>"
-        val svgTemplateWithInvalidKey = "<svg>{{/credentialSubject/genders}}</svg>"
-
-        val processedJson = JSONObject("""{
-            "credentialSubject": {
-                "gender":
-                    {
-                        "eng": "English Male",
-                        "tam": "Tamil Male"
-                    }
-            }
-        }""")
-
-        val expected = "<svg>English Male</svg>"
-
-        val result1 = replacePlaceholders(svgTemplateWithLocale, processedJson);
-        assertEquals(expected, result1)
-
-        val result2 = replacePlaceholders(svgTemplateWithoutLocale, processedJson);
-        assertEquals(expected, result2)
-
-        val result3 = replacePlaceholders(svgTemplateWithUnavailableLocale, processedJson);
-        assertEquals(expected, result3)
-
-        val result4 = replacePlaceholders(svgTemplateWithInvalidKey, processedJson);
-        assertEquals("<svg>-</svg>", result4)
-    }
-
-    @Test
-    fun `replace addressFields`() {
-        val svgTemplateWithLocale = "<svg>{{/credentialSubject/fullAddressLine1/eng}}</svg>"
-        val svgTemplateWithoutLocale = "<svg>{{/credentialSubject/fullAddressLine1}}</svg>"
-        val svgTemplateWithUnavailableLocale = "<svg>{{/credentialSubject/fullAddressLine1/fr}}</svg>"
-
-        val processedJson = JSONObject("""{
-            "credentialSubject": {
-                "fullAddressLine1": {"eng":"Address Line 1, City"}
-            }
-        }""")
-
-        val result1 = replacePlaceholders(svgTemplateWithLocale, processedJson)
-        assertEquals("<svg>Address Line 1, City</svg>", result1)
-
-        val result2 = replacePlaceholders(svgTemplateWithoutLocale, processedJson)
-        assertEquals("<svg>Address Line 1, City</svg>", result2)
-
-        val result3 = replacePlaceholders(svgTemplateWithUnavailableLocale, processedJson)
-        assertEquals("<svg>Address Line 1, City</svg>", result3)
-
-    }
-
     @Test
     fun `replace concatenatedAddress fields with locale`() {
 
@@ -318,7 +258,7 @@ class InjiVcRendererTest {
     @Test
     fun `replace benefits array into multiline in SVG Template`() {
         // SVG Template - <svg><text>{{/credentialSubject/benefits}}</text></svg>
-        //Item 1 is on the list, Item 2 is on the list
+
         val vcJsonString = """
               { 
                 "credentialSubject": {

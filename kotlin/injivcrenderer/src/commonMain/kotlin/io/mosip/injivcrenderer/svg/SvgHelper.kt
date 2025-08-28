@@ -3,6 +3,7 @@ package io.mosip.injivcrenderer.svg
 import io.mosip.injivcrenderer.Constants.DEFAULT_LOCALE
 import io.mosip.injivcrenderer.Constants.ID
 import io.mosip.injivcrenderer.Constants.QR_CODE_PLACEHOLDER
+import io.mosip.injivcrenderer.Constants.QR_IMAGE_PREFIX
 import io.mosip.injivcrenderer.Constants.RENDER_PROPERTY
 import io.mosip.injivcrenderer.Constants.RENDER_SUITE
 import io.mosip.injivcrenderer.Constants.SVG_MUSTACHE
@@ -61,9 +62,9 @@ object SvgHelper {
     }
 
 
-    fun injectQrCodePlaceholder(svgTemplate: String, vcJsonString: String): String {
+    private fun injectQrCodePlaceholder(svgTemplate: String, vcJsonString: String): String {
         val qrBase64 = QrCodeGenerator().generateQRCodeImage(vcJsonString)
-        val qrImageTag = "data:image/png;base64,$qrBase64"
+        val qrImageTag = "$QR_IMAGE_PREFIX,$qrBase64"
         return svgTemplate.replace(QR_CODE_PLACEHOLDER, qrImageTag)
     }
 
