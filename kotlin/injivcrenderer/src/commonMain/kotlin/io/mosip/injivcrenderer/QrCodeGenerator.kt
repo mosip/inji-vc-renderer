@@ -9,7 +9,7 @@ class QrCodeGenerator {
             val qrData: String = pixelPass.generateQRData(vcJson)
 
             if (qrData.length <= 10000) {
-                return BASE64_PNG_IMAGE_PREFIX +convertQrDataIntoBase64(qrData)
+                return convertQrDataIntoBase64(qrData)
             }
             return ""
         } catch (e: Exception){

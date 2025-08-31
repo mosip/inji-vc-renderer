@@ -32,7 +32,7 @@ object SvgHelper {
                         if (templateValue.has(ID)) {
                             var rawSvg = NetworkHandler().fetchSvgAsText(templateValue.getString(ID))
 
-                            if (templateValue.has(QR_CODE_PLACEHOLDER)) {
+                            if (rawSvg.contains(QR_CODE_PLACEHOLDER)) {
                                 rawSvg = injectQrCodePlaceholder(rawSvg, vcJsonString)
                             }
 
