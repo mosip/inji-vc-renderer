@@ -1,9 +1,10 @@
 package io.mosip.injivcrenderer
 
-import io.mosip.injivcrenderer.Constants.RENDER_METHOD
-import io.mosip.injivcrenderer.svg.SvgHelper.extractSvgTemplate
-import io.mosip.injivcrenderer.svg.SvgPlaceholderHelper.replacePlaceholders
-import org.json.JSONArray
+import io.mosip.injivcrenderer.Constants.RENDER_PROPERTY
+import io.mosip.injivcrenderer.Constants.TEMPLATE
+import io.mosip.injivcrenderer.JsonPointerResolver.replacePlaceholders
+import io.mosip.injivcrenderer.SvgHelper.extractSvgTemplate
+import io.mosip.injivcrenderer.SvgHelper.parseRenderMethod
 import org.json.JSONObject
 
 
@@ -19,28 +20,20 @@ class InjiVcRenderer {
      */
     fun renderSvg(vcJsonString: String): List<String> {
         return try {
-            val jsonObject = JSONObject(vcJsonString)
-
-            if(jsonObject.has(RENDER_METHOD).not()) {
-                return emptyList()
-            }
-
-            val renderMethodArray = when (val renderMethodValue = jsonObject.get(RENDER_METHOD)) {
-                is JSONArray -> renderMethodValue
-                is JSONObject -> {
-                    if (renderMethodValue.length() == 0) return emptyList()
-                    JSONArray().put(renderMethodValue)
-                }
-                else -> JSONArray()
-            }
+            val vcJsonObject = JSONObject(vcJsonString)
+            val renderMethodArray = parseRenderMethod(vcJsonObject)
 
             val results = mutableListOf<String>()
             for (i in 0 until renderMethodArray.length()) {
                 val renderMethod = renderMethodArray.getJSONObject(i)
 
                 val svgTemplate = extractSvgTemplate(renderMethod, vcJsonString)
-                if (svgTemplate != null) {
-                    val renderedSvg = replacePlaceholders(svgTemplate, jsonObject)
+                if (svgTemplate.isNotEmpty()) {
+                    val renderProperties = renderMethod.optJSONObject(TEMPLATE)?.optJSONArray(
+                        RENDER_PROPERTY)?.let {
+                        List(it.length()) { idx -> it.getString(idx) }
+                    }
+                    val renderedSvg = replacePlaceholders(svgTemplate, vcJsonObject, renderProperties)
                     results.add(renderedSvg)
                 }
             }

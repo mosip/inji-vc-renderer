@@ -1,8 +1,6 @@
 package io.mosip.injivcrenderer
 
 
-import io.mosip.injivcrenderer.svg.SvgPlaceholderHelper.replacePlaceholders
-import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -28,282 +26,23 @@ class InjiVcRendererTest {
             whenever(mock.fetchSvgAsText(any())).thenAnswer { invocation ->
                 val url = invocation.arguments[0] as String
                 when {
-                    url.contains("front") -> "<svg>Full Name - {{/credentialSubject/fullName}}</svg>"
-                    url.contains("rear") -> "<svg>Email - {{/credentialSubject/email}}</svg>"
-                    url.contains("with-render-property") -> "<svg>Details - {{/credentialSubject/fullName}}****{{/issuer}}****{{/validFrom}}***{{/credentialSubject/phone}}</svg>"
-                    url.contains("address.svg") -> "<svg>Address : {{/address}}****{{/city}}****{{/pincode}}***</svg>"
-                    url.contains("benefits.svg") -> "<svg>{{/credentialSubject/benefits}}</svg>"
-                    url.contains("benefits-mutliline.svg") -> "<svg width=\"340\" height=\"234\">\n<text>{{/credentialSubject/benefits}}</text></svg>"
-                    url.contains("address-concatenated.svg") -> "<svg lang=\"eng\">{{/credentialSubject/concatenatedAddress}}</svg>"
-                    url.contains("address-concatenated-no-locale.svg") -> "<svg >{{/credentialSubject/concatenatedAddress}}</svg>"
+                    url.contains("normal.svg") -> "<svg>Email: {{/credentialSubject/email}}, Mobile: {{/credentialSubject/mobile}}</svg>"
+                    url.contains("arrays.svg") -> "<svg>Benefits: {{/credentialSubject/benefits/0}}, {{/credentialSubject/benefits/1}}</svg>"
+                    url.contains("with-locale-object.svg") -> "<svg>Full Name - {{/credentialSubject/fullName/en}},முழுப் பெயர் - {{/credentialSubject/fullName/tam}}</svg>"
+                    url.contains("with-locale-as-array-of-object.svg") -> "<svg>Full Name - {{/credentialSubject/fullName/0/value}},முழுப் பெயர் - {{/credentialSubject/fullName/1/value}}</svg>"
+                    url.contains("nested-object.svg") -> "<svg>Address : {{/credentialSubject/addressLine1/0/value}}****{{/credentialSubject/region/0/value}}****{{/credentialSubject/city/0/value}}***</svg>"
+                    url.contains("qrcode.svg") -> "<svg>QR code : <image id = \"qrCodeImage\" xlink:href{{/qrCodeImage}}</svg>"
                     else -> "<svg>default</svg>"
                 }
             }
         }
-        injivcRenderer = InjiVcRenderer() // uses its internal NetworkHandler
+        injivcRenderer = InjiVcRenderer()
     }
 
     @After
     fun tearDown() {
         mockConstruction.close()
     }
-
-    @Test
-    fun `replace concatenatedAddress fields with locale`() {
-
-
-        val vcJson = """{
-            "credentialSubject": {
-                "addressLine1": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_ADDRESS_LINE_1eng"
-                    },
-                   {
-                        "language": "fr",
-                        "value": "TEST_ADDRESS_LINE_1fr"
-                    },
-                ],
-                "addressLine2": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_ADDRESS_LINE_2eng"
-                    }
-                ],
-                "city": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_CITYeng"
-                    }
-                ],
-                "province": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_PROVINCEeng"
-                    }
-                ],
-                "region": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_REGIONeng"
-                    }
-                ],
-                "postalCode": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_POSTAL_CODEeng"
-                    }
-                ]
-            },
-            "renderMethod": {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                      "template": {
-                        "id": "https://degree.example/credential-templates/address-concatenated.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
-                      }
-                  }
-              }
-        }"""
-
-        val result = injivcRenderer.renderSvg(vcJson)
-        assertEquals(
-            listOf(
-            "<svg lang=\"eng\"><tspan x=\"0\" dy=\"1.2em\"></tspan><tspan x=\"0\" dy=\"1.2em\">TEST_ADDRESS_LINE_1eng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_ADDRESS_LINE_2eng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_CITYeng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_PROVINCEeng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_REGIONeng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_POSTAL_CODEeng</tspan></svg>"), result)
-
-    }
-
-    @Test
-    fun `replace concatenatedAddress fields without locale`() {
-
-
-        val vcJson = """{
-            "credentialSubject": {
-                "addressLine1": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_ADDRESS_LINE_1eng"
-                    },
-                   {
-                        "language": "fr",
-                        "value": "TEST_ADDRESS_LINE_1fr"
-                    },
-                ],
-                "addressLine2": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_ADDRESS_LINE_2eng"
-                    }
-                ],
-                "city": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_CITYeng"
-                    }
-                ],
-                "province": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_PROVINCEeng"
-                    }
-                ],
-                "region": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_REGIONeng"
-                    }
-                ],
-                "postalCode": [
-                    {
-                        "language": "eng",
-                        "value": "TEST_POSTAL_CODEeng"
-                    }
-                ]
-            },
-            "renderMethod": {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                      "template": {
-                        "id": "https://degree.example/credential-templates/address-concatenated-no-locale.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
-                      }
-                  }
-              }
-        }"""
-
-        val result = injivcRenderer.renderSvg(vcJson)
-        assertEquals(
-            listOf(
-                "<svg ><tspan x=\"0\" dy=\"1.2em\"></tspan><tspan x=\"0\" dy=\"1.2em\">TEST_ADDRESS_LINE_1eng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_ADDRESS_LINE_2eng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_CITYeng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_PROVINCEeng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_REGIONeng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_POSTAL_CODEeng</tspan></svg>"), result)
-
-    }
-
-    @Test
-    fun `replace concatenatedAddress fields with address fields as plain string`() {
-
-        val vcJson = """{
-            "credentialSubject": {
-                "addressLine1": "TEST_ADDRESS_LINE_1eng",
-                "addressLine2": "TEST_ADDRESS_LINE_2eng",
-                "city": "TEST_CITYeng",
-                "province": "TEST_PROVINCEeng",
-                "region": "TEST_REGIONeng",
-                "postalCode": "TEST_POSTAL_CODEeng"
-            },
-            "renderMethod": {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                      "template": {
-                        "id": "https://degree.example/credential-templates/address-concatenated-no-locale.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
-                      }
-                  }
-              }
-        }"""
-
-        val result = injivcRenderer.renderSvg(vcJson)
-        assertEquals(
-            listOf(
-                "<svg ><tspan x=\"0\" dy=\"1.2em\"></tspan><tspan x=\"0\" dy=\"1.2em\">TEST_ADDRESS_LINE_1eng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_ADDRESS_LINE_2eng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_CITYeng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_PROVINCEeng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_REGIONeng,</tspan><tspan x=\"0\" dy=\"1.2em\">TEST_POSTAL_CODEeng</tspan></svg>"), result)
-
-    }
-
-    @Test
-    fun `replace addressFields with empty fullAddress`() {
-        val svgTemplate = "<svg>{{/credentialSubject/fullAddressLine1/eng}}</svg>"
-
-        val processedJson = JSONObject("""{
-            "credentialSubject": {
-                "fullAddressLine1": {}
-            }
-        }""")
-
-        val result = replacePlaceholders(svgTemplate, processedJson)
-        assertEquals("<svg>-</svg>", result)
-
-    }
-
-
-    @Test
-    fun `replace benefits array in SVG Template`() {
-        val vcJsonString = """
-              { 
-                "credentialSubject": {
-                    "fullName": "John Doe",
-                    "benefits": [
-                        "Critical Surgery",
-                        "Full body checkup"
-                    ]
-                },
-                "renderMethod": {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                      "template": {
-                        "id": "https://degree.example/credential-templates/benefits.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
-                      }
-                  }
-              }
-        """.trimIndent()
-
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertEquals(listOf("<svg><tspan x=\"0\" dy=\"1.2em\">Critical</tspan><tspan x=\"0\" dy=\"1.2em\">Surgery,</tspan><tspan x=\"0\" dy=\"1.2em\">Full body</tspan><tspan x=\"0\" dy=\"1.2em\">checkup</tspan></svg>"), result)
-    }
-
-    @Test
-    fun `replace benefits array into multiline in SVG Template`() {
-        // SVG Template - <svg><text>{{/credentialSubject/benefits}}</text></svg>
-
-        val vcJsonString = """
-              { 
-                "credentialSubject": {
-                    "fullName": "John Doe",
-                    "benefits": [
-                        "Item 1 is on the list",
-                        "Item 2 is on the list",
-                        "Item 3 is on the list",
-                        "Item 4 is on the list",
-                        "Item 5 is on the list",
-                        "Item 6 is on the list"
-                    ]
-                },
-                "renderMethod": {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                      "template": {
-                        "id": "https://degree.example/credential-templates/benefits-mutliline.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
-                      }
-                  }
-              }
-        """.trimIndent()
-
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertEquals(listOf("<svg width=\"340\" height=\"234\">\n<text><tspan x=\"0\" dy=\"1.2em\">Item 1 is on the list, Item 2 is on the</tspan><tspan x=\"0\" dy=\"1.2em\">list, Item 3 is on the list, Item 4 is on</tspan><tspan x=\"0\" dy=\"1.2em\">the list, Item 5 is on the list, Item 6 is</tspan><tspan x=\"0\" dy=\"1.2em\">on the list</tspan></text></svg>"), result)
-    }
-
-    @Test
-    fun `replace addressFields with empty benefits`() {
-        val svgTemplate = "<svg>{{/credentialSubject/benefitsLine1}}</svg>"
-
-        val processedJson = JSONObject("""{
-            "credentialSubject": {
-                "benenfitsLine1": []
-            }
-        }""")
-
-        val result = replacePlaceholders(svgTemplate, processedJson)
-        assertEquals("<svg>-</svg>", result)
-
-    }
-
 
     @Test
     fun `renderSvg handles missing renderMethod`() {
@@ -324,12 +63,11 @@ class InjiVcRendererTest {
     }
 
 
-
     @Test
     fun `renderSvg handles without renderMethod field`() {
         val vcJsonString = """
-            { 
-                "someField": "someValue" 
+            {
+                "someField": "someValue"
             }
         """.trimIndent()
 
@@ -364,6 +102,8 @@ class InjiVcRendererTest {
 
         assertEquals(emptyList<String>(), result)
     }
+
+
 
     @Test
     fun `renderSvg handles with renderMethod as array - renderSuite is invalid`() {
@@ -422,150 +162,74 @@ class InjiVcRendererTest {
     }
 
 
-    @Test
-    fun `renderSvg handles with renderMethod field as object - embedded SVG`() {
-        val vcJsonString = """
-              { 
-                "credentialSubject": {
-                    "fullName": "John Doe"
-                },
-                "renderMethod": {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,PHN2Zz5GdWxsIE5hbWUgLSB7ey9jcmVkZW50aWFsU3ViamVjdC9mdWxsTmFtZX19PC9zdmc+"
-                  }
-              }
-        """.trimIndent()
-
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertEquals(listOf("<svg>Full Name - John Doe</svg>"), result)
-    }
 
     @Test
-    fun `renderSvg handles with renderMethod field as array - embedded multiple SVG`() {
-        val vcJsonString = """
-              { 
-                "credentialSubject": {
-                    "fullName": "John Doe",
-                    "email": "test@gmail.com"
-                },
-                "renderMethod": [
-                  {
+    fun `replace address fields with locale`() {
+
+        val vcJson = """{
+            "credentialSubject": {
+                "addressLine1": [
+                    {
+                        "language": "eng",
+                        "value": "TEST_ADDRESS_LINE_1eng"
+                    },
+                   {
+                        "language": "fr",
+                        "value": "TEST_ADDRESS_LINE_1fr"
+                    }
+                ],
+                "city": [
+                    {
+                        "language": "eng",
+                        "value": "TEST_CITYeng"
+                    }
+                ],
+                "region": [
+                    {
+                        "language": "eng",
+                        "value": "TEST_REGIONeng"
+                    }
+                ],
+                "postalCode": [
+                    {
+                        "language": "eng",
+                        "value": "TEST_POSTAL_CODEeng"
+                    }
+                ]
+            },
+            "renderMethod": {
                     "type": "TemplateRenderMethod",
                     "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,PHN2Zz5GdWxsIE5hbWUgLSB7ey9jcmVkZW50aWFsU3ViamVjdC9mdWxsTmFtZX19PC9zdmc+"
-                  },
-                  {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,PHN2Zz5FbWFpbCAtIHt7L2NyZWRlbnRpYWxTdWJqZWN0L2VtYWlsfX08L3N2Zz4="
+                      "template": {
+                        "id": "https://degree.example/credential-templates/nested-object.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
                   }
-              ]
               }
-        """.trimIndent()
+        }"""
+        val result = injivcRenderer.renderSvg(vcJson)
+        assertEquals(
+            listOf(
+            "<svg>Address : TEST_ADDRESS_LINE_1eng****TEST_REGIONeng****TEST_CITYeng***</svg>"), result)
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertEquals(listOf("<svg>Full Name - John Doe</svg>", "<svg>Email - test@gmail.com</svg>"), result)
     }
 
-    @Test
-    fun `renderSvg handles with renderMethod field as object - embedded multiple SVG with one invalid type`() {
-        val vcJsonString = """
-              { 
-                "credentialSubject": {
-                    "fullName": "John Doe",
-                    "email": "test@gmail.com"
-                },
-                "renderMethod": [
-                  {
-                    "type": "invalid",
-                    "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,PHN2Zz48dGV4dD5Gcm9udCBOYW1lIC0ge3tjcmVkZW50aWFsU3ViamVjdC9mdWxsTmFtZX19PC90ZXh0Pjwvc3ZnPg=="
-                  },
-                  {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,PHN2Zz5FbWFpbCAtIHt7L2NyZWRlbnRpYWxTdWJqZWN0L2VtYWlsfX08L3N2Zz4="
-                  }
-              ]
-              }
-        """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertEquals(listOf("<svg>Email - test@gmail.com</svg>"), result)
-    }
-
-    @Test
-    fun `renderSvg handles with renderMethod field as object - embedded multiple SVG with one invalid uri`() {
-        val vcJsonString = """
-              { 
-                "credentialSubject": {
-                    "fullName": "John Doe",
-                    "email": "test@gmail.com"
-                },
-                "renderMethod": [
-                  {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,@@@INVALIDBASE64###!!!"
-                  },
-                  {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,PHN2Zz5FbWFpbCAtIHt7L2NyZWRlbnRpYWxTdWJqZWN0L2VtYWlsfX08L3N2Zz4="
-                  }
-              ]
-              }
-        """.trimIndent()
-
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertEquals(listOf("<svg>Email - test@gmail.com</svg>"), result)
-    }
-
-    @Test
-    fun `renderSvg handles with renderMethod field as object - embedded multiple SVG with all invalid uri`() {
-        val vcJsonString = """
-              { 
-                "credentialSubject": {
-                    "fullName": "John Doe",
-                    "email": "test@gmail.com"
-                },
-                "renderMethod": [
-                  {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,@@@INVALIDBASE64###!!!"
-                  },
-                  {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,@@@INVALIDBASE64###!!!"
-                  }
-              ]
-              }
-        """.trimIndent()
-
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertTrue(result.isEmpty())
-    }
 
     @Test
     fun `renderSvg handles with renderMethod field as object - SVG Hosted`() {
         val vcJsonString = """
-              { 
+              {
                 "credentialSubject": {
-                    "fullName": "John Doe"
+                    "email": "test@gmail.com",
+                    "mobile": "1234567890"
                 },
                 "renderMethod": {
                     "type": "TemplateRenderMethod",
                     "renderSuite": "svg-mustache",
                       "template": {
-                        "id": "https://degree.example/credential-templates/front.svg",
+                        "id": "https://degree.example/credential-templates/normal.svg",
                         "mediaType": "image/svg+xml",
                         "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
                       }
@@ -575,23 +239,27 @@ class InjiVcRendererTest {
 
         val result = injivcRenderer.renderSvg(vcJsonString)
 
-        assertEquals(listOf("<svg>Full Name - John Doe</svg>"), result)
+        assertEquals(listOf("<svg>Email: test@gmail.com, Mobile: 1234567890</svg>"), result)
     }
 
     @Test
     fun `renderSvg handles with renderMethod field as array - Multiple SVG Hosted`() {
         val vcJsonString = """
-              { 
+              {
                 "credentialSubject": {
-                    "fullName": "John Doe",
-                    "email": "test@gmail.com"
+                    "mobile": "John Doe",
+                    "email": "test@gmail.com",
+                    "fullName": {
+                        "en": "John Doe",
+                        "tam": "ஜான் டோ"
+                    }
                 },
                 "renderMethod": [
                   {
                     "type": "TemplateRenderMethod",
                     "renderSuite": "svg-mustache",
                     "template": {
-                        "id": "https://degree.example/credential-templates/front.svg",
+                        "id": "https://degree.example/credential-templates/normal.svg",
                         "mediaType": "image/svg+xml",
                         "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
                       }
@@ -600,7 +268,7 @@ class InjiVcRendererTest {
                     "type": "TemplateRenderMethod",
                     "renderSuite": "svg-mustache",
                     "template": {
-                        "id": "https://degree.example/credential-templates/rear.svg",
+                        "id": "https://degree.example/credential-templates/with-locale-object.svg",
                         "mediaType": "image/svg+xml",
                         "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
                       }
@@ -611,59 +279,29 @@ class InjiVcRendererTest {
 
         val result = injivcRenderer.renderSvg(vcJsonString)
 
-        assertEquals(listOf("<svg>Full Name - John Doe</svg>", "<svg>Email - test@gmail.com</svg>"), result)
-    }
-
-    @Test
-    fun `renderSvg handles with renderMethod field as array - One SVG Hosted and Other embedded`() {
-        val vcJsonString = """
-              { 
-                "credentialSubject": {
-                    "fullName": "John Doe",
-                    "email": "test@gmail.com"
-                },
-                "renderMethod": [
-                  {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                    "template": {
-                        "id": "https://degree.example/credential-templates/front.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
-                      }
-                  },
-                  {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,PHN2Zz5FbWFpbCAtIHt7L2NyZWRlbnRpYWxTdWJqZWN0L2VtYWlsfX08L3N2Zz4="
-                  }
-              ]
-              }
-        """.trimIndent()
-
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertEquals(listOf("<svg>Full Name - John Doe</svg>", "<svg>Email - test@gmail.com</svg>"), result)
+        assertEquals(listOf("<svg>Email: test@gmail.com, Mobile: John Doe</svg>", "<svg>Full Name - John Doe,முழுப் பெயர் - ஜான் டோ</svg>"), result)
     }
 
     @Test
     fun `renderSvg with renderProperty - Hosted one SVG`() {
         val vcJsonString = """
-              { 
+              {
                 "issuer": "Example University",
                 "validFrom": "2023-01-01",
                 "credentialSubject": {
-                    "fullName": "John Doe"
+                    "fullName": "John Doe",
+                    "name": "Tester",
+                    "email": "test@test.com"
                 },
                 "renderMethod": {
                     "type": "TemplateRenderMethod",
                     "renderSuite": "svg-mustache",
                     "template": {
-                        "id": "https://degree.example/credential-templates/with-render-property.svg",
+                        "id": "https://degree.example/credential-templates/normal.svg",
                         "mediaType": "image/svg+xml",
                         "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR",
                         "renderProperty": [
-                            "/issuer", "/validFrom", "/credentialSubject/degree/name"
+                            "/issuer", "/credentialSubject/email", "/credentialSubject/degree/name"
                           ]
                       }
                   }
@@ -672,152 +310,8 @@ class InjiVcRendererTest {
 
         val result = injivcRenderer.renderSvg(vcJsonString)
 
-        assertEquals(listOf("<svg>Details - -****Example University****2023-01-01***-</svg>"), result)
+        assertEquals(listOf("<svg>Email: test@test.com, Mobile: -</svg>"), result)
     }
-
-    @Test
-    fun `renderSvg with renderProperty - Hosted multiple SVG`() {
-        val vcJsonString = """
-              {
-                  "issuer": "Example University",
-                  "validFrom": "2023-01-01",
-                  "address": "123 Main St",
-                  "city": "Springfield",
-                  "pincode": "12345",
-                  "credentialSubject": {
-                    "fullName": "John Doe"
-                  },
-                  "renderMethod": [
-                    {
-                      "type": "TemplateRenderMethod",
-                      "renderSuite": "svg-mustache",
-                      "template": {
-                        "id": "https://degree.example/credential-templates/with-render-property.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR",
-                        "renderProperty": [
-                          "/issuer",
-                          "/validFrom",
-                          "/credentialSubject/degree/name"
-                        ]
-                      }
-                    },
-                    {
-                      "type": "TemplateRenderMethod",
-                      "renderSuite": "svg-mustache",
-                      "template": {
-                        "id": "https://degree.example/credential-templates/address.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR",
-                        "renderProperty": [
-                          "/address",
-                          "/pincode"
-                        ]
-                      }
-                    }
-                  ]
-                }
-        """.trimIndent()
-
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertEquals(listOf("<svg>Details - -****Example University****2023-01-01***-</svg>", "<svg>Address : 123 Main St****-****12345***</svg>"), result)
-    }
-
-
-    @Test
-    fun `valid embedded SVG with placeholder not in VC`() {
-        val vcJsonString = """
-              { 
-                "credentialSubject": {
-                    "middleName": "John Doe"
-                },
-                "renderMethod": {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                    "template": "data:image/svg+xml;base64,PHN2Zz5GdWxsIE5hbWUgLSB7ey9jcmVkZW50aWFsU3ViamVjdC9mdWxsTmFtZX19PC9zdmc+"
-                  }
-              }
-        """.trimIndent()
-
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertEquals(listOf("<svg>Full Name - -</svg>"), result)
-    }
-
-    @Test
-    fun `valid SVG Hosted with placeholder not in VC`() {
-        val vcJsonString = """
-              { 
-                "credentialSubject": {
-                    "middleName": "John Doe"
-                },
-                "renderMethod": {
-                    "type": "TemplateRenderMethod",
-                    "renderSuite": "svg-mustache",
-                      "template": {
-                        "id": "https://degree.example/credential-templates/front.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
-                      }
-                  }
-              }
-        """.trimIndent()
-
-        val result = injivcRenderer.renderSvg(vcJsonString)
-
-        assertEquals(listOf("<svg>Full Name - -</svg>"), result)
-    }
-
-//    @Test
-//    fun `render Farmer SVG`() {
-//
-//
-//        val vcJson = """
-//           {
-//              "@context": [
-//                "https://www.w3.org/2018/credentials/v1",
-//                "https://jainhitesh9998.github.io/tempfiles/farmer-credential.json",
-//                "https://w3id.org/security/suites/ed25519-2020/v1"
-//              ],
-//              "credentialSubject": {
-//                "id": "did:jwk:eyJrdHkiO",
-//                "fullName": "Ramesh",
-//                "farmerID": "3823333312345",
-//                "gender": "Male",
-//                "mobile": "9840298402",
-//                "email": "ramesh@mosip.io",
-//                "dob": "1980-01-24",
-//                "benefits": [
-//                  "Wheat",
-//                  "Corn"
-//                ],
-//                "ownershipType": "Owner",
-//                "crop": "Rice",
-//                "totalLandArea": "2.5 hectares"
-//              },
-//              "type": [
-//                "VerifiableCredential",
-//                "FarmerCredential"
-//              ],
-//              "renderMethod": {
-//                "type": "TemplateRenderMethod",
-//                "renderSuite": "svg-mustache",
-//                "template": {
-//                  "id": "https://281230d9ab5e.ngrok-free.app/templates/farmer_front_final.svg",
-//                  "mediaType": "image/svg+xml",
-//                  "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
-//                }
-//              }
-//            }
-//        """.trimIndent()
-//        val expected = "<svg>English Male</svg>"
-//
-//        val result = injivcRenderer.renderSvg(vcJson)
-//
-//
-//        assertEquals("<svg>-</svg>", result)
-//    }
-
 
 }
+

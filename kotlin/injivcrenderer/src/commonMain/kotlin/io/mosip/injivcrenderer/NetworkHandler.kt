@@ -15,10 +15,10 @@ class NetworkHandler {
         return try {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    throw IOException("Unexpected code $response")
+                    throw IOException("Unexpected response code $response")
                 }
-                val contentType = response.header("Content-Type")
-                if (contentType != "image/svg+xml") {
+                val contentType = response.header(CONTENT_TYPE)
+                if (contentType != CONTENT_TYPE_SVG) {
                     throw IOException("Expected image/svg+xml but received $contentType")
                 }
                 response.body?.string() ?: throw IOException("Empty response body")
@@ -28,5 +28,10 @@ class NetworkHandler {
         } catch (e: Exception) {
             throw IOException("Unexpected error", e)
         }
+    }
+
+    companion object {
+        const val CONTENT_TYPE_SVG = "image/svg+xml"
+        const val CONTENT_TYPE = "Content-Type"
     }
 }

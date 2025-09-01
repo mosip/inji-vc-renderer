@@ -29,6 +29,7 @@ kotlin {
                 implementation(libs.squareup.okhttp)
                 implementation(libs.google.zxing.javase)
                 implementation(libs.org.json)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         val commonTest by getting {
