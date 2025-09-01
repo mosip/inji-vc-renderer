@@ -1,5 +1,5 @@
 ## InjiVcRenderer - Kotlin Library
-- A Kotlin library to convert SVG Template to SVG Image by replacing the placeholders in the SVG Template with actual Verifiable Credential Json Data.
+- A Kotlin library to convert SVG Template to SVG Image by replacing the placeholders in the SVG Template with actual Verifiable Credential Json Data. Strictly follows JSON Pointer Algorithm RFC6901 to extract the values from the VC.
 
 ### Features
 - Downloads the SVG template from the renderMethod field of the VC to support VC Data Model 2.0.
@@ -18,8 +18,8 @@
     - Run using  `./gradlew :example-java-app:build`
 3. injivcrenderer
        - Library to replace the placeholders in the Svg Template received from the renderMethod with the actual Verifiable Credential
-       - Run using `./gradlew :injivcrenderer:build` to generate the aar
-       - Gradle task is registered to generate jar by running the command `./gradlew jarRelease` which creates jar in the `build/libs` folder
+       - Run using `./gradlew :injivcrenderer:assembleRelease` to generate the aar
+       - Gradle task is registered to generate jar by running the command `./gradlew :injivcrenderer:build` which creates jar in the `build/libs` folder
        - Run Tests using `./gradlew testDebugUnitTest` or `./gradlew testReleaseUnitTest` based on the build type.
 
 ### API
@@ -58,16 +58,7 @@
   - Extracts the render method from the VC Json data.
   - If multiple render methods are present, it will process all the render methods and return the list of replaced SVG Templates.
 
-#### Embedding SVG Template in VC
-- If Render Method object has `template` field as string, SVG Template is directly embedded in the VC.
-  - Replaces the placeholders in the SVG Template with actual VC Json Data.
-        ```
-            "renderMethod": {
-            "type": "TemplateRenderMethod",
-            "renderSuite": "svg-mustache",
-            "template": "data:image/svg+xml;base64,Qjei89...3jZpW"
-            }
-        ```
+
 #### Downloading SVG Template from URL in VC
   - If Render Method object has `template` field as object with `id` field as url and `mediaType` as `image/svg+xml`, SVG Template needs to be downloaded from the URL and then replace the placeholders.
       ```
@@ -81,19 +72,24 @@
               }
           }
       ```
- - For both cases, render method type should be `TemplateRenderMethod` and render suite should be `svg-mustache`.
+ - Render method type should be `TemplateRenderMethod` and render suite should be `svg-mustache`.
+- Note : Embedded SVG Template and hosting render method as jsonld document are not supported in this library. Hosting the SVG Template as URL is supported.
 
 #### Preprocessing the SVG Template
 
 ##### QR Code Placeholder
-  - If the SVG Template has `{{/qrCodeImage}}` placeholder, it will generate the QR code using Pixelpass library and replace the placeholder with generated QR code image in base64 format.
+  - If the SVG Template has `{{/qrCodeImage}}` , it will generate the QR code using Pixelpass library and replace the placeholder with generated QR code image in base64 format.
     - Example:
         ```
         val vcJson = {"credentialSubject" : "id": "did:example:123456789", "name": "Tester"}
         
-        val svgTempalte = "<svg>{{/qrCodeImage}}</svg>"
+        val svgTempalte = "<svg><image id = "qrCodeImage" href="{{/qrCodeImage}}"</svg>"
         
-        //result => <svg><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABmJLR0QA/wD/AP+gvaeTAAAIKklEQVR4nO3de5QdZZnv8e9M7MzMzM7szszM7s"
+        //result => <svg><image id = "qrCodeImage" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABmJLR0QA/wD/AP+gvaeTAAAIKklEQVR4nO3de5QdZZnv8e9M7MzMzM7szszM7s"
+      
+- Note: It is mandatory to have `id` field in the `<image>` as `qrCodeImage` and placeholder as `{{/qrCodeImage}}` to generate the QR code.
+      
+
 ##### Handling Render Property
   - If the `template` field is an object and has `renderMethod` property. Property in the `renderMethod` will be taken into consideration for further processing and rest of the fields placeholders will be replaced with empty string.
     - Example:
@@ -114,74 +110,42 @@
     - In the above example, only the fields `issuer`, `validFrom` and `credentialSubject/degree/name` will be considered for replacing the placeholders in the SVG Template.
   - If `renderProperty` is not present, all the fields in the VC will be considered for replacing the placeholders in the SVG Template.
 
-##### Locale Handling
-- If the template has locale like `<svg lang="eng">{{/credentialSubject/city}}</svg>`, extract the language from template, check for the locale object that has the language and then replace the placeholders with appropriate locale value.
-- Example:
-    ```
-    val vcJson = {      "credentialSubject": { "fullName": "Tester", "city": [{"value": "TestCITY", "language": "eng"},{"value": "VilleTest", "language": "fr"}]}
-          
-      val svgTempalte = "<svg>{{/credentialSubject/fullName}} - {{/credentialSubject/city}}</svg>"
-          
-      //result => <svg>Tester - TestCITY</svg>
-  ```
-  
-- If no language is provided in the SVG Template, it will look for the value from `eng` locale object and use it as default language .
-- Example:
-    ```
-    val template = <svg>{{/credentialSubject/city}}</svg>
-    val vcJson = {      "credentialSubject": { "city": [{"value": "Hindi City", "language": "hin"}, {"value": "English City", "language": "eng"},{"value": "French City", "language": "fr"}]}
-          
-      val svgTempalte = "<svg>{{/credentialSubject/city}}</svg>"
-          
-      //result => <svg>English City</svg>
-  ```
--  If `eng` also not available , it will pick the first item from the language array.
-- Example:
-    ```
-    val template = <svg>{{/credentialSubject/city}}</svg>
-    val vcJson = {      "credentialSubject": { "city": [{"value": "Hindi City", "language": "hin"},{"value": "French City", "language": "fr"}]}
-          
-      val svgTempalte = "<svg>{{/credentialSubject/city}}</svg>"
-          
-      //result => <svg>Hindi City</svg>
-  ```
-
 ##### Array Fields Handling
-- For array fields in the VC, below approach will be followed.
-- **chunkArrayFields**: Joins elements of a JSONArray into a single string, then wraps it into multiple lines for SVG. 
-- **wrapText**: Core logic that splits text into lines without breaking words, based on the calculated character limit per line based on svg width, and wraps each line in a <tspan>.
+- For array fields in the VC, index based approach will be followed.
 - Example:
     ```
     val vcJson = {"credentialSubject" : "benefits": ["Critical Surgery", "Full Health Checkup", "Testing"]}
     
-    val svgTempalte = "<svg>{{/benefits}}</svg>"
+    val svgTempalte = "<svg>{{/benefits/0}},{{/benefits/1}}</svg>"
     
-    //result => <svg><text><tspan>Critical Surgery, Full</tspan><tspan>Health Checkup, Testing</tspan></text></svg>
+    //result => <svg>Critical Surgery,Full Health Checkup</svg>
+    ```
+- Example for array of objects:
+    ```
+    val vcJson = {      "credentialSubject": {          "awards": [              {"title": "Award1", "year": "2020"},              {"title": "Award2", "year": "2021"}          ]      }  }
+    
+    val svgTemplate = "<svg>{{/credentialSubject/awards/0/title}} - {{/credentialSubject/awards/0/year}}, {{/credentialSubject/awards/1/title}} - {{/credentialSubject/awards/1/year}}</svg>"
+    
+    //result => <svg>Award1 - 2020, Award2 - 2021</svg>
     ```
 
-##### Concatenated Address Field Handling
-- For svg Template with `{{/concatenatedAddress}}, below approach will be followed.
-- **chunkAddressFields**: Wraps a single address string into multiple lines for SVG.
-- **wrapText**: Core logic that splits text into lines without breaking words, based on the calculated character limit per line based on svg width, and wraps each line in a <tspan>.
+##### Locale Handling
+- For locale handling, same JSON Pointer Algorithm is used to extract the value from the VC.
 - Example:
     ```
-    val vcJson = {      "credentialSubject": {          "addressLine1": [{"value": "No 123, Test Address line1", "language": "eng"}],          "addressLine2": [{"value": "Test Address line", "language": "eng"}],          "city": [{"value": "TestCITY", "language": "eng"}],          "province": [{"value": "TESTProvince", "language": "eng"}],      }  }
-    
-    val svgTemplate = "<svg>{{/concatenatedAddress}}</svg>"
-    
-    //result => <svg><text><tspan>No 123, Test Address line1,</tspan><tspan>Test Address line, TestCITY, TESTProvince</tspan></text></svg>
-    ```
-- Here are the list of fields considered for concatenating address - `addressLine1`, `addressLine2`, `addressLine3`, `city`, `province`, `region` and `postalCode`
-
-Note : For Array Fields and Concatenated Address , better to have the fields at the end of template or give enough height for the fields in the design. Because it will be wrapped based on the VC data for those fields. Because in SVG Template , there is limitation to do wrapping based on the content, so we are manually wrapping based the SVG Width
-
-
+    val vcJson = {      "credentialSubject": { "fullName": "Tester", "city": [{"value": "TestCITY", "language": "eng"},{"value": "VilleTest", "language": "fr"}]}
+          
+      val svgTempalte = "<svg>{{/credentialSubject/fullName}} - {{/credentialSubject/city/0/value}}</svg>"
+          
+      //result => <svg>Tester - TestCITY</svg>
+  ```
 
 #### Replacing Placeholders in SVG Template
-- Replaces the placeholders in the SVG Template with actual VC Json Data using JSON Pointer Algorithm.
+- Replaces the placeholders in the SVG Template with actual VC Json Data strictly follows JSON Pointer Algorithm RFC6901.
 - Returns the list of replaced SVG Templates if multiple render methods are present in the VC.
 
 
 ### References
+- [JSON Pointer Algorithm - RFC6901](https://www.rfc-editor.org/rfc/rfc6901)
 - [Draft Implementation of Verifiable Credential Rendering Methods](https://w3c-ccg.github.io/vc-render-method/#the-rendermethod-property)
 - [Data model 2.0 implementation](https://www.w3.org/TR/vc-data-model-2.0/#reserved-extension-points)
