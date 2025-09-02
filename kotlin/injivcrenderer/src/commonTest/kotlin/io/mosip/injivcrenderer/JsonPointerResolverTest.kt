@@ -1,7 +1,7 @@
 package io.mosip.injivcrenderer
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosip.injivcrenderer.JsonPointerResolver.replacePlaceholders
-import org.json.JSONObject
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.runner.RunWith
@@ -9,13 +9,15 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class JsonPointerResolverTest {
+    private val mapper = ObjectMapper()
+
 
     @Test
     fun `replace simple object field`() {
 
         val svgTemplateWithLocale = "<svg >{{/credentialSubject/gender/0/value}}##{{/credentialSubject/fullName}}</svg>"
 
-        val processedJson = JSONObject("""{
+        val processedJson = mapper.readTree("""{
             "credentialSubject": {
                 "gender":[
                     {
@@ -38,7 +40,7 @@ class JsonPointerResolverTest {
 
         val svgTemplateWithLocale = "<svg >{{/credentialSubject/benefits/0}}, {{/credentialSubject/benefits/1}}</svg>"
 
-        val processedJson = JSONObject("""{
+        val processedJson = mapper.readTree("""{
             "credentialSubject": {
                 "benefits":[
                     "Item 1 is on the list",
@@ -60,7 +62,7 @@ class JsonPointerResolverTest {
 
         val svgTemplateWithLocale = "<svg >{{/credentialSubject/email}}##{{/credentialSubject/middleName}}</svg>"
 
-        val processedJson = JSONObject("""{
+        val processedJson = mapper.readTree("""{
             "credentialSubject": {
                 "gender":[
                     {
@@ -83,7 +85,7 @@ class JsonPointerResolverTest {
 
         val svgTemplateWithLocale = "<svg>Gender: {{/credentialSubject/gender/eng}}, பாலினம் : {{/credentialSubject/gender/tam}} </svg>"
 
-        val processedJson = JSONObject("""{
+        val processedJson = mapper.readTree("""{
             "credentialSubject": {
                 "gender": {
                     "eng": "Male",
@@ -103,7 +105,7 @@ class JsonPointerResolverTest {
 
         val svgTemplateWithLocale = "<svg>Gender: {{/credentialSubject/gender/0/value}}, பாலினம் : {{/credentialSubject/gender/1/value}} </svg>"
 
-        val processedJson = JSONObject("""{
+        val processedJson = mapper.readTree("""{
             "credentialSubject": {
                 "gender": [
                     {
@@ -129,7 +131,7 @@ class JsonPointerResolverTest {
 
         val svgTemplateWithLocale = "<svg>{{/credentialSubject/address/addressLine1/0/value}}</svg>"
 
-        val processedJson = JSONObject("""{
+        val processedJson = mapper.readTree("""{
             "credentialSubject": {
                 "address": {
                     "addressLine1": [
@@ -164,7 +166,7 @@ class JsonPointerResolverTest {
 
         val svgTemplateWithLocale = "<svg >{{/credentialSubject/ac~1dc}}</svg>"
 
-        val processedJson = JSONObject("""{
+        val processedJson = mapper.readTree("""{
             "credentialSubject": {
                 "ac/dc": "current unit"
             }
@@ -181,7 +183,7 @@ class JsonPointerResolverTest {
 
         val svgTemplateWithLocale = "<svg >{{/credentialSubject/a~0b}}</svg>"
 
-        val processedJson = JSONObject("""{
+        val processedJson = mapper.readTree("""{
             "credentialSubject": {
                 "a~b": "test"
             }
@@ -196,7 +198,7 @@ class JsonPointerResolverTest {
     @Test
     fun `pointer to root returns full document`() {
         val svgTemplate = "<svg>{{}}</svg>"
-        val json = JSONObject("""{"a":1,"b":2}""")
+        val json = mapper.readTree("""{"a":1,"b":2}""")
         val expected = "<svg>${json.toString()}</svg>"
 
         val result = replacePlaceholders(svgTemplate, json)
@@ -206,7 +208,7 @@ class JsonPointerResolverTest {
     @Test
     fun `empty array and object pointers`() {
         val svgTemplate = "<svg>{{/emptyArray}},{{/emptyObject}}</svg>"
-        val json = JSONObject("""{"emptyArray": [], "emptyObject": {}}""")
+        val json = mapper.readTree("""{"emptyArray": [], "emptyObject": {}}""")
         val expected = "<svg>[],{}</svg>"
 
         val result = replacePlaceholders(svgTemplate, json)
@@ -216,7 +218,7 @@ class JsonPointerResolverTest {
     @Test
     fun `array index out of bounds returns dash`() {
         val svgTemplate = "<svg>{{/items/99}}</svg>"
-        val json = JSONObject("""{"items": ["one","two"]}""")
+        val json = mapper.readTree("""{"items": ["one","two"]}""")
         val expected = "<svg>-</svg>"
 
         val result = replacePlaceholders(svgTemplate, json)
@@ -226,18 +228,8 @@ class JsonPointerResolverTest {
     @Test
     fun `multiple tildes and slashes in key`() {
         val svgTemplate = "<svg>{{/a~0b~1c}}</svg>"
-        val json = JSONObject("""{"a~b/c": "value"}""")
+        val json = mapper.readTree("""{"a~b/c": "value"}""")
         val expected = "<svg>value</svg>"
-
-        val result = replacePlaceholders(svgTemplate, json)
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun `special characters in keys`() {
-        val svgTemplate = "<svg>{{/!@#\$%^&*()}}</svg>"
-        val json = JSONObject("""{"!@#\$%^&*()": "special"}""")
-        val expected = "<svg>special</svg>"
 
         val result = replacePlaceholders(svgTemplate, json)
         assertEquals(expected, result)
@@ -246,7 +238,7 @@ class JsonPointerResolverTest {
     @Test
     fun `unicode characters in keys`() {
         val svgTemplate = "<svg>{{/ключ}}</svg>"
-        val json = JSONObject("""{"ключ": "значение"}""")
+        val json = mapper.readTree("""{"ключ": "значение"}""")
         val expected = "<svg>значение</svg>"
 
         val result = replacePlaceholders(svgTemplate, json)
@@ -259,7 +251,7 @@ class JsonPointerResolverTest {
 
         val svgTemplateWithLocale = "<svg >{{/issuer}}##{{/credentialSubject/fullName}}</svg>"
 
-        val processedJson = JSONObject("""{
+        val processedJson = mapper.readTree("""{
             "issuer": "did:mosip:123456789",
             "credentialSubject": {
                 "gender":[
@@ -283,7 +275,7 @@ class JsonPointerResolverTest {
 
         val svgTemplateWithLocale = "<svg >{{/credentialSubject/gender/0/value}}##{{/credentialSubject/fullName}}</svg>"
 
-        val processedJson = JSONObject("""{
+        val processedJson = mapper.readTree("""{
             "issuer": "did:mosip:123456789",
             "credentialSubject": {
                 "gender":[

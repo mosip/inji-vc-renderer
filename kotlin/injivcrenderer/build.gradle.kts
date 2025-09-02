@@ -30,6 +30,7 @@ kotlin {
                 implementation(libs.google.zxing.javase)
                 implementation(libs.org.json)
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.jackson.databind)
             }
         }
         val commonTest by getting {

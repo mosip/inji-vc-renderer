@@ -5,10 +5,12 @@ import io.mosip.injivcrenderer.Constants.TEMPLATE
 import io.mosip.injivcrenderer.JsonPointerResolver.replacePlaceholders
 import io.mosip.injivcrenderer.SvgHelper.extractSvgTemplate
 import io.mosip.injivcrenderer.SvgHelper.parseRenderMethod
-import org.json.JSONObject
-
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 
 class InjiVcRenderer {
+
+    private val mapper = ObjectMapper()
 
     /**
      * Renders SVG templates defined in the VC's renderMethod section.
@@ -20,20 +22,17 @@ class InjiVcRenderer {
      */
     fun renderSvg(vcJsonString: String): List<String> {
         return try {
-            val vcJsonObject = JSONObject(vcJsonString)
-            val renderMethodArray = parseRenderMethod(vcJsonObject)
+            val vcJsonNode: JsonNode = mapper.readTree(vcJsonString)
+            val renderMethodArray = parseRenderMethod(vcJsonNode)
 
             val results = mutableListOf<String>()
-            for (i in 0 until renderMethodArray.length()) {
-                val renderMethod = renderMethodArray.getJSONObject(i)
+            for (element in renderMethodArray) {
 
-                val svgTemplate = extractSvgTemplate(renderMethod, vcJsonString)
+                val svgTemplate = extractSvgTemplate(element, vcJsonString)
                 if (svgTemplate.isNotEmpty()) {
-                    val renderProperties = renderMethod.optJSONObject(TEMPLATE)?.optJSONArray(
-                        RENDER_PROPERTY)?.let {
-                        List(it.length()) { idx -> it.getString(idx) }
-                    }
-                    val renderedSvg = replacePlaceholders(svgTemplate, vcJsonObject, renderProperties)
+                    val renderProperties =
+                        element.path(TEMPLATE).path(RENDER_PROPERTY).takeIf { it.isArray }?.map { it.asText() }
+                    val renderedSvg = replacePlaceholders(svgTemplate, vcJsonNode, renderProperties)
                     results.add(renderedSvg)
                 }
             }
@@ -43,5 +42,4 @@ class InjiVcRenderer {
             emptyList()
         }
     }
-
 }
