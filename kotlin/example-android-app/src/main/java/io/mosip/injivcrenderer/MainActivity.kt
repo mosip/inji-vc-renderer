@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
 
-    var svgString by remember { mutableStateOf<String?>(null) }
+    var svgString by remember { mutableStateOf<Any?>(null) }
 
 
     val farmerVc = """
@@ -159,22 +159,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        svgString?.let { svg ->
-            val svgBytes = svg.toByteArray(Charsets.UTF_8) // Ensure UTF-8
-            val context = LocalContext.current
-
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(ByteArrayInputStream(svgBytes)) // InputStream works
-                    .decoderFactory(SvgDecoder.Factory())
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Rendered SVG",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-            )
-        }
 
     }
 

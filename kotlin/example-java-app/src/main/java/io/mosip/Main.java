@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
 
         InjiVcRenderer injiVcRenderer = new InjiVcRenderer("sample-java-app");
-        List<String> svgImage = injiVcRenderer.renderVC(farmerVc);
+        List<Object> svgImage = injiVcRenderer.renderVC(farmerVc);
         System.out.println(":::::Replaced Template-->"+svgImage);
 
     }

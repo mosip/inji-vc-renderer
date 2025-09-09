@@ -18,9 +18,9 @@ class InjiVcRenderer(private val traceabilityId: String) {
      * Replaces placeholders in the templates with values from the VC JSON.
      *
      * @param vcJsonString The Verifiable Credential as a JSON string.
-     * @return A list of rendered SVG strings. Empty list if no valid render methods found or on error.
+     * @return A list of rendered SVG strings. Empty list if no valid render methods found or on error. Return is List<Any> to accommodate future extensions.
      */
-    fun renderVC(vcJsonString: String): List<String> {
+    fun renderVC(vcJsonString: String): List<Any> {
         return try {
             val vcJsonNode: JsonNode = mapper.readTree(vcJsonString)
             val renderMethodArray = SvgHelper(traceabilityId).parseRenderMethod(vcJsonNode, traceabilityId)
