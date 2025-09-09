@@ -16,5 +16,7 @@ object Constants {
     const val QR_CODE_PLACEHOLDER = "{{/qrCodeImage}}"
     const val QR_IMAGE_PREFIX="data:image/png;base64"
 
+    const val UNKNOWN_ERROR = "Unknown error"
+
 
 }

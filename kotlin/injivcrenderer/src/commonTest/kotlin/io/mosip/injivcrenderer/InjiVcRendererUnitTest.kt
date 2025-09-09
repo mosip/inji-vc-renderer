@@ -1,16 +1,20 @@
 package io.mosip.injivcrenderer
 
+import io.mosip.injivcrenderer.constants.Constants.SVG_MUSTACHE
+import io.mosip.injivcrenderer.constants.Constants.TEMPLATE_RENDER_METHOD
+import io.mosip.injivcrenderer.constants.VcRendererErrorCodes
+import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 import io.mosip.injivcrenderer.networkManager.NetworkManager
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.*
 
 @RunWith(RobolectricTestRunner::class)
 class InjiVcRendererTest {
@@ -36,7 +40,7 @@ class InjiVcRendererTest {
                 }
             }
         }
-        injivcRenderer = InjiVcRenderer()
+        injivcRenderer = InjiVcRenderer("test-trace-id")
     }
 
     @After
@@ -44,22 +48,19 @@ class InjiVcRendererTest {
         mockConstruction.close()
     }
 
-    @Test
-    fun `renderVC handles missing renderMethod`() {
-        val vcJsonString = """{}"""
-
-        val result = injivcRenderer.renderVC(vcJsonString)
-
-        assertTrue(result.isEmpty())
-    }
 
     @Test
     fun `renderVC handles invalid JSON input`() {
         val vcJsonString = """{ "renderMethod": [ "invalid" ] }"""
 
-        val result = injivcRenderer.renderVC(vcJsonString)
+        val actualException =
+            assertFailsWith<VcRendererExceptions.InvalidRenderMethodException> {
+                injivcRenderer.renderVC(vcJsonString)
+            }
+        val expectedErrorMessage = "RenderMethod object is invalid"
 
-        assertTrue(result.isEmpty())
+        assertEquals(VcRendererErrorCodes.INVALID_RENDER_METHOD, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
     }
 
 
@@ -71,9 +72,14 @@ class InjiVcRendererTest {
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderVC(vcJsonString)
+        val actualException =
+            assertFailsWith<VcRendererExceptions.InvalidRenderMethodException> {
+                injivcRenderer.renderVC(vcJsonString)
+            }
+        val expectedErrorMessage = "RenderMethod object is invalid"
 
-        assertEquals(emptyList<String>(), result)
+        assertEquals(VcRendererErrorCodes.INVALID_RENDER_METHOD, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
     }
 
     @Test
@@ -84,9 +90,14 @@ class InjiVcRendererTest {
               }
         """.trimIndent()
 
-        val result = injivcRenderer.renderVC(vcJsonString)
+        val actualException =
+            assertFailsWith<VcRendererExceptions.InvalidRenderMethodException> {
+                injivcRenderer.renderVC(vcJsonString)
+            }
+        val expectedErrorMessage = "RenderMethod object is invalid"
 
-        assertEquals(emptyList<String>(), result)
+        assertEquals(VcRendererErrorCodes.INVALID_RENDER_METHOD, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
     }
 
     @Test
@@ -98,9 +109,14 @@ class InjiVcRendererTest {
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderVC(vcJsonString)
+        val actualException =
+            assertFailsWith<VcRendererExceptions.InvalidRenderMethodException> {
+                injivcRenderer.renderVC(vcJsonString)
+            }
+        val expectedErrorMessage = "RenderMethod object is invalid"
 
-        assertEquals(emptyList<String>(), result)
+        assertEquals(VcRendererErrorCodes.INVALID_RENDER_METHOD, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
     }
 
 
@@ -115,9 +131,14 @@ class InjiVcRendererTest {
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderVC(vcJsonString)
+        val actualException =
+            assertFailsWith<VcRendererExceptions.InvalidRenderSuiteException> {
+                injivcRenderer.renderVC(vcJsonString)
+            }
+        val expectedErrorMessage = "Render suite must be '$SVG_MUSTACHE'"
 
-        assertEquals(emptyList<String>(), result)
+        assertEquals(VcRendererErrorCodes.INVALID_RENDER_SUITE, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
     }
 
     @Test
@@ -129,10 +150,14 @@ class InjiVcRendererTest {
                 ]
             }
         """.trimIndent()
+        val actualException =
+            assertFailsWith<VcRendererExceptions.InvalidRenderMethodTypeException> {
+                injivcRenderer.renderVC(vcJsonString)
+            }
+        val expectedErrorMessage = "Render method type must be '$TEMPLATE_RENDER_METHOD'"
 
-        val result = injivcRenderer.renderVC(vcJsonString)
-
-        assertEquals(emptyList<String>(), result)
+        assertEquals(VcRendererErrorCodes.INVALID_RENDER_METHOD_TYPE, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
     }
 
     @Test
@@ -143,9 +168,14 @@ class InjiVcRendererTest {
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderVC(vcJsonString)
+        val actualException =
+            assertFailsWith<VcRendererExceptions.InvalidRenderSuiteException> {
+                injivcRenderer.renderVC(vcJsonString)
+            }
+        val expectedErrorMessage = "Render suite must be '$SVG_MUSTACHE'"
 
-        assertEquals(emptyList<String>(), result)
+        assertEquals(VcRendererErrorCodes.INVALID_RENDER_SUITE, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
     }
 
     @Test
@@ -156,9 +186,14 @@ class InjiVcRendererTest {
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderVC(vcJsonString)
+        val actualException =
+            assertFailsWith<VcRendererExceptions.InvalidRenderMethodTypeException> {
+                injivcRenderer.renderVC(vcJsonString)
+            }
+        val expectedErrorMessage = "Render method type must be '$TEMPLATE_RENDER_METHOD'"
 
-        assertEquals(emptyList<String>(), result)
+        assertEquals(VcRendererErrorCodes.INVALID_RENDER_METHOD_TYPE, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
     }
 
 

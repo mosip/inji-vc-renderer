@@ -1,37 +1,51 @@
 package io.mosip.injivcrenderer.networkManager
 
+import io.mosip.injivcrenderer.constants.NetworkConstants.CONTENT_TYPE
+import io.mosip.injivcrenderer.constants.NetworkConstants.CONTENT_TYPE_SVG
+import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.IOException
-
-class NetworkManager {
-
+class NetworkManager(
+    private val traceabilityId: String,
+    private val client: OkHttpClient = OkHttpClient() // default production client
+) {
     fun fetchSvgAsText(url: String): String {
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(url)
-            .build()
+        val request = Request.Builder().url(url).build()
 
         return try {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    throw IOException("Unexpected response code $response")
+                    throw VcRendererExceptions.SvgFetchException(
+                        traceabilityId,
+                        this::class.simpleName,
+                        "Unexpected response code $response"
+                    )
                 }
-                val contentType = response.header(CONTENT_TYPE)
-                if (contentType != CONTENT_TYPE_SVG) {
-                    throw IOException("Expected image/svg+xml but received $contentType")
+
+                val contentType = response.header("Content-Type")
+                if (contentType != "image/svg+xml") {
+                    throw VcRendererExceptions.SvgFetchException(
+                        traceabilityId,
+                        this::class.simpleName,
+                        "Expected image/svg+xml but received $contentType"
+                    )
                 }
-                response.body?.string() ?: throw IOException("Empty response body")
+
+                response.body?.string()
+                    ?: throw VcRendererExceptions.SvgFetchException(
+                        traceabilityId,
+                        this::class.simpleName,
+                        "Empty response body"
+                    )
             }
-        } catch (e: IOException) {
+        } catch (e: VcRendererExceptions.SvgFetchException) {
             throw e
         } catch (e: Exception) {
-            throw IOException("Unexpected error", e)
+            throw VcRendererExceptions.SvgFetchException(
+                traceabilityId,
+                this::class.simpleName,
+                e.message ?: "Unexpected error"
+            )
         }
-    }
-
-    companion object {
-        const val CONTENT_TYPE_SVG = "image/svg+xml"
-        const val CONTENT_TYPE = "Content-Type"
     }
 }

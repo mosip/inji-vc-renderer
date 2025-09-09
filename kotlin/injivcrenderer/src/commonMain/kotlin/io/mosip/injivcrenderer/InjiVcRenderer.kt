@@ -2,13 +2,13 @@ package io.mosip.injivcrenderer
 
 import io.mosip.injivcrenderer.constants.Constants.RENDER_PROPERTY
 import io.mosip.injivcrenderer.constants.Constants.TEMPLATE
-import io.mosip.injivcrenderer.templateEngine.svg.JsonPointerResolver.replacePlaceholders
-import io.mosip.injivcrenderer.utils.SvgHelper.extractSvgTemplate
-import io.mosip.injivcrenderer.utils.SvgHelper.parseRenderMethod
+import io.mosip.injivcrenderer.templateEngine.svg.JsonPointerResolver
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
+import io.mosip.injivcrenderer.utils.SvgHelper
 
-class InjiVcRenderer {
+class InjiVcRenderer(private val traceabilityId: String) {
 
     private val mapper = ObjectMapper()
 
@@ -23,23 +23,21 @@ class InjiVcRenderer {
     fun renderVC(vcJsonString: String): List<String> {
         return try {
             val vcJsonNode: JsonNode = mapper.readTree(vcJsonString)
-            val renderMethodArray = parseRenderMethod(vcJsonNode)
+            val renderMethodArray = SvgHelper(traceabilityId).parseRenderMethod(vcJsonNode, traceabilityId)
 
             val results = mutableListOf<String>()
             for (element in renderMethodArray) {
 
-                val svgTemplate = extractSvgTemplate(element, vcJsonString)
-                if (svgTemplate.isNotEmpty()) {
-                    val renderProperties =
-                        element.path(TEMPLATE).path(RENDER_PROPERTY).takeIf { it.isArray }?.map { it.asText() }
-                    val renderedSvg = replacePlaceholders(svgTemplate, vcJsonNode, renderProperties)
-                    results.add(renderedSvg)
-                }
+                val svgTemplate = SvgHelper(traceabilityId).extractSvgTemplate(element, vcJsonString)
+                val renderProperties =
+                    element.path(TEMPLATE).path(RENDER_PROPERTY).takeIf { it.isArray }?.map { it.asText() }
+                val renderedSvg = JsonPointerResolver(traceabilityId).replacePlaceholders(svgTemplate, vcJsonNode, renderProperties)
+                results.add(renderedSvg)
+
             }
             results
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList()
+        } catch (vcRendererException : VcRendererExceptions) {
+            throw vcRendererException
         }
     }
 }

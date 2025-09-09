@@ -2,10 +2,12 @@ package io.mosip.injivcrenderer.templateEngine.svg
 
 import com.fasterxml.jackson.core.JsonPointer
 import com.fasterxml.jackson.databind.JsonNode
+import io.mosip.injivcrenderer.constants.VcRendererErrorCodes.MISSING_JSON_PATH
+import java.util.logging.Level
+import java.util.logging.Logger
 
-object JsonPointerResolver {
-
-    private val PLACEHOLDER_REGEX = Regex("\\{\\{(/[^}]*)\\}\\}|\\{\\{\\}\\}")
+class JsonPointerResolver(private val traceabilityId: String) {
+    private val className = JsonPointerResolver::class.simpleName
 
     /**
      * Replaces placeholders in an SVG template using a Verifiable Credential JSON.
@@ -24,6 +26,10 @@ object JsonPointerResolver {
                 if (pointerPath.isEmpty()) vcJsonNode
                 else vcJsonNode.at(JsonPointer.compile(pointerPath)).takeIf { !it.isMissingNode }
             } catch (e: Exception) {
+                Logger.getLogger(className).log(
+                    Level.SEVERE,
+                    "ERROR [$MISSING_JSON_PATH] - Missing: $pointerPath | Class: $className | TraceabilityId: $traceabilityId"
+                )
                 null
             }
 
@@ -33,5 +39,10 @@ object JsonPointerResolver {
                 else -> valueNode.toString()
             }
         }
+    }
+
+    companion object {
+        private val PLACEHOLDER_REGEX = Regex("\\{\\{(/[^}]*)\\}\\}|\\{\\{\\}\\}")
+
     }
 }

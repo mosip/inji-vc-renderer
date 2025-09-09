@@ -1,7 +1,7 @@
 package io.mosip.injivcrenderer
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mosip.injivcrenderer.templateEngine.svg.JsonPointerResolver.replacePlaceholders
+import io.mosip.injivcrenderer.templateEngine.svg.JsonPointerResolver
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.runner.RunWith
@@ -31,7 +31,7 @@ class JsonPointerResolverTest {
 
         val expected = "<svg >English Male##John</svg>"
 
-        val result = replacePlaceholders(svgTemplateWithLocale, processedJson);
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson);
         assertEquals(expected, result)
     }
 
@@ -53,7 +53,7 @@ class JsonPointerResolverTest {
 
         val expected = "<svg >Item 1 is on the list, Item 2 is on the list</svg>"
 
-        val result = replacePlaceholders(svgTemplateWithLocale, processedJson);
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson);
         assertEquals(expected, result)
     }
 
@@ -76,7 +76,7 @@ class JsonPointerResolverTest {
 
         val expected = "<svg >-##-</svg>"
 
-        val result = replacePlaceholders(svgTemplateWithLocale, processedJson);
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson);
         assertEquals(expected, result)
     }
 
@@ -96,7 +96,7 @@ class JsonPointerResolverTest {
 
         val expected = "<svg>Gender: Male, பாலினம் : ஆண் </svg>"
 
-        val result = replacePlaceholders(svgTemplateWithLocale, processedJson);
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson);
         assertEquals(expected, result)
     }
 
@@ -122,7 +122,7 @@ class JsonPointerResolverTest {
 
         val expected = "<svg>Gender: Male, பாலினம் : ஆண் </svg>"
 
-        val result = replacePlaceholders(svgTemplateWithLocale, processedJson);
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson);
         assertEquals(expected, result)
     }
 
@@ -157,7 +157,7 @@ class JsonPointerResolverTest {
 
         val expected = "<svg>TEST_ADDRESS_LINE_1eng</svg>"
 
-        val result = replacePlaceholders(svgTemplateWithLocale, processedJson);
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson);
         assertEquals(expected, result)
     }
 
@@ -174,7 +174,7 @@ class JsonPointerResolverTest {
 
         val expected = "<svg >current unit</svg>"
 
-        val result = replacePlaceholders(svgTemplateWithLocale, processedJson);
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson);
         assertEquals(expected, result)
     }
 
@@ -191,7 +191,7 @@ class JsonPointerResolverTest {
 
         val expected = "<svg >test</svg>"
 
-        val result = replacePlaceholders(svgTemplateWithLocale, processedJson);
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson);
         assertEquals(expected, result)
     }
 
@@ -201,7 +201,7 @@ class JsonPointerResolverTest {
         val json = mapper.readTree("""{"a":1,"b":2}""")
         val expected = "<svg>${json.toString()}</svg>"
 
-        val result = replacePlaceholders(svgTemplate, json)
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplate, json)
         assertEquals(expected, result)
     }
 
@@ -211,7 +211,7 @@ class JsonPointerResolverTest {
         val json = mapper.readTree("""{"emptyArray": [], "emptyObject": {}}""")
         val expected = "<svg>[],{}</svg>"
 
-        val result = replacePlaceholders(svgTemplate, json)
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplate, json)
         assertEquals(expected, result)
     }
 
@@ -221,7 +221,7 @@ class JsonPointerResolverTest {
         val json = mapper.readTree("""{"items": ["one","two"]}""")
         val expected = "<svg>-</svg>"
 
-        val result = replacePlaceholders(svgTemplate, json)
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplate, json)
         assertEquals(expected, result)
     }
 
@@ -231,7 +231,7 @@ class JsonPointerResolverTest {
         val json = mapper.readTree("""{"a~b/c": "value"}""")
         val expected = "<svg>value</svg>"
 
-        val result = replacePlaceholders(svgTemplate, json)
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplate, json)
         assertEquals(expected, result)
     }
 
@@ -241,7 +241,7 @@ class JsonPointerResolverTest {
         val json = mapper.readTree("""{"ключ": "значение"}""")
         val expected = "<svg>значение</svg>"
 
-        val result = replacePlaceholders(svgTemplate, json)
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplate, json)
         assertEquals(expected, result)
     }
 
@@ -266,7 +266,7 @@ class JsonPointerResolverTest {
 
         val expected = "<svg >did:mosip:123456789##-</svg>"
 
-        val result = replacePlaceholders(svgTemplateWithLocale, processedJson, listOf("/issuer"));
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson, listOf("/issuer"));
         assertEquals(expected, result)
     }
 
@@ -290,7 +290,7 @@ class JsonPointerResolverTest {
 
         val expected = "<svg >English Male##-</svg>"
 
-        val result = replacePlaceholders(svgTemplateWithLocale, processedJson, listOf("/credentialSubject/gender/0/value"));
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson, listOf("/credentialSubject/gender/0/value"));
         assertEquals(expected, result)
     }
 

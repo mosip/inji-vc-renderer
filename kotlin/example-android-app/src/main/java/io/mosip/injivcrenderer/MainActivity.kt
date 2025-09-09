@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
+import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -135,19 +136,21 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         Button(onClick = {
             scope.launch {
                 try {
-                    // Perform network and heavy work on IO dispatcher
                     val replacedTemplate = withContext(Dispatchers.IO) {
-                        InjiVcRenderer().renderVC(farmerVc)
+                        InjiVcRenderer("sample-app-trace-id").renderVC(farmerVc)
                     }
                     println("Replaced Template: $replacedTemplate")
 
-                    // Update state on main thread
                     if (replacedTemplate.isNotEmpty()) {
                         svgString = replacedTemplate[0]
                     }
 
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    if(e is VcRendererExceptions) {
+                        println("VC Rendering error: ${e.errorCode} - ${e.message}")
+                    } else {
+                        println("Unexpected error: ${e.message}")
+                    }
                 }
             }
         }) {
