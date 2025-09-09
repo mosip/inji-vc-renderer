@@ -53,6 +53,37 @@
 - Returns the Replaced svg template to render proper SVG Image. It list of SVG Template if multiple render methods are present in the VC.
 
 
+## Package Structure
+```
+io.mosip.injivcrenderer/commonMain
+├── InjiVcRenderer.kt                  # Main library class with public API
+├── constants/         # Constants used across the library
+│   ├── Constants.kt   
+│   ├── NetworkConstants.kt      
+│   └── VcRendererErrorCodes.kt #Error codes used for Custom Exceptions              
+│   |
+├── exceptions/        # Exceptions
+│   ├── VcRendererExceptions.kt  # Centralized exception definitions
+│   │
+│── qrCode/          
+│   │   ├── QRCodeGenerator.kt  # QR code generation utility
+│   │   └── QrDataConvertor.kt # Implementation of QR code generation
+│── templateEngine/svg/        # Json Pointer Algorithm implementation
+    |--JsonPointerResolver.kt    
+├── utils      # Utility classes
+    ├── SVGHelper.kt               # SVG related utilities
+```
+
+###### Exceptions
+
+1. InvalidRenderSuiteException is thrown if render suite is not `svg-mustache`
+2. InvalidRenderMethodTypeException is thrown if render method type is not `TemplateRenderMethod`
+3. QRCodeGenerationFailureException is thrown if QR code generation fails
+4. MissingTemplateIdException is thrown if template id is missing in render method
+5. SvgFetchException is thrown if fetching SVG from the URL fails
+6. InvalidRenderMethodException is thrown if render method object is invalid
+
+
 ### Steps involved in SVG Template to SVG Image Conversion
 - Render Method Extraction from VC
   - Extracts the render method from the VC Json data.
