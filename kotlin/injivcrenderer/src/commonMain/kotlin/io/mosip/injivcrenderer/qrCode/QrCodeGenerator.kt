@@ -1,4 +1,4 @@
-package io.mosip.injivcrenderer
+package io.mosip.injivcrenderer.qrCode
 
 import io.mosip.pixelpass.PixelPass
 

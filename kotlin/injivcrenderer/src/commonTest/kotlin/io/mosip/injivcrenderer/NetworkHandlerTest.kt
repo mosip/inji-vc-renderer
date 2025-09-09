@@ -1,5 +1,6 @@
 package io.mosip.injivcrenderer
 
+import io.mosip.injivcrenderer.networkManager.NetworkManager
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -12,7 +13,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
-class NetworkHandlerTest {
+class NetworkManagerTest {
     @Test(expected = IOException::class)
     fun `fetchSvgAsText throws IOException when response is not successful`() {
         val mockClient = mock<OkHttpClient>()
@@ -25,7 +26,7 @@ class NetworkHandlerTest {
 
         whenever(mockResponse.isSuccessful).thenReturn(false)
 
-        NetworkHandler().fetchSvgAsText(url)
+        NetworkManager().fetchSvgAsText(url)
     }
 
     @Test(expected = IOException::class)
@@ -42,7 +43,7 @@ class NetworkHandlerTest {
         whenever(mockResponse.isSuccessful).thenReturn(true)
         whenever(mockResponse.header("Content-Type")).thenReturn("text/html")
 
-        NetworkHandler().fetchSvgAsText(url)
+        NetworkManager().fetchSvgAsText(url)
     }
 
     @Test(expected = IOException::class)
@@ -60,7 +61,7 @@ class NetworkHandlerTest {
         whenever(mockResponse.header("Content-Type")).thenReturn("image/svg+xml")
         whenever(mockResponse.body).thenReturn(null) // Simulate empty response body
 
-        NetworkHandler().fetchSvgAsText(url)
+        NetworkManager().fetchSvgAsText(url)
     }
 
 }

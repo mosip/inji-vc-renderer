@@ -1,4 +1,4 @@
-package io.mosip.injivcrenderer
+package io.mosip.injivcrenderer.qrCode
 
 import android.util.Log
 import io.mosip.pixelpass.PixelPass

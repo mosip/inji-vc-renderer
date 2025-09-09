@@ -1,10 +1,10 @@
-package io.mosip.injivcrenderer
+package io.mosip.injivcrenderer.networkManager
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
 
-class NetworkHandler {
+class NetworkManager {
 
     fun fetchSvgAsText(url: String): String {
         val client = OkHttpClient()

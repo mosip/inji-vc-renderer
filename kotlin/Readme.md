@@ -23,7 +23,7 @@
        - Run Tests using `./gradlew testDebugUnitTest` or `./gradlew testReleaseUnitTest` based on the build type.
 
 ### API
-- `renderSvg(vcJsonData: String)` - expects the Verifiable Credential as parameter and returns the replaced SVG Template.
+- `renderVC(vcJsonData: String)` - expects the Verifiable Credential as parameter and returns the replaced SVG Template.
     - `vcJsonData` - VC Downloaded in stringified format.
 - This method takes entire VC data as input.
 - Example :

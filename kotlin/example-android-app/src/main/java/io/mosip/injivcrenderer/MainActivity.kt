@@ -137,7 +137,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                 try {
                     // Perform network and heavy work on IO dispatcher
                     val replacedTemplate = withContext(Dispatchers.IO) {
-                        InjiVcRenderer().renderSvg(farmerVc)
+                        InjiVcRenderer().renderVC(farmerVc)
                     }
                     println("Replaced Template: $replacedTemplate")
 

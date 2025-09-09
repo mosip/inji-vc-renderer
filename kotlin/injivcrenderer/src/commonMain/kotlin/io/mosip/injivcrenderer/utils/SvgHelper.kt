@@ -1,15 +1,17 @@
-package io.mosip.injivcrenderer
+package io.mosip.injivcrenderer.utils
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.mosip.injivcrenderer.Constants.ID
-import io.mosip.injivcrenderer.Constants.QR_CODE_PLACEHOLDER
-import io.mosip.injivcrenderer.Constants.QR_IMAGE_PREFIX
-import io.mosip.injivcrenderer.Constants.RENDER_METHOD
-import io.mosip.injivcrenderer.Constants.RENDER_SUITE
-import io.mosip.injivcrenderer.Constants.SVG_MUSTACHE
-import io.mosip.injivcrenderer.Constants.TEMPLATE
-import io.mosip.injivcrenderer.Constants.TEMPLATE_RENDER_METHOD
-import io.mosip.injivcrenderer.Constants.TYPE
+import io.mosip.injivcrenderer.networkManager.NetworkManager
+import io.mosip.injivcrenderer.constants.Constants.ID
+import io.mosip.injivcrenderer.constants.Constants.QR_CODE_PLACEHOLDER
+import io.mosip.injivcrenderer.constants.Constants.QR_IMAGE_PREFIX
+import io.mosip.injivcrenderer.constants.Constants.RENDER_METHOD
+import io.mosip.injivcrenderer.constants.Constants.RENDER_SUITE
+import io.mosip.injivcrenderer.constants.Constants.SVG_MUSTACHE
+import io.mosip.injivcrenderer.constants.Constants.TEMPLATE
+import io.mosip.injivcrenderer.constants.Constants.TEMPLATE_RENDER_METHOD
+import io.mosip.injivcrenderer.constants.Constants.TYPE
+import io.mosip.injivcrenderer.qrCode.QrCodeGenerator
 
 object SvgHelper {
 
@@ -19,7 +21,7 @@ object SvgHelper {
         val templateValue = renderMethod.path(TEMPLATE)
         val templateId = templateValue.path(ID).asText(null) ?: return ""
 
-        var rawSvg = NetworkHandler().fetchSvgAsText(templateId)
+        var rawSvg = NetworkManager().fetchSvgAsText(templateId)
 
         rawSvg = injectQrCodeIfNeeded(rawSvg, vcJsonString)
 

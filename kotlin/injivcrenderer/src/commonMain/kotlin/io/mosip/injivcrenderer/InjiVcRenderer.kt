@@ -1,10 +1,10 @@
 package io.mosip.injivcrenderer
 
-import io.mosip.injivcrenderer.Constants.RENDER_PROPERTY
-import io.mosip.injivcrenderer.Constants.TEMPLATE
-import io.mosip.injivcrenderer.JsonPointerResolver.replacePlaceholders
-import io.mosip.injivcrenderer.SvgHelper.extractSvgTemplate
-import io.mosip.injivcrenderer.SvgHelper.parseRenderMethod
+import io.mosip.injivcrenderer.constants.Constants.RENDER_PROPERTY
+import io.mosip.injivcrenderer.constants.Constants.TEMPLATE
+import io.mosip.injivcrenderer.templateEngine.svg.JsonPointerResolver.replacePlaceholders
+import io.mosip.injivcrenderer.utils.SvgHelper.extractSvgTemplate
+import io.mosip.injivcrenderer.utils.SvgHelper.parseRenderMethod
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 
@@ -20,7 +20,7 @@ class InjiVcRenderer {
      * @param vcJsonString The Verifiable Credential as a JSON string.
      * @return A list of rendered SVG strings. Empty list if no valid render methods found or on error.
      */
-    fun renderSvg(vcJsonString: String): List<String> {
+    fun renderVC(vcJsonString: String): List<String> {
         return try {
             val vcJsonNode: JsonNode = mapper.readTree(vcJsonString)
             val renderMethodArray = parseRenderMethod(vcJsonNode)

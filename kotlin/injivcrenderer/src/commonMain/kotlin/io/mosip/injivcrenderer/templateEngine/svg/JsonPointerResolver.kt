@@ -1,4 +1,4 @@
-package io.mosip.injivcrenderer
+package io.mosip.injivcrenderer.templateEngine.svg
 
 import com.fasterxml.jackson.core.JsonPointer
 import com.fasterxml.jackson.databind.JsonNode

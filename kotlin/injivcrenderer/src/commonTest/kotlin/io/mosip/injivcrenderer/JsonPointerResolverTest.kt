@@ -1,7 +1,7 @@
 package io.mosip.injivcrenderer
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mosip.injivcrenderer.JsonPointerResolver.replacePlaceholders
+import io.mosip.injivcrenderer.templateEngine.svg.JsonPointerResolver.replacePlaceholders
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.runner.RunWith

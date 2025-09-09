@@ -1,4 +1,4 @@
-package io.mosip.injivcrenderer
+package io.mosip.injivcrenderer.constants
 
 object Constants {
     const val RENDER_METHOD = "renderMethod"

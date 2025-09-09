@@ -1,6 +1,6 @@
 package io.mosip.injivcrenderer
 
-
+import io.mosip.injivcrenderer.networkManager.NetworkManager
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -22,7 +22,7 @@ class InjiVcRendererTest {
 
     @Before
     fun setup() {
-        mockConstruction = mockConstruction(NetworkHandler::class.java) { mock, _ ->
+        mockConstruction = mockConstruction(NetworkManager::class.java) { mock, _ ->
             whenever(mock.fetchSvgAsText(any())).thenAnswer { invocation ->
                 val url = invocation.arguments[0] as String
                 when {
@@ -45,52 +45,52 @@ class InjiVcRendererTest {
     }
 
     @Test
-    fun `renderSvg handles missing renderMethod`() {
+    fun `renderVC handles missing renderMethod`() {
         val vcJsonString = """{}"""
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertTrue(result.isEmpty())
     }
 
     @Test
-    fun `renderSvg handles invalid JSON input`() {
+    fun `renderVC handles invalid JSON input`() {
         val vcJsonString = """{ "renderMethod": [ "invalid" ] }"""
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertTrue(result.isEmpty())
     }
 
 
     @Test
-    fun `renderSvg handles without renderMethod field`() {
+    fun `renderVC handles without renderMethod field`() {
         val vcJsonString = """
             {
                 "someField": "someValue"
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertEquals(emptyList<String>(), result)
     }
 
     @Test
-    fun `renderSvg handles with renderMethod field as empty object`() {
+    fun `renderVC handles with renderMethod field as empty object`() {
         val vcJsonString = """
               { "renderMethod": {
                 }
               }
         """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertEquals(emptyList<String>(), result)
     }
 
     @Test
-    fun `renderSvg handles with renderMethod field as empty array`() {
+    fun `renderVC handles with renderMethod field as empty array`() {
         val vcJsonString = """
               {
                 "renderMethod": [
@@ -98,7 +98,7 @@ class InjiVcRendererTest {
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertEquals(emptyList<String>(), result)
     }
@@ -106,7 +106,7 @@ class InjiVcRendererTest {
 
 
     @Test
-    fun `renderSvg handles with renderMethod as array - renderSuite is invalid`() {
+    fun `renderVC handles with renderMethod as array - renderSuite is invalid`() {
         val vcJsonString = """
               {
                 "renderMethod": [
@@ -115,13 +115,13 @@ class InjiVcRendererTest {
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertEquals(emptyList<String>(), result)
     }
 
     @Test
-    fun `renderSvg handles with renderMethod as array - type is invalid`() {
+    fun `renderVC handles with renderMethod as array - type is invalid`() {
         val vcJsonString = """
               {
                 "renderMethod": [
@@ -130,33 +130,33 @@ class InjiVcRendererTest {
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertEquals(emptyList<String>(), result)
     }
 
     @Test
-    fun `renderSvg handles with renderMethod as json - renderSuite is invalid`() {
+    fun `renderVC handles with renderMethod as json - renderSuite is invalid`() {
         val vcJsonString = """
               {
                 "renderMethod": { "type": "TemplateRenderMethod", "renderSuite": "invalid-suite" }
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertEquals(emptyList<String>(), result)
     }
 
     @Test
-    fun `renderSvg handles with renderMethod as json - type is invalid`() {
+    fun `renderVC handles with renderMethod as json - type is invalid`() {
         val vcJsonString = """
               {
                 "renderMethod": { "type": "invalid", "renderSuite": "svg-mustache" }
             }
         """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertEquals(emptyList<String>(), result)
     }
@@ -208,7 +208,7 @@ class InjiVcRendererTest {
                   }
               }
         }"""
-        val result = injivcRenderer.renderSvg(vcJson)
+        val result = injivcRenderer.renderVC(vcJson)
         assertEquals(
             listOf(
             "<svg>Address : TEST_ADDRESS_LINE_1eng****TEST_REGIONeng****TEST_CITYeng***</svg>"), result)
@@ -218,7 +218,7 @@ class InjiVcRendererTest {
 
 
     @Test
-    fun `renderSvg handles with renderMethod field as object - SVG Hosted`() {
+    fun `renderVC handles with renderMethod field as object - SVG Hosted`() {
         val vcJsonString = """
               {
                 "credentialSubject": {
@@ -237,13 +237,13 @@ class InjiVcRendererTest {
               }
         """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertEquals(listOf("<svg>Email: test@gmail.com, Mobile: 1234567890</svg>"), result)
     }
 
     @Test
-    fun `renderSvg handles with renderMethod field as array - Multiple SVG Hosted`() {
+    fun `renderVC handles with renderMethod field as array - Multiple SVG Hosted`() {
         val vcJsonString = """
               {
                 "credentialSubject": {
@@ -277,13 +277,13 @@ class InjiVcRendererTest {
               }
         """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertEquals(listOf("<svg>Email: test@gmail.com, Mobile: John Doe</svg>", "<svg>Full Name - John Doe,முழுப் பெயர் - ஜான் டோ</svg>"), result)
     }
 
     @Test
-    fun `renderSvg with renderProperty - Hosted one SVG`() {
+    fun `renderVC with renderProperty - Hosted one SVG`() {
         val vcJsonString = """
               {
                 "issuer": "Example University",
@@ -308,7 +308,7 @@ class InjiVcRendererTest {
               }
         """.trimIndent()
 
-        val result = injivcRenderer.renderSvg(vcJsonString)
+        val result = injivcRenderer.renderVC(vcJsonString)
 
         assertEquals(listOf("<svg>Email: test@test.com, Mobile: -</svg>"), result)
     }
