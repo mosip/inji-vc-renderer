@@ -7,7 +7,7 @@ import io.mosip.injivcrenderer.InjiVcRenderer;
 public class Main {
     public static void main(String[] args) {
 
-        InjiVcRenderer injiVcRenderer = new InjiVcRenderer();
+        InjiVcRenderer injiVcRenderer = new InjiVcRenderer("sample-java-app");
         List<String> svgImage = injiVcRenderer.renderVC(farmerVc);
         System.out.println(":::::Replaced Template-->"+svgImage);
 
