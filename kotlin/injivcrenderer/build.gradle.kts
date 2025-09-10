@@ -55,6 +55,8 @@ kotlin {
                 implementation(libs.pixelpass.aar)
             }
         }
+        val jvmTest by getting
+        val androidUnitTest by getting
 
     }
 }
