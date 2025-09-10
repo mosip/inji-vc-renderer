@@ -14,8 +14,8 @@ import io.mosip.injivcrenderer.constants.Constants.TYPE
 import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 import io.mosip.injivcrenderer.qrCode.QrCodeGenerator
 
-class SvgHelper(private val traceabilityId: String) {
-    private val className = SvgHelper::class.simpleName
+class Utils(private val traceabilityId: String) {
+    private val className = Utils::class.simpleName
 
     fun extractSvgTemplate(renderMethod: JsonNode, vcJsonString: String): String {
         if (!isSvgMustacheRenderSuite(renderMethod)) {

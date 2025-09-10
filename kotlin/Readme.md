@@ -71,7 +71,9 @@ io.mosip.injivcrenderer/commonMain
 │── templateEngine/svg/        # Json Pointer Algorithm implementation
     |--JsonPointerResolver.kt    
 ├── utils      # Utility classes
-    ├── SVGHelper.kt               # SVG related utilities
+|    ├── Utils.kt               # SVG related utilities
+├── networkManager     
+    ├── NetworkManager.kt               # Network related utilities
 ```
 
 ###### Exceptions

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosip.injivcrenderer.constants.CredentialFormat
 import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
-import io.mosip.injivcrenderer.utils.SvgHelper
+import io.mosip.injivcrenderer.utils.Utils
 
 class InjiVcRenderer(private val traceabilityId: String) {
 
@@ -33,12 +33,12 @@ class InjiVcRenderer(private val traceabilityId: String) {
                 )
             }
             val vcJsonNode: JsonNode = mapper.readTree(vcJsonString)
-            val renderMethodArray = SvgHelper(traceabilityId).parseRenderMethod(vcJsonNode, traceabilityId)
+            val renderMethodArray = Utils(traceabilityId).parseRenderMethod(vcJsonNode, traceabilityId)
 
             val results = mutableListOf<String>()
             for (element in renderMethodArray) {
 
-                var svgTemplate = SvgHelper(traceabilityId).extractSvgTemplate(element, vcJsonString)
+                var svgTemplate = Utils(traceabilityId).extractSvgTemplate(element, vcJsonString)
 
                 if(!wellKnownJson.isNullOrEmpty()) {
                     val wellKnownJsonNode: JsonNode = mapper.readTree(wellKnownJson)

@@ -10,8 +10,11 @@ class JsonPointerResolver(private val traceabilityId: String) {
     private val className = JsonPointerResolver::class.simpleName
 
     /**
-     * Replaces placeholders in an SVG template using a Verifiable Credential JSON.
-     * Supports optional whitelist of allowed placeholders.
+     * Replaces placeholders in an SVG template using a Verifiable Credential JSON for values and Wellknown for labels.
+     * @param svgTemplate The SVG template containing placeholders in the format {{/json/pointer}} or {{}}
+     * @param jsonNode The root JsonNode of the Verifiable Credential or WellKnown Json
+     * @param renderProperties Optional list of allowed JSON pointer paths; others will be replaced with "-"
+     * @param isLabelPlaceholder If true, leaves label placeholders ({{}}) unchanged; otherwise replaces with "-"
      */
     fun replacePlaceholders(
         svgTemplate: String,
