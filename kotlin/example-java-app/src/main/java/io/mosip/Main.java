@@ -3,12 +3,13 @@ package io.mosip;
 import java.util.List;
 
 import io.mosip.injivcrenderer.InjiVcRenderer;
+import io.mosip.injivcrenderer.constants.CredentialFormat;
 
 public class Main {
     public static void main(String[] args) {
 
         InjiVcRenderer injiVcRenderer = new InjiVcRenderer("sample-java-app");
-        List<Object> svgImage = injiVcRenderer.renderVC(farmerVc);
+        List<Object> svgImage = injiVcRenderer.renderVC(CredentialFormat.LDP_VC, null, farmerVc);
         System.out.println(":::::Replaced Template-->"+svgImage);
 
     }

@@ -46,5 +46,8 @@ sealed class VcRendererExceptions(
         VcRendererExceptions(
             INVALID_RENDER_METHOD, "RenderMethod object is invalid", className.orEmpty(), traceabilityId)
 
+    class UnsupportedCredentialFormat(traceabilityId: String, className: String?) :
+        VcRendererExceptions(
+            INVALID_RENDER_METHOD, "Only LDP_VC credential format is supported ", className.orEmpty(), traceabilityId)
 
 }
