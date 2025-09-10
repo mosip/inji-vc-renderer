@@ -1,11 +1,12 @@
-### InjiVcRenderer - Kotlin Library
+## InjiVcRenderer - Kotlin Library
+- A Kotlin library to convert SVG Template to SVG Image by replacing the placeholders in the SVG Template with actual Verifiable Credential Json Data. Strictly follows JSON Pointer Algorithm RFC6901 to extract the values from the VC.
 
-#### Features
+### Features
 - Downloads the SVG template from the renderMethod field of the VC to support VC Data Model 2.0.
 - Replace the placeholders in the SVG template with actual VC Json Data.
 - Generates aar and jar from the library .
 
-#### Build
+### Build
 - Modules in the Kotlin Project
 1. example-android-app
     - Application that uses **injivcrenderer** library project to print Updated SVG Template.
@@ -16,83 +17,166 @@
     - Update the test data of VC with valid SVG Host URL.
     - Run using  `./gradlew :example-java-app:build`
 3. injivcrenderer
-       - Library to replace the placeholders in the Svg Template received from the renderMethod with the actual Verifable Credential
-       - Run using `./gradlew :injivcrenderer:build` to generate the aar
-       - Gradle task is registered to generate jar by running the command `./gradlew jarRelease` which creates jar in the `build/libs` folder
+       - Library to replace the placeholders in the Svg Template received from the renderMethod with the actual Verifiable Credential
+       - Run using `./gradlew :injivcrenderer:assembleRelease` to generate the aar
+       - Gradle task is registered to generate jar by running the command `./gradlew :injivcrenderer:build` which creates jar in the `build/libs` folder
        - Run Tests using `./gradlew testDebugUnitTest` or `./gradlew testReleaseUnitTest` based on the build type.
-#### API
-- `renderSvg(vcJsonData: String)` - expects the Verifiable Credential as parameter and returns the replaced SVG Template.
+
+### API
+- `renderVC(vcJsonData: String): List<Any>` - expects the Verifiable Credential as parameter and returns the list of replaced SVG Template.
     - `vcJsonData` - VC Downloaded in stringified format.
 - This method takes entire VC data as input.
-- Returns the Replaced svg template to render proper SVG Image.
+- Example :
+```
+        val vcJson = """{
+            "credentialSubject": {
+                "fullName": "John",
+                "gender": [
+                    "language": "eng",
+                    "value": "Male"
+                ] 
+            },
+            "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/sample.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
+                  }
+              }
+        }"""
+        // Assume SVG Template hosted is "<svg lang="eng">{{/credentialSubject/gender}}##{{/credentialSubject/fullName}}</svg>"
+    Result will be => [<svg lang="eng">Male##John</svg>]
+```
+- Returns the Replaced svg template to render proper SVG Image. It list of SVG Template if multiple render methods are present in the VC.
 
 
-#### Steps involved in SVG Template to SVG Image Conversion
+## Package Structure
+```
+io.mosip.injivcrenderer/commonMain
+├── InjiVcRenderer.kt                  # Main library class with public API
+├── constants/         # Constants used across the library
+│   ├── Constants.kt   
+│   ├── NetworkConstants.kt      
+│   └── VcRendererErrorCodes.kt #Error codes used for Custom Exceptions              
+│   |
+├── exceptions/        # Exceptions
+│   ├── VcRendererExceptions.kt  # Centralized exception definitions
+│   │
+│── qrCode/          
+│   │   ├── QRCodeGenerator.kt  # QR code generation utility
+│   │   └── QrDataConvertor.kt # Implementation of QR code generation
+│── templateEngine/svg/        # Json Pointer Algorithm implementation
+    |--JsonPointerResolver.kt    
+├── utils      # Utility classes
+    ├── SVGHelper.kt               # SVG related utilities
+```
 
-- **Fetch SVG Template**
-    - Extracts the svg template url from the render method
-        - Downloads the SVG XML string.
-- **PreProcess Credential Subject in VC**
-  Preprocess SVG template for the Placeholders which needs some processing before replacing the placeholders.
+###### Exceptions
 
-    - **Update Locale Based Field for proper replacement**
-      -  In SvgTemplate, the fields which requires translation should have the placeholders end with `/locale`.
-      Example: {{crendetialSubject/gender/eng}}
-      - Update the locale based fields to replace the svg template placeholder directly.
-      - If locales are not provided, defaults it to English language.
-      - Example
+1. InvalidRenderSuiteException is thrown if render suite is not `svg-mustache`
+2. InvalidRenderMethodTypeException is thrown if render method type is not `TemplateRenderMethod`
+3. QRCodeGenerationFailureException is thrown if QR code generation fails
+4. MissingTemplateIdException is thrown if template id is missing in render method
+5. SvgFetchException is thrown if fetching SVG from the URL fails
+6. InvalidRenderMethodException is thrown if render method object is invalid
 
-          ```
-          val vcJson = {"credentialSubject" : "gender": [{"value": "Male", "language":"eng"},
-          {"value": "mâle", "language":"fr"}
-          ]
-          //After updating the locale based fields
-          val updatedVcJson = {"credentialSubject" : "gender": {"eng": "Male", "fr":"mâle"}}
+
+### Steps involved in SVG Template to SVG Image Conversion
+- Render Method Extraction from VC
+  - Extracts the render method from the VC Json data.
+  - If multiple render methods are present, it will process all the render methods and return the list of replaced SVG Templates.
+
+
+#### Downloading SVG Template from URL in VC
+  - If Render Method object has `template` field as object with `id` field as url and `mediaType` as `image/svg+xml`, SVG Template needs to be downloaded from the URL and then replace the placeholders.
+      ```
+          "renderMethod": {
+          "type": "TemplateRenderMethod",
+          "renderSuite": "svg-mustache",
+          "template": {
+                  "id": "https://degree.example/credential-templates/bachelors",
+                  "mediaType": "image/svg+xml",
+                  "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+              }
+          }
+      ```
+ - Render method type should be `TemplateRenderMethod` and render suite should be `svg-mustache`.
+- Note : Embedded SVG Template and hosting render method as jsonld document are not supported in this library. Hosting the SVG Template as URL is supported.
+
+#### Preprocessing the SVG Template
+
+##### QR Code Placeholder
+  - If the SVG Template has `{{/qrCodeImage}}` , it will generate the QR code using Pixelpass library and replace the placeholder with generated QR code image in base64 format.
+    - Example:
         ```
-    - **Update QR Code**
-        - Generates the QR code using Pixelpass library and add the `qrCodeImage` field in credentialSubject
-
-    - **Update Benefits Array Field for Multi line text**
-        -  We are splitting the whole comma separate benefits string into two lines through code to accommodate in the svg template design and replacing two placeholders {{benefitsLine1}} and {{benefitsLine2}}.
-        - SVG Template must have the placeholders like {{benefitsLine1}}, {{benefitsLine1}} and so on as many as the number of lines they want to split the comma separated benefits string.
-        - Update the benefits value field in CredentialSubject,
-        - Example
-
-      ```
-      val vcJson = {"credentialSubject" : "benefits": ["Critical Surgery", "Full Health Checkup", "Testing"]}
+        val vcJson = {"credentialSubject" : "id": "did:example:123456789", "name": "Tester"}
+        
+        val svgTempalte = "<svg><image id = "qrCodeImage" href="{{/qrCodeImage}}"</svg>"
+        
+        //result => <svg><image id = "qrCodeImage" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABmJLR0QA/wD/AP+gvaeTAAAIKklEQVR4nO3de5QdZZnv8e9M7MzMzM7szszM7s"
       
-      val svgTempalte = "<svg>{{benefitsLine1}} {{benefitsLine2}}</svg>"
+- Note: It is mandatory to have `id` field in the `<image>` as `qrCodeImage` and placeholder as `{{/qrCodeImage}}` to generate the QR code.
       
-      // Above VC will be converted into below
-      val updatedVcJson = {"credentialSubject" : "benefitsLine1": "Critical Surgery, Full Health Checkup, Testing}
-  
-      ```
 
-    - **Update Address Fields for Multi line text**
-        - Check for the address fields and create comma separated full Address String.
-        - We are splitting the whole comma separate full Address string into two lines through code to accommodate in the svg template design and replacing two placeholders with locales {{fullAddress1_eng}} and {{fullAddress1_eng}}.
-        - SVG Template must have the placeholders like {{fullAddress1_eng}}, {{fullAddress1_eng}} and so on as many as the number of lines they want to split the comma separated address string.
-        - Update the fullAddress value field in CredentialSubject,
-    - Example
+##### Handling Render Property
+  - If the `template` field is an object and has `renderMethod` property. Property in the `renderMethod` will be taken into consideration for further processing and rest of the fields placeholders will be replaced with empty string.
+    - Example:
+        ```
+          "renderMethod": {
+              "type": "TemplateRenderMethod",
+              "renderSuite": "svg-mustache",
+              "template": {
+                      "id": "https://example.edu/credential-templates/BachelorDegree",
+                      "mediaType": "image/svg+xml",
+                      "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR",
+                      "renderProperty": [
+                        "/issuer", "/validFrom", "/credentialSubject/degree/name"
+                      ]
+                  }
+          }
+        ```
+    - In the above example, only the fields `issuer`, `validFrom` and `credentialSubject/degree/name` will be considered for replacing the placeholders in the SVG Template.
+  - If `renderProperty` is not present, all the fields in the VC will be considered for replacing the placeholders in the SVG Template.
 
-      ```
-      val vcJson = {      "credentialSubject": {          "addressLine1": [{"value": "No 123, Test Address line1", "language": "eng"}],          "addressLine2": [{"value": "Test Address line", "language": "eng"}],          "city": [{"value": "TestCITY", "language": "eng"}],          "province": [{"value": "TESTProvince", "language": "eng"}],      }  }
-      
-      val svgTemplate = "<svg>{{fullAddressLine1/eng}} {{fullAddressLine2/eng}}</svg>"
-      
-      // Above VC will be converted into below
-      val updatedVcJson = {"credentialSubject" : "fullAddressLine1": { "eng": "No 123, Test Address line1,Test Address line, TestCITY, TESTProvince "}}
-      ```
+##### Array Fields Handling
+- For array fields in the VC, index based approach will be followed.
+- Example:
+    ```
+    val vcJson = {"credentialSubject" : "benefits": ["Critical Surgery", "Full Health Checkup", "Testing"]}
+    
+    val svgTempalte = "<svg>{{/benefits/0}},{{/benefits/1}}</svg>"
+    
+    //result => <svg>Critical Surgery,Full Health Checkup</svg>
+    ```
+- Example for array of objects:
+    ```
+    val vcJson = {      "credentialSubject": {          "awards": [              {"title": "Award1", "year": "2020"},              {"title": "Award2", "year": "2021"}          ]      }  }
+    
+    val svgTemplate = "<svg>{{/credentialSubject/awards/0/title}} - {{/credentialSubject/awards/0/year}}, {{/credentialSubject/awards/1/title}} - {{/credentialSubject/awards/1/year}}</svg>"
+    
+    //result => <svg>Award1 - 2020, Award2 - 2021</svg>
+    ```
 
-- **Replacing placeholders with PreProcessed Vc Data**
-  - When the placeholder has locale like "{{credentialSubject/gender_eng}}", Replace the placeholders with appropriate locale value.
+##### Locale Handling
+- For locale handling, same JSON Pointer Algorithm is used to extract the value from the VC.
+- Example:
+    ```
+    val vcJson = {      "credentialSubject": { "fullName": "Tester", "city": [{"value": "TestCITY", "language": "eng"},{"value": "VilleTest", "language": "fr"}]}
+          
+      val svgTempalte = "<svg>{{/credentialSubject/fullName}} - {{/credentialSubject/city/0/value}}</svg>"
+          
+      //result => <svg>Tester - TestCITY</svg>
+  ```
 
-       ```
-       val vcJson = {      "credentialSubject": { "fullName": "Tester", "gender": [{"value": Male", "language": "eng"}]}
-         
-         val svgTempalte = "<svg>{{credentialSubject/fullName}} - {{credentialSubject/gender/eng}}</svg>"
-         
-         //result => <svg>Tester - Male</svg>
-         ```
+#### Replacing Placeholders in SVG Template
+- Replaces the placeholders in the SVG Template with actual VC Json Data strictly follows JSON Pointer Algorithm RFC6901.
+- Returns the list of replaced SVG Templates if multiple render methods are present in the VC.
 
-- **Returns the final replaced SVG Image**
+
+### References
+- [JSON Pointer Algorithm - RFC6901](https://www.rfc-editor.org/rfc/rfc6901)
+- [Draft Implementation of Verifiable Credential Rendering Methods](https://w3c-ccg.github.io/vc-render-method/#the-rendermethod-property)
+- [Data model 2.0 implementation](https://www.w3.org/TR/vc-data-model-2.0/#reserved-extension-points)
