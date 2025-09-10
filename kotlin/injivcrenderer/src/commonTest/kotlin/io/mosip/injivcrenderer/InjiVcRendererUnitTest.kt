@@ -53,6 +53,56 @@ class InjiVcRendererTest {
         mockConstruction.close()
     }
 
+    @Test
+    fun `renderVC should throw UnsupportedCredentialFormat when format is not LDP_VC`() {
+        val unsupportedFormat = CredentialFormat.fromValue("mso_mdoc")
+
+        val vcJson = """
+            {
+              "credentialSubject": {
+                "fullName": "John Doe"
+              }
+            }
+        """.trimIndent()
+
+        val actualException =
+            assertFailsWith<VcRendererExceptions.UnsupportedCredentialFormat> {
+                injivcRenderer.renderVC(unsupportedFormat, vcJsonString = vcJson)
+            }
+        val expectedErrorMessage = "Only LDP_VC credential format is supported"
+
+        assertEquals(VcRendererErrorCodes.UNSUPPORTED_CREDENTIAL_FORMAT, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
+    }
+
+    @Test
+    fun `replace supported Format`() {
+
+        val supportedFormat = CredentialFormat.fromValue("ldp_vc")
+        val vcJsonString = """{
+            "credentialSubject": {
+                "email": "test@test.com",
+                "mobile": "1234567890"
+            },
+            "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/normal.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
+                  }
+              }
+        }"""
+        val result = injivcRenderer.renderVC(credentialFormat = supportedFormat, vcJsonString = vcJsonString)
+        assertEquals(
+            listOf(
+                "<svg>Email: test@test.com, Mobile: 1234567890</svg>"), result)
+
+    }
+
+
 
     @Test
     fun `renderVC handles invalid JSON input`() {
@@ -200,6 +250,8 @@ class InjiVcRendererTest {
         assertEquals(VcRendererErrorCodes.INVALID_RENDER_METHOD_TYPE, actualException.errorCode)
         assertEquals(expectedErrorMessage, actualException.message)
     }
+
+
 
 
 
