@@ -36,6 +36,10 @@ class InjiVcRendererTest {
                     url.contains("with-locale-as-array-of-object.svg") -> "<svg>Full Name - {{/credentialSubject/fullName/0/value}},முழுப் பெயர் - {{/credentialSubject/fullName/1/value}}</svg>"
                     url.contains("nested-object.svg") -> "<svg>Address : {{/credentialSubject/addressLine1/0/value}}****{{/credentialSubject/region/0/value}}****{{/credentialSubject/city/0/value}}***</svg>"
                     url.contains("qrcode.svg") -> "<svg>QR code : <image id = \"qrCodeImage\" xlink:href{{/qrCodeImage}}</svg>"
+                    url.contains("multilingual.svg") -> "<svg>" +
+                            "{{/credential_definition/credentialSubject/fullName/display/0/name}}: {{/credentialSubject/fullName/0/value}}," +
+                            "{{/credential_definition/credentialSubject/fullName/display/1/name}}: {{/credentialSubject/fullName/1/value}}" +
+                            "</svg>"
                     else -> "<svg>default</svg>"
                 }
             }
@@ -347,6 +351,110 @@ class InjiVcRendererTest {
 
         assertEquals(listOf("<svg>Email: test@test.com, Mobile: -</svg>"), result)
     }
+
+    @Test
+    fun `renderVC with wellKnown and label placeholder present in svg`() {
+        val vcJsonString = """
+              {
+                "credentialSubject": {
+                    "fullName": [
+                        {
+                            "language": "eng",
+                            "value": "John Doe"
+                        },
+                        {
+                            "language": "tam",
+                            "value": "ஜான் டோ"
+                        }
+                    ],
+                    "mobile": "1234567890"
+                },
+                "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/multilingual.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
+                  }
+              }
+        """.trimIndent()
+
+        val wellKnownJsonString = """
+              {
+                "credential_definition": {
+                  "type": [
+                    "FarmerCredential_WithFace",
+                    "VerifiableCredential"
+                  ],
+                  "credentialSubject": {
+                    "fullName": {
+                          "display": [
+                             {
+                                "language": "eng",
+                                "name": "Full Name"
+                            },
+                            {
+                                "language": "tam",
+                                "name": "முழுப் பெயர்"
+                            }
+                          ]
+                    }
+                  }
+                }
+              }
+        """.trimIndent()
+
+        val result = injivcRenderer.renderVC(vcJsonString, wellKnownJsonString)
+        assertEquals(listOf("<svg>" +
+                "Full Name: John Doe," +
+                "முழுப் பெயர்: ஜான் டோ" +
+                "</svg>"), result)
+    }
+
+    @Test
+    fun `renderVC without wellKnown and label placeholder present in svg`() {
+        val vcJsonString = """
+              {
+                "credentialSubject": {
+                    "fullName": [
+                        {
+                            "language": "eng",
+                            "value": "John Doe"
+                        },
+                        {
+                            "language": "tam",
+                            "value": "ஜான் டோ"
+                        }
+                    ],
+                    "mobile": "1234567890"
+                },
+                "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/multilingual.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
+                  }
+              }
+        """.trimIndent()
+
+        "<svg>" +
+                "{{/credential_definition/credentialSubject/fullName/display/0/name}}: {{/credentialSubject/fullName/0/value}}," +
+                "{{/credential_definition/credentialSubject/fullName/display/1/name}}: {{/credentialSubject/fullName/1/value}}" +
+                "</svg>"
+
+        val result = injivcRenderer.renderVC(vcJsonString)
+        assertEquals(listOf("<svg>" +
+                "Full Name: John Doe," +
+                "Full Name: ஜான் டோ" +
+                "</svg>"), result)
+    }
+
+
 
 }
 

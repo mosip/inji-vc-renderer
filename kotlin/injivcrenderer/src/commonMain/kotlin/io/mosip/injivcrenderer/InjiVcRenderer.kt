@@ -20,7 +20,7 @@ class InjiVcRenderer(private val traceabilityId: String) {
      * @param vcJsonString The Verifiable Credential as a JSON string.
      * @return A list of rendered SVG strings. Empty list if no valid render methods found or on error. Return is List<Any> to accommodate future extensions.
      */
-    fun renderVC(vcJsonString: String): List<Any> {
+    fun renderVC(vcJsonString: String, wellKnownJson: String? = null): List<Any> {
         return try {
             val vcJsonNode: JsonNode = mapper.readTree(vcJsonString)
             val renderMethodArray = SvgHelper(traceabilityId).parseRenderMethod(vcJsonNode, traceabilityId)
@@ -28,10 +28,24 @@ class InjiVcRenderer(private val traceabilityId: String) {
             val results = mutableListOf<String>()
             for (element in renderMethodArray) {
 
-                val svgTemplate = SvgHelper(traceabilityId).extractSvgTemplate(element, vcJsonString)
+                var svgTemplate = SvgHelper(traceabilityId).extractSvgTemplate(element, vcJsonString)
+
+                if(!wellKnownJson.isNullOrEmpty()) {
+                    val wellKnownJsonNode: JsonNode = mapper.readTree(wellKnownJson)
+                    svgTemplate = JsonPointerResolver(traceabilityId).replacePlaceholders(
+                        svgTemplate = svgTemplate,
+                        jsonNode = wellKnownJsonNode,
+                        isLabelPlaceholder = true
+                    )
+                }
+
                 val renderProperties =
                     element.path(TEMPLATE).path(RENDER_PROPERTY).takeIf { it.isArray }?.map { it.asText() }
-                val renderedSvg = JsonPointerResolver(traceabilityId).replacePlaceholders(svgTemplate, vcJsonNode, renderProperties)
+
+                val renderedSvg = JsonPointerResolver(traceabilityId).replacePlaceholders(
+                    svgTemplate = svgTemplate,
+                    jsonNode = vcJsonNode,
+                    renderProperties = renderProperties)
                 results.add(renderedSvg)
 
             }
@@ -40,4 +54,7 @@ class InjiVcRenderer(private val traceabilityId: String) {
             throw vcRendererException
         }
     }
+
+
+
 }

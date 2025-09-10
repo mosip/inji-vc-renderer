@@ -15,16 +15,17 @@ class JsonPointerResolver(private val traceabilityId: String) {
      */
     fun replacePlaceholders(
         svgTemplate: String,
-        vcJsonNode: JsonNode,
-        renderProperties: List<String>? = null
+        jsonNode: JsonNode,
+        renderProperties: List<String>? = null,
+        isLabelPlaceholder: Boolean = false
     ): String {
         return PLACEHOLDER_REGEX.replace(svgTemplate) { match ->
             val pointerPath = match.groups[1]?.value ?: ""
             if (renderProperties != null && pointerPath !in renderProperties) return@replace "-"
 
             val valueNode: JsonNode? = try {
-                if (pointerPath.isEmpty()) vcJsonNode
-                else vcJsonNode.at(JsonPointer.compile(pointerPath)).takeIf { !it.isMissingNode }
+                if (pointerPath.isEmpty()) jsonNode
+                else jsonNode.at(JsonPointer.compile(pointerPath)).takeIf { !it.isMissingNode }
             } catch (e: Exception) {
                 Logger.getLogger(className).log(
                     Level.SEVERE,
@@ -34,15 +35,32 @@ class JsonPointerResolver(private val traceabilityId: String) {
             }
 
             when {
-                valueNode == null || valueNode.isNull -> "-"
+                valueNode == null || valueNode.isNull -> {
+                    if (pointerPath.startsWith(FALLBACK_PATH)) {
+                        return@replace extractFieldName(pointerPath)
+                    }
+                    if (isLabelPlaceholder) match.value else "-"
+
+                }
                 valueNode.isValueNode -> valueNode.asText()
                 else -> valueNode.toString()
             }
         }
     }
 
+    private fun extractFieldName(pointerPath: String): String {
+        val raw = pointerPath
+            .removePrefix(FALLBACK_PATH)
+            .substringBefore("/")
+
+        return raw.replace(Regex("([a-z])([A-Z])"), "$1 $2")
+            .replace(Regex("([A-Z]+)([A-Z][a-z])"), "$1 $2")
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+    }
+
+
     companion object {
         private val PLACEHOLDER_REGEX = Regex("\\{\\{(/[^}]*)\\}\\}|\\{\\{\\}\\}")
-
+        private const val FALLBACK_PATH = "/credential_definition/credentialSubject/"
     }
 }
