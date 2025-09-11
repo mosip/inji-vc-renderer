@@ -39,11 +39,11 @@ class JsonPointerResolver(private val traceabilityId: String) {
 
             when {
                 valueNode == null || valueNode.isNull -> {
-                    if (pointerPath.startsWith(FALLBACK_PATH)) {
-                        return@replace extractFieldName(pointerPath)
+                    when {
+                        isLabelPlaceholder && pointerPath.startsWith(FALLBACK_PATH) -> extractFieldName(pointerPath)
+                        isLabelPlaceholder -> match.value
+                        else -> "-"
                     }
-                    if (isLabelPlaceholder) match.value else "-"
-
                 }
                 valueNode.isValueNode -> valueNode.asText()
                 else -> valueNode.toString()

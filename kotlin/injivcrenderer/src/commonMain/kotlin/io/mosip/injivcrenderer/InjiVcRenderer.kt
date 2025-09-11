@@ -32,6 +32,7 @@ class InjiVcRenderer(private val traceabilityId: String) {
                     className = this::class.simpleName
                 )
             }
+            var wellKnownJsonNode: JsonNode = mapper.createObjectNode()
             val vcJsonNode: JsonNode = mapper.readTree(vcJsonString)
             val renderMethodArray = Utils(traceabilityId).parseRenderMethod(vcJsonNode, traceabilityId)
 
@@ -40,15 +41,18 @@ class InjiVcRenderer(private val traceabilityId: String) {
 
                 var svgTemplate = Utils(traceabilityId).extractSvgTemplate(element, vcJsonString)
 
+                // Replace label placeholders first using well-known JSON
                 if(!wellKnownJson.isNullOrEmpty()) {
-                    val wellKnownJsonNode: JsonNode = mapper.readTree(wellKnownJson)
-                    svgTemplate = JsonPointerResolver(traceabilityId).replacePlaceholders(
-                        svgTemplate = svgTemplate,
-                        jsonNode = wellKnownJsonNode,
-                        isLabelPlaceholder = true
-                    )
-                }
+                    wellKnownJsonNode = mapper.readTree(wellKnownJson)
 
+                }
+                svgTemplate = JsonPointerResolver(traceabilityId).replacePlaceholders(
+                    svgTemplate = svgTemplate,
+                    jsonNode = wellKnownJsonNode,
+                    isLabelPlaceholder = true
+                )
+
+                // Replace value placeholders using VC JSON
                 val renderProperties =
                     element.path(TEMPLATE).path(RENDER_PROPERTY).takeIf { it.isArray }?.map { it.asText() }
 
