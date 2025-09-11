@@ -185,8 +185,7 @@ tasks.withType<Test> {
 
 tasks {
     register<Wrapper>("wrapper") {
-        gradleVersion = "8.7"
-        validateDistributionUrl = true
+        gradleVersion = "8.5"
     }
 }
 tasks.register("prepareKotlinBuildScriptModel"){}
