@@ -186,8 +186,7 @@ io.mosip.injivcrenderer/commonMain
           
       //result => <svg>Full Name - Tester</svg>
   ```
-  Note : Camel case or pascal case value is converted to Snake case for the label. e.g. fullName is converted to Full Name.
-
+Note: camelCase, PascalCase or snake_case value is converted to Title Case for the label. e.g. fullName or FullName or full_name is converted to Full Name.
 
 #### Replacing Placeholders in SVG Template
 - Replaces the placeholders in the SVG Template with actual VC Json Data strictly follows JSON Pointer Algorithm RFC6901.

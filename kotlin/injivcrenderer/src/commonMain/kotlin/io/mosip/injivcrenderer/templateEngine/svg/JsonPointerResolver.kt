@@ -56,9 +56,15 @@ class JsonPointerResolver(private val traceabilityId: String) {
             .removePrefix(FALLBACK_PATH)
             .substringBefore("/")
 
-        return raw.replace(Regex("([a-z])([A-Z])"), "$1 $2")
-            .replace(Regex("([A-Z]+)([A-Z][a-z])"), "$1 $2")
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        return raw
+            .replace(Regex("\\[\\d+\\]"), "")
+            .replace(Regex("([a-z])([A-Z])"), "$1 $2")
+            .replace(Regex("([A-Z])([A-Z][a-z])"), "$1 $2")
+            .split(Regex("[_\\s]+"))
+            .filter { it.isNotBlank() }
+            .joinToString(" ") { word ->
+                word.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            }
     }
 
 

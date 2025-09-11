@@ -329,9 +329,57 @@ class JsonPointerResolverTest {
     }
 
     @Test
-    fun `replace the label placeholders(fallback)`() {
+    fun `replace the label placeholders(fallback-camelCase)`() {
 
         val svgTemplateWithLocale = "<svg >{{/credential_definition/credentialSubject/addressLine/display/0/name}}:{{/credentialSubject/addressLine}}</svg>"
+
+        val processedJson = mapper.readTree("""{
+            "issuer": "did:mosip:123456789",
+            "credentialSubject": {
+                "gender":[
+                    {
+                        "language": "eng",
+                        "value": "English Male"
+                    }
+                ],
+                "fullName": "John"
+            }
+        }""")
+
+        val expected = "<svg >Address Line:{{/credentialSubject/addressLine}}</svg>"
+
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson, isLabelPlaceholder = true);
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `replace the label placeholders(fallback-Pascal Case)`() {
+
+        val svgTemplateWithLocale = "<svg >{{/credential_definition/credentialSubject/AddressLine/display/0/name}}:{{/credentialSubject/addressLine}}</svg>"
+
+        val processedJson = mapper.readTree("""{
+            "issuer": "did:mosip:123456789",
+            "credentialSubject": {
+                "gender":[
+                    {
+                        "language": "eng",
+                        "value": "English Male"
+                    }
+                ],
+                "fullName": "John"
+            }
+        }""")
+
+        val expected = "<svg >Address Line:{{/credentialSubject/addressLine}}</svg>"
+
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson, isLabelPlaceholder = true);
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `replace the label placeholders(fallback - snake_case)`() {
+
+        val svgTemplateWithLocale = "<svg >{{/credential_definition/credentialSubject/address_line/display/0/name}}:{{/credentialSubject/addressLine}}</svg>"
 
         val processedJson = mapper.readTree("""{
             "issuer": "did:mosip:123456789",
