@@ -6,9 +6,6 @@ import io.mosip.injivcrenderer.constants.CredentialFormat
 import io.mosip.injivcrenderer.constants.VcRendererErrorCodes
 import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 import io.mosip.injivcrenderer.networkManager.NetworkManager
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mockConstruction
@@ -25,7 +22,7 @@ class InjiVcRendererTest {
     private lateinit var mockConstruction: AutoCloseable
 
 
-    @Before
+    @BeforeTest
     fun setup() {
         mockConstruction = mockConstruction(NetworkManager::class.java) { mock, _ ->
             whenever(mock.fetchSvgAsText(any())).thenAnswer { invocation ->
@@ -48,7 +45,7 @@ class InjiVcRendererTest {
         injivcRenderer = InjiVcRenderer("test-trace-id")
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         mockConstruction.close()
     }

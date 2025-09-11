@@ -3,7 +3,6 @@ package io.mosip.injivcrenderer.networkManager
 import io.mosip.injivcrenderer.constants.VcRendererErrorCodes.SVG_FETCH_ERROR
 import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 import okhttp3.*
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -12,6 +11,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class NetworkManagerTest {
