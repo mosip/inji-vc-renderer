@@ -294,6 +294,112 @@ class JsonPointerResolverTest {
         assertEquals(expected, result)
     }
 
+    @Test
+    fun `replace the label placeholders`() {
+
+        val svgTemplateWithLocale = "<svg >{{/credential_definition/credentialSubject/fullName/display/0/name}}:{{/credentialSubject/fullName}}</svg>"
+
+        val wellKnownJson = mapper.readTree(""" {
+                "credential_definition": {
+                  "type": [
+                    "FarmerCredential_WithFace",
+                    "VerifiableCredential"
+                  ],
+                  "credentialSubject": {
+                    "fullName": {
+                          "display": [
+                             {
+                                "language": "eng",
+                                "name": "Full Name"
+                            },
+                            {
+                                "language": "tam",
+                                "name": "முழுப் பெயர்"
+                            }
+                          ]
+                    }
+                  }
+                }
+              }""")
+
+        val expected = "<svg >Full Name:{{/credentialSubject/fullName}}</svg>"
+
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, wellKnownJson, isLabelPlaceholder = true);
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `replace the label placeholders(fallback-camelCase)`() {
+
+        val svgTemplateWithLocale = "<svg >{{/credential_definition/credentialSubject/addressLine/display/0/name}}:{{/credentialSubject/addressLine}}</svg>"
+
+        val processedJson = mapper.readTree("""{
+            "issuer": "did:mosip:123456789",
+            "credentialSubject": {
+                "gender":[
+                    {
+                        "language": "eng",
+                        "value": "English Male"
+                    }
+                ],
+                "fullName": "John"
+            }
+        }""")
+
+        val expected = "<svg >Address Line:{{/credentialSubject/addressLine}}</svg>"
+
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson, isLabelPlaceholder = true);
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `replace the label placeholders(fallback-Pascal Case)`() {
+
+        val svgTemplateWithLocale = "<svg >{{/credential_definition/credentialSubject/AddressLine/display/0/name}}:{{/credentialSubject/addressLine}}</svg>"
+
+        val processedJson = mapper.readTree("""{
+            "issuer": "did:mosip:123456789",
+            "credentialSubject": {
+                "gender":[
+                    {
+                        "language": "eng",
+                        "value": "English Male"
+                    }
+                ],
+                "fullName": "John"
+            }
+        }""")
+
+        val expected = "<svg >Address Line:{{/credentialSubject/addressLine}}</svg>"
+
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson, isLabelPlaceholder = true);
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `replace the label placeholders(fallback - snake_case)`() {
+
+        val svgTemplateWithLocale = "<svg >{{/credential_definition/credentialSubject/address_line/display/0/name}}:{{/credentialSubject/addressLine}}</svg>"
+
+        val processedJson = mapper.readTree("""{
+            "issuer": "did:mosip:123456789",
+            "credentialSubject": {
+                "gender":[
+                    {
+                        "language": "eng",
+                        "value": "English Male"
+                    }
+                ],
+                "fullName": "John"
+            }
+        }""")
+
+        val expected = "<svg >Address Line:{{/credentialSubject/addressLine}}</svg>"
+
+        val result = JsonPointerResolver("test-trace-id").replacePlaceholders(svgTemplateWithLocale, processedJson, isLabelPlaceholder = true);
+        assertEquals(expected, result)
+    }
+
 
 
 }

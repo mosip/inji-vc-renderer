@@ -18,16 +18,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.mosip.injivcrenderer.ui.theme.InjiVcRendererJarTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.decode.SvgDecoder
-import coil.request.ImageRequest
+import io.mosip.injivcrenderer.constants.CredentialFormat
 import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayInputStream
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -137,7 +133,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             scope.launch {
                 try {
                     val replacedTemplate = withContext(Dispatchers.IO) {
-                        InjiVcRenderer("sample-app-trace-id").renderVC(farmerVc)
+                        InjiVcRenderer("sample-app-trace-id").renderVC(
+                            credentialFormat = CredentialFormat.LDP_VC,
+                            vcJsonString = farmerVc)
                     }
                     println("Replaced Template: $replacedTemplate")
 

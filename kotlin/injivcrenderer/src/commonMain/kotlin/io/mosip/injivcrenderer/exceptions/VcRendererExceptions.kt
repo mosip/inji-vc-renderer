@@ -8,6 +8,7 @@ import io.mosip.injivcrenderer.constants.VcRendererErrorCodes.INVALID_RENDER_SUI
 import io.mosip.injivcrenderer.constants.VcRendererErrorCodes.MISSING_TEMPLATE_ID
 import io.mosip.injivcrenderer.constants.VcRendererErrorCodes.QR_CODE_GENERATION_FAILURE
 import io.mosip.injivcrenderer.constants.VcRendererErrorCodes.SVG_FETCH_ERROR
+import io.mosip.injivcrenderer.constants.VcRendererErrorCodes.UNSUPPORTED_CREDENTIAL_FORMAT
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -46,5 +47,8 @@ sealed class VcRendererExceptions(
         VcRendererExceptions(
             INVALID_RENDER_METHOD, "RenderMethod object is invalid", className.orEmpty(), traceabilityId)
 
+    class UnsupportedCredentialFormat(traceabilityId: String, className: String?) :
+        VcRendererExceptions(
+            UNSUPPORTED_CREDENTIAL_FORMAT, "Only LDP_VC credential format is supported", className.orEmpty(), traceabilityId)
 
 }

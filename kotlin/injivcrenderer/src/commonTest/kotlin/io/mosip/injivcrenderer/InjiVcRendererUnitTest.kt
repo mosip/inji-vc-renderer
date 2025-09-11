@@ -2,6 +2,7 @@ package io.mosip.injivcrenderer
 
 import io.mosip.injivcrenderer.constants.Constants.SVG_MUSTACHE
 import io.mosip.injivcrenderer.constants.Constants.TEMPLATE_RENDER_METHOD
+import io.mosip.injivcrenderer.constants.CredentialFormat
 import io.mosip.injivcrenderer.constants.VcRendererErrorCodes
 import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 import io.mosip.injivcrenderer.networkManager.NetworkManager
@@ -36,6 +37,10 @@ class InjiVcRendererTest {
                     url.contains("with-locale-as-array-of-object.svg") -> "<svg>Full Name - {{/credentialSubject/fullName/0/value}},முழுப் பெயர் - {{/credentialSubject/fullName/1/value}}</svg>"
                     url.contains("nested-object.svg") -> "<svg>Address : {{/credentialSubject/addressLine1/0/value}}****{{/credentialSubject/region/0/value}}****{{/credentialSubject/city/0/value}}***</svg>"
                     url.contains("qrcode.svg") -> "<svg>QR code : <image id = \"qrCodeImage\" xlink:href{{/qrCodeImage}}</svg>"
+                    url.contains("multilingual.svg") -> "<svg>" +
+                            "{{/credential_definition/credentialSubject/fullName/display/0/name}}: {{/credentialSubject/fullName/0/value}}," +
+                            "{{/credential_definition/credentialSubject/fullName/display/1/name}}: {{/credentialSubject/fullName/1/value}}" +
+                            "</svg>"
                     else -> "<svg>default</svg>"
                 }
             }
@@ -48,6 +53,56 @@ class InjiVcRendererTest {
         mockConstruction.close()
     }
 
+    @Test
+    fun `renderVC should throw UnsupportedCredentialFormat when format is not LDP_VC`() {
+        val unsupportedFormat = CredentialFormat.fromValue("mso_mdoc")
+
+        val vcJson = """
+            {
+              "credentialSubject": {
+                "fullName": "John Doe"
+              }
+            }
+        """.trimIndent()
+
+        val actualException =
+            assertFailsWith<VcRendererExceptions.UnsupportedCredentialFormat> {
+                injivcRenderer.renderVC(unsupportedFormat, vcJsonString = vcJson)
+            }
+        val expectedErrorMessage = "Only LDP_VC credential format is supported"
+
+        assertEquals(VcRendererErrorCodes.UNSUPPORTED_CREDENTIAL_FORMAT, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
+    }
+
+    @Test
+    fun `replace supported Format`() {
+
+        val supportedFormat = CredentialFormat.fromValue("ldp_vc")
+        val vcJsonString = """{
+            "credentialSubject": {
+                "email": "test@test.com",
+                "mobile": "1234567890"
+            },
+            "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/normal.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
+                  }
+              }
+        }"""
+        val result = injivcRenderer.renderVC(credentialFormat = supportedFormat, vcJsonString = vcJsonString)
+        assertEquals(
+            listOf(
+                "<svg>Email: test@test.com, Mobile: 1234567890</svg>"), result)
+
+    }
+
+
 
     @Test
     fun `renderVC handles invalid JSON input`() {
@@ -55,7 +110,7 @@ class InjiVcRendererTest {
 
         val actualException =
             assertFailsWith<VcRendererExceptions.InvalidRenderMethodException> {
-                injivcRenderer.renderVC(vcJsonString)
+                injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
         val expectedErrorMessage = "RenderMethod object is invalid"
 
@@ -74,7 +129,7 @@ class InjiVcRendererTest {
 
         val actualException =
             assertFailsWith<VcRendererExceptions.InvalidRenderMethodException> {
-                injivcRenderer.renderVC(vcJsonString)
+                injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
         val expectedErrorMessage = "RenderMethod object is invalid"
 
@@ -92,7 +147,7 @@ class InjiVcRendererTest {
 
         val actualException =
             assertFailsWith<VcRendererExceptions.InvalidRenderMethodException> {
-                injivcRenderer.renderVC(vcJsonString)
+                injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
         val expectedErrorMessage = "RenderMethod object is invalid"
 
@@ -111,7 +166,7 @@ class InjiVcRendererTest {
 
         val actualException =
             assertFailsWith<VcRendererExceptions.InvalidRenderMethodException> {
-                injivcRenderer.renderVC(vcJsonString)
+                injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
         val expectedErrorMessage = "RenderMethod object is invalid"
 
@@ -133,7 +188,7 @@ class InjiVcRendererTest {
 
         val actualException =
             assertFailsWith<VcRendererExceptions.InvalidRenderSuiteException> {
-                injivcRenderer.renderVC(vcJsonString)
+                injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
         val expectedErrorMessage = "Render suite must be '$SVG_MUSTACHE'"
 
@@ -152,7 +207,7 @@ class InjiVcRendererTest {
         """.trimIndent()
         val actualException =
             assertFailsWith<VcRendererExceptions.InvalidRenderMethodTypeException> {
-                injivcRenderer.renderVC(vcJsonString)
+                injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
         val expectedErrorMessage = "Render method type must be '$TEMPLATE_RENDER_METHOD'"
 
@@ -170,7 +225,7 @@ class InjiVcRendererTest {
 
         val actualException =
             assertFailsWith<VcRendererExceptions.InvalidRenderSuiteException> {
-                injivcRenderer.renderVC(vcJsonString)
+                injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
         val expectedErrorMessage = "Render suite must be '$SVG_MUSTACHE'"
 
@@ -188,7 +243,7 @@ class InjiVcRendererTest {
 
         val actualException =
             assertFailsWith<VcRendererExceptions.InvalidRenderMethodTypeException> {
-                injivcRenderer.renderVC(vcJsonString)
+                injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
         val expectedErrorMessage = "Render method type must be '$TEMPLATE_RENDER_METHOD'"
 
@@ -198,10 +253,12 @@ class InjiVcRendererTest {
 
 
 
+
+
     @Test
     fun `replace address fields with locale`() {
 
-        val vcJson = """{
+        val vcJsonString = """{
             "credentialSubject": {
                 "addressLine1": [
                     {
@@ -243,7 +300,7 @@ class InjiVcRendererTest {
                   }
               }
         }"""
-        val result = injivcRenderer.renderVC(vcJson)
+        val result = injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
         assertEquals(
             listOf(
             "<svg>Address : TEST_ADDRESS_LINE_1eng****TEST_REGIONeng****TEST_CITYeng***</svg>"), result)
@@ -272,7 +329,7 @@ class InjiVcRendererTest {
               }
         """.trimIndent()
 
-        val result = injivcRenderer.renderVC(vcJsonString)
+        val result = injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
 
         assertEquals(listOf("<svg>Email: test@gmail.com, Mobile: 1234567890</svg>"), result)
     }
@@ -312,7 +369,7 @@ class InjiVcRendererTest {
               }
         """.trimIndent()
 
-        val result = injivcRenderer.renderVC(vcJsonString)
+        val result = injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
 
         assertEquals(listOf("<svg>Email: test@gmail.com, Mobile: John Doe</svg>", "<svg>Full Name - John Doe,முழுப் பெயர் - ஜான் டோ</svg>"), result)
     }
@@ -343,10 +400,114 @@ class InjiVcRendererTest {
               }
         """.trimIndent()
 
-        val result = injivcRenderer.renderVC(vcJsonString)
+        val result = injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
 
         assertEquals(listOf("<svg>Email: test@test.com, Mobile: -</svg>"), result)
     }
+
+    @Test
+    fun `renderVC with wellKnown and label placeholder present in svg`() {
+        val vcJsonString = """
+              {
+                "credentialSubject": {
+                    "fullName": [
+                        {
+                            "language": "eng",
+                            "value": "John Doe"
+                        },
+                        {
+                            "language": "tam",
+                            "value": "ஜான் டோ"
+                        }
+                    ],
+                    "mobile": "1234567890"
+                },
+                "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/multilingual.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
+                  }
+              }
+        """.trimIndent()
+
+        val wellKnownJsonString = """
+              {
+                "credential_definition": {
+                  "type": [
+                    "FarmerCredential_WithFace",
+                    "VerifiableCredential"
+                  ],
+                  "credentialSubject": {
+                    "fullName": {
+                          "display": [
+                             {
+                                "language": "eng",
+                                "name": "Full Name"
+                            },
+                            {
+                                "language": "tam",
+                                "name": "முழுப் பெயர்"
+                            }
+                          ]
+                    }
+                  }
+                }
+              }
+        """.trimIndent()
+
+        val result = injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString, wellKnownJson = wellKnownJsonString)
+        assertEquals(listOf("<svg>" +
+                "Full Name: John Doe," +
+                "முழுப் பெயர்: ஜான் டோ" +
+                "</svg>"), result)
+    }
+
+    @Test
+    fun `renderVC without wellKnown and label placeholder present in svg (fallback)`() {
+        val vcJsonString = """
+              {
+                "credentialSubject": {
+                    "fullName": [
+                        {
+                            "language": "eng",
+                            "value": "John Doe"
+                        },
+                        {
+                            "language": "tam",
+                            "value": "ஜான் டோ"
+                        }
+                    ],
+                    "mobile": "1234567890"
+                },
+                "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/multilingual.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
+                  }
+              }
+        """.trimIndent()
+
+        "<svg>" +
+                "{{/credential_definition/credentialSubject/fullName/display/0/name}}: {{/credentialSubject/fullName/0/value}}," +
+                "{{/credential_definition/credentialSubject/fullName/display/1/name}}: {{/credentialSubject/fullName/1/value}}" +
+                "</svg>"
+
+        val result = injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
+        assertEquals(listOf("<svg>" +
+                "Full Name: John Doe," +
+                "Full Name: ஜான் டோ" +
+                "</svg>"), result)
+    }
+
+
 
 }
 
