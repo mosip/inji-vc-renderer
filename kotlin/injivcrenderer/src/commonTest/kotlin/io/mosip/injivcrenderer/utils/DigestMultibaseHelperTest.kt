@@ -5,6 +5,7 @@ import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 import kotlin.test.assertFailsWith
 import io.mosip.injivcrenderer.DigestMultibaseHelper
+import io.mosip.injivcrenderer.TestUtils
 import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 
 class DigestMultibaseHelperTest {
@@ -15,7 +16,7 @@ class DigestMultibaseHelperTest {
 
     @Test
     fun `generateDigestMultibase should produce a string starting with u`() {
-        val digest = helper.generateDigestMultibase(svgSample)
+        val digest = TestUtils().generateDigestMultibase(svgSample)
         println("digest: $digest")
         assertTrue(digest.startsWith("u"), "Digest must start with 'u'")
     }
@@ -52,7 +53,7 @@ class DigestMultibaseHelperTest {
 
     @Test
     fun `verifyDigestMultibase should throw exception for wrong prefix bytes`() {
-        val digest = helper.generateDigestMultibase(svgSample)
+        val digest = TestUtils().generateDigestMultibase(svgSample)
         val corrupted = "u" + digest.substring(1).replaceFirst(digest[1], 'A')
         assertFailsWith<VcRendererExceptions.MultibaseVerificationException> {
             helper.verifyDigestMultibase(svgSample, corrupted)

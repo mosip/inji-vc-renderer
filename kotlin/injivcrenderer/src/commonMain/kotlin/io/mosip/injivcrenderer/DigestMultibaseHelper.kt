@@ -28,22 +28,6 @@ class DigestMultibaseHelper(private val traceabilityId: String) {
         return actualHash.contentEquals(expectedHash)
     }
 
-
-    fun generateDigestMultibase(svgString: String): String {
-        val svgBytes = svgString.toByteArray(Charsets.UTF_8)
-        val hash = MessageDigest.getInstance(SHA_256).digest(svgBytes)
-        val multihash = byteArrayOf(0x12, 0x20) + hash
-        return "u" + base64UrlNoPadEncode(multihash)
-    }
-
-
-    private fun base64UrlNoPadEncode(input: ByteArray): String {
-        val encoded = Base64.encode(input)
-        return encoded.replace('+', '-')
-            .replace('/', '_')
-            .replace("=", "")
-    }
-
     private fun base64UrlNoPadDecode(input: String): ByteArray {
         val standardBase64 = input
             .replace('-', '+')
