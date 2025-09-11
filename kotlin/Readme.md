@@ -188,6 +188,24 @@ io.mosip.injivcrenderer/commonMain
   ```
 Note: camelCase, PascalCase or snake_case value is converted to Title Case for the label. e.g. fullName or FullName or full_name is converted to Full Name.
 
+##### Digest Multibase Validation
+- If the `digestMultibase` field is present in the `template` object, it will validate the downloaded SVG Template using the digestMultibase value.
+- `MultibaseVerificationException` is thrown if the validation fails or digestMultibase is invalid.
+- Example:
+    ```
+          "renderMethod": {
+              "type": "TemplateRenderMethod",
+              "renderSuite": "svg-mustache",
+              "template": {
+                      "id": "https://degree.example/credential-templates/bachelors",
+                      "mediaType": "image/svg+xml",
+                      "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                  }
+          }
+      ```
+- As per spec `digestMultibase` is optional field and it should follow below standard if present.
+    - An OPTIONAL multibase-encoded Multihash of the render method referenced if id is specified. The multibase value MUST be u (base64url-nopad) and the multihash value MUST be SHA-2 with 256-bits of output (0x12).
+
 #### Replacing Placeholders in SVG Template
 - Replaces the placeholders in the SVG Template with actual VC Json Data strictly follows JSON Pointer Algorithm RFC6901.
 - Returns the list of replaced SVG Templates if multiple render methods are present in the VC.
