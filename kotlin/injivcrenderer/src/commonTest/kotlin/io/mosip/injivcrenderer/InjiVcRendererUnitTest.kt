@@ -558,8 +558,7 @@ class InjiVcRendererTest {
                     "renderSuite": "svg-mustache",
                       "template": {
                       "id": "https://degree.example/credential-templates/qrcode.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                        "mediaType": "image/svg+xml"
                       }
                   }
               }"""
@@ -581,8 +580,7 @@ class InjiVcRendererTest {
             "renderSuite": "svg-mustache",
             "template": {
               "id": "https://degree.example/credential-templates/qrcode.svg",
-              "mediaType": "image/svg+xml",
-              "digestMultibase": "xyz"
+              "mediaType": "image/svg+xml"
             }
           }
         }"""
@@ -611,8 +609,7 @@ class InjiVcRendererTest {
             "renderSuite": "svg-mustache",
             "template": {
               "id": "https://degree.example/credential-templates/qrcode.svg",
-              "mediaType": "image/svg+xml",
-              "digestMultibase": "xyz"
+              "mediaType": "image/svg+xml"
             }
           }
         }"""
