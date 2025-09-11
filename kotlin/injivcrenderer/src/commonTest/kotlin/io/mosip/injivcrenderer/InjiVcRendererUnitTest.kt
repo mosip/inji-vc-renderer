@@ -6,9 +6,8 @@ import io.mosip.injivcrenderer.constants.CredentialFormat
 import io.mosip.injivcrenderer.constants.VcRendererErrorCodes
 import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 import io.mosip.injivcrenderer.networkManager.NetworkManager
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import io.mosip.injivcrenderer.qrCode.QrCodeGenerator
+import io.mosip.injivcrenderer.utils.Utils.Companion.DEFAULT_FALLBACK_QR_BASE64
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mockConstruction
@@ -25,7 +24,7 @@ class InjiVcRendererTest {
     private lateinit var mockConstruction: AutoCloseable
 
 
-    @Before
+    @BeforeTest
     fun setup() {
         mockConstruction = mockConstruction(NetworkManager::class.java) { mock, _ ->
             whenever(mock.fetchSvgAsText(any())).thenAnswer { invocation ->
@@ -48,7 +47,7 @@ class InjiVcRendererTest {
         injivcRenderer = InjiVcRenderer("test-trace-id")
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         mockConstruction.close()
     }
@@ -73,6 +72,8 @@ class InjiVcRendererTest {
 
         assertEquals(VcRendererErrorCodes.UNSUPPORTED_CREDENTIAL_FORMAT, actualException.errorCode)
         assertEquals(expectedErrorMessage, actualException.message)
+        assertEquals("test-trace-id", actualException.traceabilityId)
+        assertEquals("InjiVcRenderer", actualException.className)
     }
 
     @Test
@@ -506,6 +507,134 @@ class InjiVcRendererTest {
                 "Full Name: ஜான் டோ" +
                 "</svg>"), result)
     }
+
+    @Test
+    fun `renderVC missing template id`() {
+        val vcJsonString = """ {
+                "credentialSubject": {
+                    "fullName": [
+                        {
+                            "language": "eng",
+                            "value": "John Doe"
+                        },
+                        {
+                            "language": "tam",
+                            "value": "ஜான் டோ"
+                        }
+                    ],
+                    "mobile": "1234567890"
+                },
+                "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
+                  }
+              }"""
+
+        val actualException =
+            assertFailsWith<VcRendererExceptions.MissingTemplateIdException> {
+                injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
+            }
+        val expectedErrorMessage = "Template ID is missing in renderMethod"
+
+        assertEquals(VcRendererErrorCodes.MISSING_TEMPLATE_ID, actualException.errorCode)
+        assertEquals(expectedErrorMessage, actualException.message)
+    }
+
+    @Test
+    fun `test injectQrCode`() {
+        val vcJsonString = """ {
+                "credentialSubject": {
+                    "fullName": [
+                        {
+                            "language": "eng",
+                            "value": "John Doe"
+                        },
+                        {
+                            "language": "tam",
+                            "value": "ஜான் டோ"
+                        }
+                    ],
+                    "mobile": "1234567890"
+                },
+                "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                      "id": "https://degree.example/credential-templates/qrcode.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                      }
+                  }
+              }"""
+
+        val result = injivcRenderer.renderVC(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
+        assertEquals(result.contains("{{qrCodeImage}}"), false)
+
+    }
+
+    @Test
+    fun `renderVC injects fallback QR when generation fails`() {
+        mockConstruction(QrCodeGenerator::class.java) { mock, _ ->
+            whenever(mock.generateQRCodeImage(any())).thenThrow(RuntimeException("QR failed"))
+        }.use {
+            val vcJsonString = """{
+          "credentialSubject": { "fullName": "John" },
+          "renderMethod": {
+            "type": "TemplateRenderMethod",
+            "renderSuite": "svg-mustache",
+            "template": {
+              "id": "https://degree.example/credential-templates/qrcode.svg",
+              "mediaType": "image/svg+xml",
+              "digestMultibase": "xyz"
+            }
+          }
+        }"""
+
+            val result = injivcRenderer.renderVC(
+                CredentialFormat.LDP_VC,
+                vcJsonString = vcJsonString
+            ).first() as String
+
+            assertTrue(
+                result.contains("data:image/png;base64,${DEFAULT_FALLBACK_QR_BASE64}"),
+                "Expected fallback QR to be injected, but was:\n$result"
+            )
+        }
+    }
+
+    @Test
+    fun `renderVC injects fallback QR when generator returns empty string`() {
+        mockConstruction(QrCodeGenerator::class.java) { mock, _ ->
+            whenever(mock.generateQRCodeImage(any())).thenReturn("")
+        }.use {
+            val vcJsonString = """{
+          "credentialSubject": { "fullName": "Jane" },
+          "renderMethod": {
+            "type": "TemplateRenderMethod",
+            "renderSuite": "svg-mustache",
+            "template": {
+              "id": "https://degree.example/credential-templates/qrcode.svg",
+              "mediaType": "image/svg+xml",
+              "digestMultibase": "xyz"
+            }
+          }
+        }"""
+
+            val result = injivcRenderer.renderVC(
+                CredentialFormat.LDP_VC,
+                vcJsonString = vcJsonString
+            ).first() as String
+            assertTrue(
+                result.contains("data:image/png;base64,${DEFAULT_FALLBACK_QR_BASE64}"),
+                "Expected fallback QR to be injected when qrBase64 is empty, but was:\n$result"
+            )
+        }
+    }
+
 
 
 

@@ -2,10 +2,10 @@ package io.mosip.injivcrenderer
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosip.injivcrenderer.templateEngine.svg.JsonPointerResolver
-import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class JsonPointerResolverTest {
