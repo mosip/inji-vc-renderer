@@ -1,6 +1,8 @@
 package io.mosip.injivcrenderer.utils
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.mosip.injivcrenderer.DigestMultibaseHelper
+import io.mosip.injivcrenderer.constants.Constants.DIGEST_MULTIBASE
 import io.mosip.injivcrenderer.networkManager.NetworkManager
 import io.mosip.injivcrenderer.constants.Constants.ID
 import io.mosip.injivcrenderer.constants.Constants.QR_CODE_PLACEHOLDER
@@ -30,8 +32,17 @@ class Utils(private val traceabilityId: String) {
 
         val templateId = templateValue.path(ID).asText(null)
             ?: throw VcRendererExceptions.MissingTemplateIdException(traceabilityId, className)
+        val digestMultibase = templateValue.path(DIGEST_MULTIBASE).asText(null)
 
         var rawSvg = NetworkManager(traceabilityId).fetchSvgAsText(templateId)
+        if (digestMultibase != null && !DigestMultibaseHelper(traceabilityId).verifyDigestMultibase(rawSvg, digestMultibase)) {
+            throw VcRendererExceptions.MultibaseVerificationException(
+                traceabilityId = traceabilityId,
+                className = className,
+                exceptionMessage = "Mismatch between fetched SVG and provided digestMultibase"
+            )
+        }
+
 
         rawSvg = injectQrCodeIfNeeded(rawSvg, vcJsonString)
 
