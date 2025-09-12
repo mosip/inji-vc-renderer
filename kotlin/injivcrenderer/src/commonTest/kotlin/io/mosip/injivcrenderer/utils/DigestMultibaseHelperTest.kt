@@ -22,41 +22,41 @@ class DigestMultibaseHelperTest {
     }
 
     @Test
-    fun `verifyDigestMultibase should return true for correct digest`() {
+    fun `validateDigestMultibase should return true for correct digest`() {
         val digest = "uEiCi0x0IkXhQiFxa2wdnrJL02byQYoLKjN4o9_jHxh1shw"
-        val result = helper.verifyDigestMultibase(svgSample, digest)
+        val result = helper.validateDigestMultibase(svgSample, digest)
         assertTrue(result, "Verification should succeed for correct digest")
     }
 
     @Test
-    fun `verifyDigestMultibase should return false for incorrect digest`() {
+    fun `validateDigestMultibase should return false for incorrect digest`() {
         val wrongDigest = "uEiDc1-CXqeAP2klpU-FcUFH5etlFW2Za-aOyY221sRfcug"
-        val result = helper.verifyDigestMultibase(svgSample, wrongDigest)
+        val result = helper.validateDigestMultibase(svgSample, wrongDigest)
         assertFalse(result, "Verification should fail for incorrect digest")
     }
 
     @Test
-    fun `verifyDigestMultibase should throw exception when digest does not start with u`() {
+    fun `validateDigestMultibase should throw exception when digest does not start with u`() {
 
-        assertFailsWith<VcRendererExceptions.MultibaseVerificationException> {
-            helper.verifyDigestMultibase(svgSample, "xInvalidDigest")
+        assertFailsWith<VcRendererExceptions.MultibaseValidationException> {
+            helper.validateDigestMultibase(svgSample, "xInvalidDigest")
         }
     }
 
     @Test
-    fun `verifyDigestMultibase should throw exception for invalid multihash length`() {
+    fun `validateDigestMultibase should throw exception for invalid multihash length`() {
         val invalidDigest = "uAA"
-        assertFailsWith<VcRendererExceptions.MultibaseVerificationException> {
-            helper.verifyDigestMultibase(svgSample, invalidDigest)
+        assertFailsWith<VcRendererExceptions.MultibaseValidationException> {
+            helper.validateDigestMultibase(svgSample, invalidDigest)
         }
     }
 
     @Test
-    fun `verifyDigestMultibase should throw exception for wrong prefix bytes`() {
+    fun `validateDigestMultibase should throw exception for wrong prefix bytes`() {
         val digest = TestUtils().generateDigestMultibase(svgSample)
         val corrupted = "u" + digest.substring(1).replaceFirst(digest[1], 'A')
-        assertFailsWith<VcRendererExceptions.MultibaseVerificationException> {
-            helper.verifyDigestMultibase(svgSample, corrupted)
+        assertFailsWith<VcRendererExceptions.MultibaseValidationException> {
+            helper.validateDigestMultibase(svgSample, corrupted)
         }
     }
 }

@@ -52,7 +52,7 @@ sealed class VcRendererExceptions(
         VcRendererExceptions(
             UNSUPPORTED_CREDENTIAL_FORMAT, "Only LDP_VC credential format is supported", className.orEmpty(), traceabilityId)
 
-    class MultibaseVerificationException(traceabilityId: String, className: String?, exceptionMessage: String) :
+    class MultibaseValidationException(traceabilityId: String, className: String?, exceptionMessage: String) :
         VcRendererExceptions(
             MULTIBASE_VERIFICATION_FAILED, "Multibase verification failed: $exceptionMessage", className.orEmpty(), traceabilityId)
 

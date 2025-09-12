@@ -35,8 +35,8 @@ class Utils(private val traceabilityId: String) {
         val digestMultibase = templateValue.path(DIGEST_MULTIBASE).asText(null)
 
         var rawSvg = NetworkManager(traceabilityId).fetchSvgAsText(templateId)
-        if (digestMultibase != null && !DigestMultibaseHelper(traceabilityId).verifyDigestMultibase(rawSvg, digestMultibase)) {
-            throw VcRendererExceptions.MultibaseVerificationException(
+        if (digestMultibase != null && !DigestMultibaseHelper(traceabilityId).validateDigestMultibase(rawSvg, digestMultibase)) {
+            throw VcRendererExceptions.MultibaseValidationException(
                 traceabilityId = traceabilityId,
                 className = className,
                 exceptionMessage = "Mismatch between fetched SVG and provided digestMultibase"

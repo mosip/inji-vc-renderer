@@ -673,7 +673,7 @@ class InjiVcRendererTest {
         }"""
 
         val actualException =
-            assertFailsWith<VcRendererExceptions.MultibaseVerificationException> {
+            assertFailsWith<VcRendererExceptions.MultibaseValidationException> {
                 injivcRenderer.renderVC(CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
         val expectedErrorMessage = "Mismatch between fetched SVG and provided digestMultibase"
@@ -704,7 +704,7 @@ class InjiVcRendererTest {
         }"""
 
         val actualException =
-            assertFailsWith<VcRendererExceptions.MultibaseVerificationException> {
+            assertFailsWith<VcRendererExceptions.MultibaseValidationException> {
                 injivcRenderer.renderVC(CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
         val expectedErrorMessage = "Multibase verification failed: digestMultibase must start with 'u'"

@@ -12,15 +12,15 @@ class DigestMultibaseHelper(private val traceabilityId: String) {
 
     private val className = Utils::class.simpleName
 
-    fun verifyDigestMultibase(svgString: String, digestMultibase: String): Boolean {
-        if (!digestMultibase.startsWith("u")) throw VcRendererExceptions.MultibaseVerificationException(traceabilityId, className, "digestMultibase must start with 'u'")
+    fun validateDigestMultibase(svgString: String, digestMultibase: String): Boolean {
+        if (!digestMultibase.startsWith("u")) throw VcRendererExceptions.MultibaseValidationException(traceabilityId, className, "digestMultibase must start with 'u'")
         val encodedPart = digestMultibase.substring(1)
 
         val decoded = base64UrlNoPadDecode(encodedPart)
         if (decoded.size != 34)
-            throw VcRendererExceptions.MultibaseVerificationException(traceabilityId, className, "Invalid multihash length")
+            throw VcRendererExceptions.MultibaseValidationException(traceabilityId, className, "Invalid multihash length")
         if (decoded[0] != 0x12.toByte() || decoded[1] != 0x20.toByte())
-            throw VcRendererExceptions.MultibaseVerificationException(traceabilityId, className, "Unsupported multihash prefix")
+            throw VcRendererExceptions.MultibaseValidationException(traceabilityId, className, "Unsupported multihash prefix")
 
         val expectedHash = decoded.copyOfRange(2, 34)
         val actualHash = MessageDigest.getInstance(SHA_256).digest(svgString.toByteArray(Charsets.UTF_8))
