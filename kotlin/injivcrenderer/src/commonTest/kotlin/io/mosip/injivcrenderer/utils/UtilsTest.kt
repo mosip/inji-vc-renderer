@@ -24,14 +24,14 @@ class UtilsTest {
     fun `validateDigestMultibase should return true for correct digest`() {
         val digest = "uEiCi0x0IkXhQiFxa2wdnrJL02byQYoLKjN4o9_jHxh1shw"
         val result = helper.validateDigestMultibase(svgSample, digest)
-        assertTrue(result, "Verification should succeed for correct digest")
+        assertTrue(result, "Validation should succeed for correct digest")
     }
 
     @Test
     fun `validateDigestMultibase should return false for incorrect digest`() {
         val wrongDigest = "uEiDc1-CXqeAP2klpU-FcUFH5etlFW2Za-aOyY221sRfcug"
         val result = helper.validateDigestMultibase(svgSample, wrongDigest)
-        assertFalse(result, "Verification should fail for incorrect digest")
+        assertFalse(result, "Validation should fail for incorrect digest")
     }
 
     @Test

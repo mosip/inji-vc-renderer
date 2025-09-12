@@ -678,7 +678,7 @@ class InjiVcRendererTest {
             }
         val expectedErrorMessage = "Mismatch between fetched SVG and provided digestMultibase"
 
-        assertEquals(VcRendererErrorCodes.MULTIBASE_VERIFICATION_FAILED, actualException.errorCode)
+        assertEquals(VcRendererErrorCodes.MULTIBASE_VALIDATION_FAILED, actualException.errorCode)
         assertTrue(actualException.message.contains(expectedErrorMessage))
 
     }
@@ -707,9 +707,9 @@ class InjiVcRendererTest {
             assertFailsWith<VcRendererExceptions.MultibaseValidationException> {
                 injivcRenderer.renderVC(CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
             }
-        val expectedErrorMessage = "Multibase verification failed: digestMultibase must start with 'u'"
+        val expectedErrorMessage = "Multibase validation failed: digestMultibase must start with 'u'"
 
-        assertEquals(VcRendererErrorCodes.MULTIBASE_VERIFICATION_FAILED, actualException.errorCode)
+        assertEquals(VcRendererErrorCodes.MULTIBASE_VALIDATION_FAILED, actualException.errorCode)
         assertTrue(actualException.message.contains(expectedErrorMessage))
 
     }

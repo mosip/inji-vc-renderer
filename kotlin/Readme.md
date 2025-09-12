@@ -190,7 +190,7 @@ Note: camelCase, PascalCase or snake_case value is converted to Title Case for t
 
 ##### Digest Multibase Validation
 - If the `digestMultibase` field is present in the `template` object, it will validate the downloaded SVG Template using the digestMultibase value.
-- `MultibaseVerificationException` is thrown if the validation fails or digestMultibase is invalid.
+- `MultibaseValidationException` is thrown if the validation fails or digestMultibase is invalid.
 - Example:
     ```
           "renderMethod": {
