@@ -1,4 +1,4 @@
-package io.mosip.injivcrenderer
+package io.mosip.injivcrenderer.templateEngline.svg
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mosip.injivcrenderer.templateEngine.svg.JsonPointerResolver

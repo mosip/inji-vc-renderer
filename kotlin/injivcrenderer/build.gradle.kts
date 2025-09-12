@@ -205,26 +205,18 @@ tasks.register("generatePom") {
 }
 
 afterEvaluate {
-    tasks.withType<Sign>().configureEach {
-        if (name.contains("JarReleasePublication")) {
-            dependsOn("jarRelease", "javadocJar", "sourcesJar")
-        } else if (name.contains("AarPublication")) {
-            dependsOn("assembleRelease")
-        }
-    }
-
-    val signTasks = tasks.withType<Sign>()
+    val signTasks = listOf("signJarReleasePublication", "signAarPublication")
     val publishTasks = listOf(
         "publishAarPublicationToLocalMavenWithChecksumsRepository",
         "publishJarReleasePublicationToLocalMavenWithChecksumsRepository",
         "publishAarPublicationToMavenLocal",
         "publishJarReleasePublicationToMavenLocal",
-        "publishAarPublicationToInji-vcRendererRepository",
+        "publishAarPublicationToInji-vcrendererRepository",
         "publishJarReleasePublicationToInji-vcrendererRepository"
     )
 
     publishTasks.forEach { publishName ->
-        tasks.findByName(publishName)?.dependsOn(signTasks)
+        tasks.findByName(publishName)?.dependsOn(signTasks[0], signTasks[1])
     }
 }
 apply(from = "publish-artifact.gradle")

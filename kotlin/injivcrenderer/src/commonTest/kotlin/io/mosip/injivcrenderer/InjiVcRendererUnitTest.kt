@@ -40,6 +40,7 @@ class InjiVcRendererTest {
                             "{{/credential_definition/credentialSubject/fullName/display/0/name}}: {{/credentialSubject/fullName/0/value}}," +
                             "{{/credential_definition/credentialSubject/fullName/display/1/name}}: {{/credentialSubject/fullName/1/value}}" +
                             "</svg>"
+                    url.contains("test-digest.svg") -> "<svg>Email: {{/credentialSubject/email}}, Mobile: {{/credentialSubject/mobile}}</svg>"
                     else -> "<svg>default</svg>"
                 }
             }
@@ -90,8 +91,7 @@ class InjiVcRendererTest {
                     "renderSuite": "svg-mustache",
                       "template": {
                         "id": "https://degree.example/credential-templates/normal.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                        "mediaType": "image/svg+xml"
                       }
                   }
               }
@@ -295,8 +295,7 @@ class InjiVcRendererTest {
                     "renderSuite": "svg-mustache",
                       "template": {
                         "id": "https://degree.example/credential-templates/nested-object.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                        "mediaType": "image/svg+xml"
                       }
                   }
               }
@@ -323,8 +322,7 @@ class InjiVcRendererTest {
                     "renderSuite": "svg-mustache",
                       "template": {
                         "id": "https://degree.example/credential-templates/normal.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                        "mediaType": "image/svg+xml"
                       }
                   }
               }
@@ -353,8 +351,7 @@ class InjiVcRendererTest {
                     "renderSuite": "svg-mustache",
                     "template": {
                         "id": "https://degree.example/credential-templates/normal.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                        "mediaType": "image/svg+xml"
                       }
                   },
                   {
@@ -362,8 +359,7 @@ class InjiVcRendererTest {
                     "renderSuite": "svg-mustache",
                     "template": {
                         "id": "https://degree.example/credential-templates/with-locale-object.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                        "mediaType": "image/svg+xml"
                       }
                   }
               ]
@@ -392,7 +388,6 @@ class InjiVcRendererTest {
                     "template": {
                         "id": "https://degree.example/credential-templates/normal.svg",
                         "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR",
                         "renderProperty": [
                             "/issuer", "/credentialSubject/email", "/credentialSubject/degree/name"
                           ]
@@ -428,8 +423,7 @@ class InjiVcRendererTest {
                     "renderSuite": "svg-mustache",
                       "template": {
                         "id": "https://degree.example/credential-templates/multilingual.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                        "mediaType": "image/svg+xml"
                       }
                   }
               }
@@ -489,8 +483,7 @@ class InjiVcRendererTest {
                     "renderSuite": "svg-mustache",
                       "template": {
                         "id": "https://degree.example/credential-templates/multilingual.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                        "mediaType": "image/svg+xml"
                       }
                   }
               }
@@ -565,8 +558,7 @@ class InjiVcRendererTest {
                     "renderSuite": "svg-mustache",
                       "template": {
                       "id": "https://degree.example/credential-templates/qrcode.svg",
-                        "mediaType": "image/svg+xml",
-                        "digestMultibase": "zQmerWC85Wg6wFl9znFCwYxApG270iEu5h6JqWAPdhyxz2dR"
+                        "mediaType": "image/svg+xml"
                       }
                   }
               }"""
@@ -588,8 +580,7 @@ class InjiVcRendererTest {
             "renderSuite": "svg-mustache",
             "template": {
               "id": "https://degree.example/credential-templates/qrcode.svg",
-              "mediaType": "image/svg+xml",
-              "digestMultibase": "xyz"
+              "mediaType": "image/svg+xml"
             }
           }
         }"""
@@ -618,8 +609,7 @@ class InjiVcRendererTest {
             "renderSuite": "svg-mustache",
             "template": {
               "id": "https://degree.example/credential-templates/qrcode.svg",
-              "mediaType": "image/svg+xml",
-              "digestMultibase": "xyz"
+              "mediaType": "image/svg+xml"
             }
           }
         }"""
@@ -633,6 +623,95 @@ class InjiVcRendererTest {
                 "Expected fallback QR to be injected when qrBase64 is empty, but was:\n$result"
             )
         }
+    }
+
+    @Test
+    fun `digestMultibase Valid`() {
+
+        val supportedFormat = CredentialFormat.fromValue("ldp_vc")
+        val vcJsonString = """{
+            "credentialSubject": {
+                "email": "test@test.com",
+                "mobile": "1234567890"
+            },
+            "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/test-digest.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "uEiCi0x0IkXhQiFxa2wdnrJL02byQYoLKjN4o9_jHxh1shw"
+                      }
+                  }
+              }
+        }"""
+        val result = injivcRenderer.renderVC(credentialFormat = supportedFormat, vcJsonString = vcJsonString)
+        assertEquals(
+            listOf(
+                "<svg>Email: test@test.com, Mobile: 1234567890</svg>"), result)
+
+    }
+
+    @Test
+    fun `test digestMultibase Invalid`() {
+
+        val vcJsonString = """{
+            "credentialSubject": {
+                "email": "test@test.com",
+                "mobile": "1234567890"
+            },
+            "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/test-digest.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "uEiDc1-CXqeAP2klpU-FcUFH5etlFW2Za-aOyY221sRfcug"
+                      }
+                  }
+              }
+        }"""
+
+        val actualException =
+            assertFailsWith<VcRendererExceptions.MultibaseValidationException> {
+                injivcRenderer.renderVC(CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
+            }
+        val expectedErrorMessage = "Mismatch between fetched SVG and provided digestMultibase"
+
+        assertEquals(VcRendererErrorCodes.MULTIBASE_VALIDATION_FAILED, actualException.errorCode)
+        assertTrue(actualException.message.contains(expectedErrorMessage))
+
+    }
+
+    @Test
+    fun `test digestMultibase Invalid-prefix`() {
+
+        val vcJsonString = """{
+            "credentialSubject": {
+                "email": "test@test.com",
+                "mobile": "1234567890"
+            },
+            "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                        "id": "https://degree.example/credential-templates/test-digest.svg",
+                        "mediaType": "image/svg+xml",
+                        "digestMultibase": "zEiDc1-CXqeAP2klpU-FcUFH5etlFW2Za-aOyY221sRfcug"
+                      }
+                  }
+              }
+        }"""
+
+        val actualException =
+            assertFailsWith<VcRendererExceptions.MultibaseValidationException> {
+                injivcRenderer.renderVC(CredentialFormat.LDP_VC, vcJsonString = vcJsonString)
+            }
+        val expectedErrorMessage = "Multibase validation failed: digestMultibase must start with 'u'"
+
+        assertEquals(VcRendererErrorCodes.MULTIBASE_VALIDATION_FAILED, actualException.errorCode)
+        assertTrue(actualException.message.contains(expectedErrorMessage))
+
     }
 
 
