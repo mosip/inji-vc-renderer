@@ -168,8 +168,7 @@ tasks.register("jacocoMergedReport", JacocoReport::class) {
 
     sourceDirectories.setFrom(files(
         "src/commonMain/kotlin",
-        "src/jvmMain/kotlin",
-        "src/androidMain/kotlin"
+        "src/jvmMain/kotlin"
     ))
 
     executionData.setFrom(files(
@@ -234,8 +233,8 @@ sonarqube {
         property("sonar.scm.disabled", "true")
         property("sonar.coverage.jacoco.xmlReportPaths",
             "$buildDir/reports/jacoco/jacocoMergedReport/jacocoMergedReport.xml")
-        property("sonar.sources", "src/commonMain/kotlin,src/jvmMain/kotlin,src/androidMain/kotlin")
-        property("sonar.tests", "src/commonTest/kotlin,src/jvmTest/kotlin,src/androidUnitTest/kotlin")
+        property("sonar.sources", "src/commonMain/kotlin,src/jvmMain/kotlin")
+        property("sonar.tests", "src/commonTest/kotlin,src/jvmTest/kotlin")
     }
 }
 
