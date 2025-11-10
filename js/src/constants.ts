@@ -40,6 +40,7 @@ export function getLanguageCodes(lang: string): string[] {
   const entry = (iso6393 as any).find((e: any) => e.iso6393 === normalized);
 
   const aliases = new Set<string>();
+  if (!entry) return [normalized];
   if (entry?.iso6391) aliases.add(entry.iso6391);
   aliases.add(entry.iso6393);
 
