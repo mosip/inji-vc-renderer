@@ -12,3 +12,5 @@ export const CITY = "city"
 export const PROVINCE = "province"
 export const REGION = "region"
 export const POSTAL_CODE = "postalCode"
+
+export const DEFAULT_ENG = "en";
