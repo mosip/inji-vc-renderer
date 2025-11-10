@@ -24,7 +24,7 @@ const PLACEHOLDER_REGEX_PATTERN = /{{(.*?)}}/g;
 function getValueFromData(
   key: string,
   jsonObject: any,
-  language: string= DEFAULT_ENG,
+  language: string = DEFAULT_ENG,
   defaultLanguage: string = DEFAULT_ENG
 ): any {
   if (!key || !jsonObject) return null;
@@ -76,7 +76,7 @@ export class VCRenderer {
       if (!templateUrl) return "";
 
       let svgTemplate = await fetchTemplate(templateUrl);
-      vcJsonData = await preProcessVcJson(JSON.stringify(vcJsonData), svgTemplate, currentLanguage);
+      vcJsonData = await preProcessVcJson(JSON.stringify(vcJsonData), svgTemplate, currentLanguage, defaultLanguage);
 
       return svgTemplate.replace(PLACEHOLDER_REGEX_PATTERN, (match: string, key: string) => {
           key = key.trim().replace(/^\/+/, "");

@@ -1,3 +1,5 @@
+import { iso6393 } from "iso-639-3";
+
 export const QRCODE_PLACEHOLDER = "{{credentialSubject/qrCodeImage}}"
 
 
@@ -13,4 +15,33 @@ export const PROVINCE = "province"
 export const REGION = "region"
 export const POSTAL_CODE = "postalCode"
 
-export const DEFAULT_ENG = "en";
+export const DEFAULT_ENG = "eng";
+
+export function normalizeLanguageCode(lang: string): string {
+  if (!lang) return DEFAULT_ENG;
+
+  const code = lang.toLowerCase();
+
+  if (code.length === 3) {
+    const valid3 = (iso6393 as any).find((entry: any) => entry.iso6393 === code);
+    if (valid3) return code;
+  }
+
+  if (code.length === 2) {
+    const valid2 = (iso6393 as any).find((entry: any) => entry.iso6391 === code);
+    if (valid2) return valid2.iso6393;
+  }
+
+  return DEFAULT_ENG;
+}
+
+export function getLanguageCodes(lang: string): string[] {
+  const normalized = normalizeLanguageCode(lang);
+  const entry = (iso6393 as any).find((e: any) => e.iso6393 === normalized);
+
+  const aliases = new Set<string>();
+  if (entry?.iso6391) aliases.add(entry.iso6391);
+  aliases.add(entry.iso6393);
+
+  return Array.from(aliases);
+}

@@ -1,4 +1,4 @@
-import { BENEFITS_PLACEHOLDER_REGEX_PATTERN, QRCODE_PLACEHOLDER, BENEFITS_FIELD_NAME, FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN, DEFAULT_ENG} from "./constants";
+import { BENEFITS_PLACEHOLDER_REGEX_PATTERN, QRCODE_PLACEHOLDER, BENEFITS_FIELD_NAME, FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN, DEFAULT_ENG, getLanguageCodes} from "./constants";
 import { generateQRCode } from "@mosip/pixelpass";
 
 interface MultiLineProperties {
@@ -108,9 +108,16 @@ function getLocalizedValue(
   if (value == null) return null;
 
   if (typeof value === "object") {
-    if (value[language]) return value[language];
-    if (value[defaultLanguage]) return value[defaultLanguage];
-    if (value[DEFAULT_ENG]) return value[DEFAULT_ENG];
+    const languageCodes = [
+      ...getLanguageCodes(language),
+      ...getLanguageCodes(defaultLanguage),
+      ...getLanguageCodes(DEFAULT_ENG),
+    ];
+
+    for (const code of languageCodes) {
+      if (value[code]) return value[code];
+    }
+
     const first = Object.values(value)[0];
     if (first) return first as string;
   }
