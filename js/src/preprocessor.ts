@@ -233,9 +233,7 @@ function constructObjectBasedOnCharacterLengthChunks(
 
       jsonObject[fieldName] = language
         ? {
-            [language]: segmentValue,
-            "@language": language,
-            "@value": segmentValue,
+            [language]: segmentValue
           }
         : segmentValue;
     }
