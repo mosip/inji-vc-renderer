@@ -203,21 +203,28 @@ function constructObjectBasedOnCharacterLengthChunks(
   language: string
 ): any {
   const { dataToSplit, maxCharacterLength, placeholderList } = multiLineProperties;
+  let segments: string[] = [];
 
-  const segmenter = new Intl.Segmenter(language || "en", { granularity: "grapheme" });
-  const graphemes = Array.from(segmenter.segment(dataToSplit), s => s.segment);
+  if (typeof Intl !== "undefined" && typeof Intl.Segmenter !== "undefined") {
+    const codes = getLanguageCodes(language || "en");
+    const localeCode = codes.find((c) => c.length === 2) || codes[0] || "en";
 
-  const segments: string[] = [];
-  let current = "";
+    const segmenter = new Intl.Segmenter(localeCode, { granularity: "grapheme" });
+    const graphemes = Array.from(segmenter.segment(dataToSplit), (s) => s.segment);
 
-  for (const g of graphemes) {
-    if (current.length + g.length <= maxCharacterLength) current += g;
-    else {
-      segments.push(current);
-      current = g;
+    let current = "";
+    for (const g of graphemes) {
+      if (current.length + g.length <= maxCharacterLength) current += g;
+      else {
+        segments.push(current);
+        current = g;
+      }
     }
+    if (current) segments.push(current);
+  } else {
+    const regex = new RegExp(`.{1,${maxCharacterLength}}`, "g");
+    segments = dataToSplit.match(regex) || [];
   }
-  if (current) segments.push(current);
 
   placeholderList.forEach((placeholder, index) => {
     if (index < segments.length) {
