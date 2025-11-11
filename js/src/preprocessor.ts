@@ -1,4 +1,4 @@
-import { BENEFITS_PLACEHOLDER_REGEX_PATTERN, QRCODE_PLACEHOLDER, BENEFITS_FIELD_NAME, FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN, DEFAULT_ENG, getLanguageCodes} from "./constants";
+import { BENEFITS_PLACEHOLDER_REGEX_PATTERN, QRCODE_PLACEHOLDER, BENEFITS_FIELD_NAME, DEFAULT_ENG, getLanguageCodes} from "./constants";
 import { generateQRCode } from "@mosip/pixelpass";
 
 interface MultiLineProperties {
@@ -18,9 +18,8 @@ export async function preProcessVcJson(
     vcJsonObject.credential?.credentialSubject || vcJsonObject.credentialSubject;
   if (!credentialSubject) return vcJsonObject;
 
-  credentialSubject = replaceFieldsWithLanguage(credentialSubject);
+  credentialSubject = normalizeLocalizedFields(credentialSubject);
 
-    // Checks for {{qrCodeImage}} for QR Code Replacement
   if (svgTemplate.includes(QRCODE_PLACEHOLDER)) {
     const qrCode = await replaceQRCode(vcJsonString);
     credentialSubject[getFieldNameFromPlaceholder(QRCODE_PLACEHOLDER)] = qrCode;
@@ -40,66 +39,73 @@ export async function preProcessVcJson(
     delete credentialSubject[BENEFITS_FIELD_NAME];
   }
 
-    // Checks for address placeholders
-  const fullAddressRegex = new RegExp(FULL_ADDRESS_PLACEHOLDER_REGEX_PATTERN, "g");
-  if (fullAddressRegex.test(svgTemplate)) {
-    const addr = credentialSubject.address || {};
-    const combinedAddress = [
-      getLocalizedValue(addr.village, currentLanguage, defaultLanguage),
-      getLocalizedValue(addr.district, currentLanguage, defaultLanguage),
-      getLocalizedValue(addr.state, currentLanguage, defaultLanguage),
-    ]
-      .filter(Boolean)
-      .join(", ");
-
-    const fullAddressPlaceholders = getPlaceholdersList(fullAddressRegex, svgTemplate);
-    credentialSubject = constructObjectBasedOnCharacterLengthChunks(
-      { dataToSplit: combinedAddress, placeholderList: fullAddressPlaceholders, maxCharacterLength: 55 },
-      credentialSubject,
-      currentLanguage
-    );
-  }
-
-  // 🌾 totalLandArea normalization
-  if (credentialSubject.totalLandArea) {
-    const area = credentialSubject.totalLandArea;
-    credentialSubject.totalLandArea = {
-      value: getLocalizedValue(area.value, currentLanguage, defaultLanguage),
-      unit: getLocalizedValue(area.unit, currentLanguage, defaultLanguage),
-    };
-  }
-
   vcJsonObject.credentialSubject = credentialSubject;
   return vcJsonObject;
 }
 
-function replaceFieldsWithLanguage(jsonObject: any): any {
-  if (!jsonObject || typeof jsonObject !== "object") return jsonObject;
+/**
+ * Recursively normalize localized or nested objects
+ * Supports all language formats:
+ * - { "@language": "en", "@value": "John" }
+ * - { "language": "en", "value": "John" }
+ * - { "en": "John" }
+ * - [ { "en": "John" }, { "hi": "जॉन" } ]
+ */
+function normalizeLocalizedFields(input: any): any {
+  if (input === null || input === undefined) return input;
 
-  for (const key of Object.keys(jsonObject)) {
-    const value = jsonObject[key];
+  if (Array.isArray(input)) {
+    const langMap: Record<string, string> = {};
+    let isLocalizedArray = false;
 
-    if (Array.isArray(value)) {
-      const langMap: any = {};
-      let hasLang = false;
+    for (const item of input) {
+      if (typeof item !== "object" || item === null) continue;
 
-      value.forEach((item) => {
-        const lang = item.language || item["@language"];
-        const val = item.value || item["@value"];
-        if (lang && val !== undefined) {
-          hasLang = true;
+      const singleEntry = Object.entries(item);
+      if (singleEntry.length === 1) {
+        const [lang, val] = singleEntry[0];
+        if (typeof val === "string") {
           langMap[lang] = val;
+          isLocalizedArray = true;
+          continue;
         }
-      });
+      }
 
-      if (hasLang) jsonObject[key] = langMap;
-    } else if (typeof value === "object" && value !== null) {
-      jsonObject[key] = replaceFieldsWithLanguage(value);
+      const lang = item["@language"] || item["language"];
+      const val = item["@value"] || item["value"];
+      if (lang && typeof val === "string") {
+        langMap[lang] = val;
+        isLocalizedArray = true;
+      }
     }
+
+    if (isLocalizedArray) return langMap;
+
+    return input.map(normalizeLocalizedFields);
   }
-  return jsonObject;
+
+  if (typeof input === "object") {
+    if (input["@language"] && input["@value"]) {
+      return { [input["@language"]]: input["@value"] };
+    }
+
+    if (input["language"] && input["value"]) {
+      return { [input["language"]]: input["value"] };
+    }
+
+    const result: Record<string, any> = {};
+    for (const [key, val] of Object.entries(input)) {
+      result[key] = normalizeLocalizedFields(val);
+    }
+    return result;
+  }
+
+  return input;
 }
 
+/**
+ * 🌐 Pick the best localized value from object based on language priority
+ */
 function getLocalizedValue(
   value: any,
   language: string,
