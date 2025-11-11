@@ -202,12 +202,35 @@ function constructObjectBasedOnCharacterLengthChunks(
   jsonObject: any,
   language: string
 ): any {
-  const segments = multiLineProperties.dataToSplit.match(new RegExp(`.{1,${multiLineProperties.maxCharacterLength}}`, "g")) || [];
-  multiLineProperties.placeholderList.forEach((placeholder, index) => {
+  const { dataToSplit, maxCharacterLength, placeholderList } = multiLineProperties;
+
+  const segmenter = new Intl.Segmenter(language || "en", { granularity: "grapheme" });
+  const graphemes = Array.from(segmenter.segment(dataToSplit), s => s.segment);
+
+  const segments: string[] = [];
+  let current = "";
+
+  for (const g of graphemes) {
+    if (current.length + g.length <= maxCharacterLength) current += g;
+    else {
+      segments.push(current);
+      current = g;
+    }
+  }
+  if (current) segments.push(current);
+
+  placeholderList.forEach((placeholder, index) => {
     if (index < segments.length) {
-      jsonObject[getFieldNameFromPlaceholder(placeholder)] = language
-        ? { [language]: segments[index] }
-        : segments[index];
+      const fieldName = getFieldNameFromPlaceholder(placeholder);
+      const segmentValue = segments[index];
+
+      jsonObject[fieldName] = language
+        ? {
+            [language]: segmentValue,
+            "@language": language,
+            "@value": segmentValue,
+          }
+        : segmentValue;
     }
   });
   return jsonObject;
