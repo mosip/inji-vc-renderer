@@ -10,11 +10,7 @@ class QrCodeGenerator(private val traceabilityId: String) {
 
     fun generateQRCodeImage( vcJson: String): String {
         try {
-            val pixelPass = PixelPass()
-            val qrData: String = pixelPass.generateQRData(vcJson)
-
-            return convertQrDataIntoBase64(qrData)
-
+            return convertQrDataIntoBase64(vcJson)
         } catch (e: Exception){
             throw VcRendererExceptions.QRCodeGenerationFailureException(traceabilityId, e.message ?: UNKNOWN_ERROR,  className)
         }
