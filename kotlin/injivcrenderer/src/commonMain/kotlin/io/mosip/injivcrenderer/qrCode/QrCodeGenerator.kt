@@ -2,7 +2,6 @@ package io.mosip.injivcrenderer.qrCode
 
 import io.mosip.injivcrenderer.constants.Constants.UNKNOWN_ERROR
 import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
-import io.mosip.pixelpass.PixelPass
 
 
 class QrCodeGenerator(private val traceabilityId: String) {
