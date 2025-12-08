@@ -458,6 +458,41 @@ class InjiVcRendererTest {
     }
 
     @Test
+    fun `test injectQrCode when Qr data present`() {
+        val vcJsonString = """ {
+                "credentialSubject": {
+                    "fullName": [
+                        {
+                            "language": "eng",
+                            "value": "John Doe"
+                        },
+                        {
+                            "language": "tam",
+                            "value": "ஜான் டோ"
+                        }
+                    ],
+                    "mobile": "1234567890"
+                },
+                "renderMethod": {
+                    "type": "TemplateRenderMethod",
+                    "renderSuite": "svg-mustache",
+                      "template": {
+                      "id": "https://degree.example/credential-templates/qrcode.svg",
+                        "mediaType": "image/svg+xml"
+                      }
+                  }
+              }"""
+        val qrCodeData = "ASKJDFHFAUIFGGugiugyif576447TFF"
+
+        val result = injivcRenderer.generateCredentialDisplayContent(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString, qrCodeData = qrCodeData).first() as String
+        assertFalse(result.contains("{{/qrCodeImage}}"))
+        assertTrue(result.contains("data:image/png;base64,$qrCodeData"))
+
+        assertTrue(result.contains("qrCodeImage"))
+        assertFalse(result.contains("qrCodeFallbackImage"))
+    }
+
+    @Test
     fun `generateCredentialDisplayContent injects fallback QR when generation fails`() {
         mockConstruction(QrCodeGenerator::class.java) { mock, _ ->
             whenever(mock.generateQRCodeImage(any())).thenThrow(RuntimeException("QR failed"))

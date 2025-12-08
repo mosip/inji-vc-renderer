@@ -21,13 +21,15 @@ class InjiVcRenderer(private val traceabilityId: String) {
      * @param credentialFormat The format of the credential. Currently only LDP_VC is supported.
      * @param wellKnownJson Optional well-known JSON.
      * @param vcJsonString The Verifiable Credential as a JSON string.
+     * @param qrCodeData Optional QR code data to embed in the SVG.
      * @return A list of rendered SVG strings.
      */
     @JvmOverloads
     fun generateCredentialDisplayContent(
         credentialFormat: CredentialFormat,
         wellKnownJson: String? = null,
-        vcJsonString: String
+        vcJsonString: String,
+        qrCodeData: String? = null
     ): List<Any> {
 
         if (credentialFormat != CredentialFormat.LDP_VC) {
@@ -42,7 +44,7 @@ class InjiVcRenderer(private val traceabilityId: String) {
 
         return renderMethodArray.flatMap { renderMethodElement ->
             templateHelper.extractSVG(renderMethodElement).map { rawSvg ->
-                jsonPointerResolver.replaceSvgPlaceholders(rawSvg, vcJsonNode, renderMethodElement, vcJsonString)
+                jsonPointerResolver.replaceSvgPlaceholders(rawSvg, vcJsonNode, renderMethodElement, vcJsonString, qrCodeData)
             }
         }
     }

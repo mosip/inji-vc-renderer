@@ -22,11 +22,16 @@
        - Gradle task is registered to generate jar by running the command `./gradlew :injivcrenderer:build` which creates jar in the `build/libs` folder
        - Run Tests using `./gradlew testDebugUnitTest` or `./gradlew testReleaseUnitTest` based on the build type.
 
+### Runtime Dependencies
+- The library does not bundle its runtime dependencies in the generated aar or jar.
+- The runtime dependencies are to be explicitly added in the consumer application to avoid runtime failures.
+
 ### API
-- `generateCredentialDisplayContent(credentialFormat: CredentialFormat, wellknownJsonString: String? = null, vcJsonString: String)` - expects the Verifiable Credential, Well-known Json and Credential Format as input and returns the list of replaced SVG Templates.
+- `generateCredentialDisplayContent(credentialFormat: CredentialFormat, wellknownJsonString: String? = null, vcJsonString: String, qrCodeData: String? = null)` - expects the Verifiable Credential, Well-known Json, Credential Format and QR Code Data as input and returns the list of replaced SVG Templates.
     - `credentialFormat` - Enum to specify the credential format. Currently only LDP_VC format is supported.
     - `wellknownJsonString` - Well-known Json downloaded in stringified format. It is optional parameter.
     - `vcJsonString` - VC Downloaded in stringified format.
+    - `qrCodeData` - QR code data to embed in the SVG. It is optional parameter.
     
     
 
@@ -160,7 +165,11 @@ For each item in the renderMethodArray, the library validates the `renderSuite` 
     - An OPTIONAL multibase-encoded Multihash of the render method referenced if id is specified. The multibase value MUST be u (base64url-nopad) and the multihash value MUST be SHA-2 with 256-bits of output (0x12).
 
 ##### QR Code Placeholder
-  - If the SVG Template has `{{/qrCodeImage}}` , it will generate the QR code using Pixelpass library and replace the placeholder with generated QR code image in base64 format.
+  - If the SVG Template has `{{/qrCodeImage}}` , the placeholder will be replaced based on the value of the qrCodeData parameter.
+    - If qrCodeData is provided, the placeholder will be replaced with the QR code image using the value supplied.
+      - The consumer must pass only the raw base64 string (Example:  ```iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABm... ```).
+      - The library will prefix it with  ```data:image/png;base64 ```, before inserting it into the SVG.
+    - If qrCodeData is not provided, it will generate the QR code using Pixelpass library and replace the placeholder with generated QR code image in base64 format.
     - Example:
         ```
         val vcJsonString = """{"credentialSubject" : "id": "did:example:123456789", "name": "Tester"}"""
