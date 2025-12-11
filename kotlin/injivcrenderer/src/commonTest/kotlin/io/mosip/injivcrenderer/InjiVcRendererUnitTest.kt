@@ -494,7 +494,7 @@ class InjiVcRendererTest {
     @Test
     fun `generateCredentialDisplayContent injects fallback QR when generation fails`() {
         mockConstruction(QrCodeGenerator::class.java) { mock, _ ->
-            whenever(mock.generateQRCodeImage(any())).thenThrow(RuntimeException("QR failed"))
+            whenever(mock.generateFromVcJson(any())).thenThrow(RuntimeException("QR failed"))
         }.use {
             val vcJsonString = """{
           "credentialSubject": { "fullName": "John" },
@@ -524,7 +524,7 @@ class InjiVcRendererTest {
     @Test
     fun `generateCredentialDisplayContent injects fallback QR when generator returns empty string`() {
         mockConstruction(QrCodeGenerator::class.java) { mock, _ ->
-            whenever(mock.generateQRCodeImage(any())).thenReturn("")
+            whenever(mock.generateFromVcJson(any())).thenReturn("")
         }.use {
             val vcJsonString = """{
           "credentialSubject": { "fullName": "Jane" },

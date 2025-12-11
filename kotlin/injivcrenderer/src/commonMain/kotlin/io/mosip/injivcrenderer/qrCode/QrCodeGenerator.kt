@@ -7,10 +7,18 @@ import io.mosip.injivcrenderer.exceptions.VcRendererExceptions
 class QrCodeGenerator(private val traceabilityId: String) {
     private val className = QrCodeGenerator::class.simpleName
 
-    fun generateQRCodeImage( vcJson: String): String {
+    fun generateFromVcJson(vcJson: String): String {
         try {
-            return convertQrDataIntoBase64(vcJson)
+            return generateQrFromVcJson(vcJson)
         } catch (e: Exception){
+            throw VcRendererExceptions.QRCodeGenerationFailureException(traceabilityId, e.message ?: UNKNOWN_ERROR,  className)
+        }
+    }
+
+    fun generateFromQrData(qrData: String): String {
+        try {
+            return generateQrFromQrData(qrData)
+        } catch (e: Exception) {
             throw VcRendererExceptions.QRCodeGenerationFailureException(traceabilityId, e.message ?: UNKNOWN_ERROR,  className)
         }
     }

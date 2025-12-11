@@ -1,9 +1,15 @@
 package io.mosip.injivcrenderer.qrCode
 
 import io.mosip.pixelpass.PixelPass
+import io.mosip.pixelpass.convertQRDataIntoBase64
+import io.mosip.pixelpass.types.ECC
 
 
-actual fun convertQrDataIntoBase64(qrData: String): String {
+actual fun generateQrFromVcJson(vcJson: String): String {
     val pixelPass = PixelPass()
-    return pixelPass.generateQRCode(qrData)
+    return pixelPass.generateQRCode(vcJson)
+}
+
+actual fun generateQrFromQrData(qrData: String): String {
+    return convertQRDataIntoBase64(qrData, ECC.L)
 }

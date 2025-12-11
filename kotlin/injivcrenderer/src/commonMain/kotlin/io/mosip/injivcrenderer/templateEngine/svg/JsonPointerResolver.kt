@@ -47,8 +47,13 @@ class JsonPointerResolver(private val traceabilityId: String) {
         }
 
         val qrBase64 = try {
-            QrCodeGenerator(traceabilityId)
-                .generateQRCodeImage(qrCodeData.takeUnless { it.isNullOrEmpty() } ?: vcJsonString)
+            if (!qrCodeData.isNullOrEmpty()) {
+                QrCodeGenerator(traceabilityId)
+                    .generateFromQrData(qrCodeData)
+            } else {
+                QrCodeGenerator(traceabilityId)
+                    .generateFromVcJson(vcJsonString)
+            }
         } catch (e: Exception) {
             println("[$traceabilityId] QR generation failed: ${e.message}")
             null
