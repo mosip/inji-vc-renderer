@@ -165,11 +165,9 @@ For each item in the renderMethodArray, the library validates the `renderSuite` 
     - An OPTIONAL multibase-encoded Multihash of the render method referenced if id is specified. The multibase value MUST be u (base64url-nopad) and the multihash value MUST be SHA-2 with 256-bits of output (0x12).
 
 ##### QR Code Placeholder
-  - If the SVG Template has `{{/qrCodeImage}}` , the placeholder will be replaced based on the value of the qrCodeData parameter.
-    - If qrCodeData is provided, the placeholder will be replaced with the QR code image using the value supplied.
-      - The consumer must pass only the raw base64 string (Example:  ```iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABm... ```).
-      - The library will prefix it with  ```data:image/png;base64 ```, before inserting it into the SVG.
-    - If qrCodeData is not provided, it will generate the QR code using Pixelpass library and replace the placeholder with generated QR code image in base64 format.
+  - If the SVG Template has `{{/qrCodeImage}}` placeholder, it will generate the QR code using Pixelpass library and replace the placeholder with generated QR code image in base64 format.
+    - If qrCodeData is provided, the library will generate the QR code using the value supplied.
+    - If qrCodeData is not provided, it will generate the QR code using the vcJsonString.
     - Example:
         ```
         val vcJsonString = """{"credentialSubject" : "id": "did:example:123456789", "name": "Tester"}"""

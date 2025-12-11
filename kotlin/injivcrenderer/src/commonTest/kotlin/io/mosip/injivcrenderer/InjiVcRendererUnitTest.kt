@@ -482,11 +482,10 @@ class InjiVcRendererTest {
                       }
                   }
               }"""
-        val qrCodeData = "ASKJDFHFAUIFGGugiugyif576447TFF"
+        val qrCodeData = "https://sample-redirection-request/redirect?vc=eyJ2YzIuMC4wIjoiLi4uIn0"
 
         val result = injivcRenderer.generateCredentialDisplayContent(credentialFormat = CredentialFormat.LDP_VC, vcJsonString = vcJsonString, qrCodeData = qrCodeData).first() as String
         assertFalse(result.contains("{{/qrCodeImage}}"))
-        assertTrue(result.contains("data:image/png;base64,$qrCodeData"))
 
         assertTrue(result.contains("qrCodeImage"))
         assertFalse(result.contains("qrCodeFallbackImage"))

@@ -46,26 +46,22 @@ class JsonPointerResolver(private val traceabilityId: String) {
             return svg
         }
 
-        return if (!qrCodeData.isNullOrEmpty()) {
-            val qrImageTag = "$QR_IMAGE_PREFIX,$qrCodeData"
-            svg.replace(QR_CODE_PLACEHOLDER, qrImageTag)
-        } else {
-            val qrBase64 = try {
-                QrCodeGenerator(traceabilityId).generateQRCodeImage(vcJsonString)
-            } catch (e: Exception) {
-                println("[$traceabilityId] QR generation failed: ${e.message}")
-                null
-            }
-
-            val finalQrBase64 = qrBase64.takeUnless { it.isNullOrEmpty() } ?: DEFAULT_FALLBACK_QR_BASE64
-            val qrImageTag = "$QR_IMAGE_PREFIX,$finalQrBase64"
-
-            val imageId = if (qrBase64.isNullOrEmpty()) QR_CODE_FALLBACK_IMAGE_ID else QR_CODE_IMAGE_ID
-
-            svg
-                .replace(QR_CODE_PLACEHOLDER, qrImageTag)
-                .replace(QR_CODE_IMAGE_ID, imageId)
+        val qrBase64 = try {
+            QrCodeGenerator(traceabilityId)
+                .generateQRCodeImage(qrCodeData.takeUnless { it.isNullOrEmpty() } ?: vcJsonString)
+        } catch (e: Exception) {
+            println("[$traceabilityId] QR generation failed: ${e.message}")
+            null
         }
+
+        val finalQrBase64 = qrBase64.takeUnless { it.isNullOrEmpty() } ?: DEFAULT_FALLBACK_QR_BASE64
+        val qrImageTag = "$QR_IMAGE_PREFIX,$finalQrBase64"
+
+        val imageId = if (qrBase64.isNullOrEmpty()) QR_CODE_FALLBACK_IMAGE_ID else QR_CODE_IMAGE_ID
+
+        return svg
+            .replace(QR_CODE_PLACEHOLDER, qrImageTag)
+            .replace(QR_CODE_IMAGE_ID, imageId)
     }
 
     /**
