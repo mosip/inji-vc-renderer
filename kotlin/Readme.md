@@ -171,7 +171,7 @@ For each item in the renderMethodArray, the library validates the `renderSuite` 
   - If qrCodeData is not provided, it will generate the QR code using the vcJsonString.
   - Example:
       ```
-      val vcJsonString = """{"credentialSubject" : "id": "did:example:123456789", "name": "Tester"}"""
+      val vcJsonString = """{"credentialSubject" : { "id": "did:example:123456789", "name": "Tester"}}"""
         
       val svgTempalte = "<svg><image id = "qrCodeImage" href="{{/qrCodeImage}}"</svg>"
         
@@ -243,6 +243,7 @@ For each item in the renderMethodArray, the library validates the `renderSuite` 
                     {"value": "TestCITY", "language": "eng"},
                     {"value": "VilleTest", "language": "fr"}
                 ]
+            }
         }   
         """
           
