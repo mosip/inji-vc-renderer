@@ -31,8 +31,9 @@
     - `credentialFormat` - Enum to specify the credential format. Currently only LDP_VC format is supported.
     - `wellknownJsonString` - Well-known Json downloaded in stringified format. It is optional parameter.
     - `vcJsonString` - VC Downloaded in stringified format.
-    - `qrCodeData` - QR code data to embed in the SVG. It is optional parameter.
-    
+    - `qrCodeData` - Encoded QR code data to embed in the SVG. It is optional parameter.
+        - NOTE : It is preferred that `qrCodeData` provided to the method is already encoded (for example, Base45-encoded). 
+        - It is expected that the encoding must be performed before invoking the method.
     
 
 - This method takes entire VC data as input.
