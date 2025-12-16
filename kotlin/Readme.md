@@ -28,12 +28,12 @@
 
 ### API
 - `generateCredentialDisplayContent(credentialFormat: CredentialFormat, wellknownJsonString: String? = null, vcJsonString: String, qrCodeData: String? = null)` - expects the Verifiable Credential, Well-known Json, Credential Format and QR Code Data as input and returns the list of replaced SVG Templates.
-    - `credentialFormat` - Enum to specify the credential format. Currently only LDP_VC format is supported.
-    - `wellknownJsonString` - Well-known Json downloaded in stringified format. It is optional parameter.
-    - `vcJsonString` - VC Downloaded in stringified format.
-    - `qrCodeData` - Encoded QR code data to embed in the SVG. It is optional parameter.
-        - NOTE : It is preferred that `qrCodeData` provided to the method is already encoded (for example, Base45-encoded). 
-        - It is expected that the encoding must be performed before invoking the method.
+  - `credentialFormat` - Enum to specify the credential format. Currently only LDP_VC format is supported.
+  - `wellknownJsonString` - Well-known Json downloaded in stringified format. It is optional parameter.
+  - `vcJsonString` - VC Downloaded in stringified format.
+  - `qrCodeData` - Encoded QR code data to embed in the SVG. It is optional parameter.
+    - NOTE : It is preferred that `qrCodeData` provided to the method is already encoded (for example, Base45-encoded). 
+    - The encoding should be performed before invoking this method.
     
 
 - This method takes entire VC data as input.
@@ -166,16 +166,16 @@ For each item in the renderMethodArray, the library validates the `renderSuite` 
     - An OPTIONAL multibase-encoded Multihash of the render method referenced if id is specified. The multibase value MUST be u (base64url-nopad) and the multihash value MUST be SHA-2 with 256-bits of output (0x12).
 
 ##### QR Code Placeholder
-  - If the SVG Template has `{{/qrCodeImage}}` placeholder, it will generate the QR code using Pixelpass library and replace the placeholder with generated QR code image in base64 format.
-    - If qrCodeData is provided, the library will generate the QR code using the value supplied.
-    - If qrCodeData is not provided, it will generate the QR code using the vcJsonString.
-    - Example:
-        ```
-        val vcJsonString = """{"credentialSubject" : "id": "did:example:123456789", "name": "Tester"}"""
+- If the SVG Template has `{{/qrCodeImage}}` placeholder, it will generate the QR code using Pixelpass library and replace the placeholder with generated QR code image in base64 format.
+  - If qrCodeData is provided, the library will generate the QR code using the value supplied.
+  - If qrCodeData is not provided, it will generate the QR code using the vcJsonString.
+  - Example:
+      ```
+      val vcJsonString = """{"credentialSubject" : "id": "did:example:123456789", "name": "Tester"}"""
         
-        val svgTempalte = "<svg><image id = "qrCodeImage" href="{{/qrCodeImage}}"</svg>"
+      val svgTempalte = "<svg><image id = "qrCodeImage" href="{{/qrCodeImage}}"</svg>"
         
-        //result => <svg><image id = "qrCodeImage" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABmJLR0QA/wD/AP+gvaeTAAAIKklEQVR4nO3de5QdZZnv8e9M7MzMzM7szszM7s"
+      //result => <svg><image id = "qrCodeImage" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABmJLR0QA/wD/AP+gvaeTAAAIKklEQVR4nO3de5QdZZnv8e9M7MzMzM7szszM7s"
 - If the template contains a `{{/qrCodeImage}}` placeholder but the QR code generation fails, it replaces the placeholder with an fallback image.
 - Note : It is mandatory to have <image id= "qrCodeImage" .../> tag in the SVG template for the QR code replacement to work. Because if it is fallback scenario, `<image>` id will be replaced with `qrCodeFallbackImage` which can be used to identify from consumer side if design have valid QR code or fallback one.
 
