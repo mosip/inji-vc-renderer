@@ -9,7 +9,7 @@ class QrCodeGenerator(private val traceabilityId: String) {
 
     fun generateFromVcJson(vcJson: String): String {
         try {
-            return generateQrFromVcJson(vcJson)
+            return generateQrCodeFromVcJson(vcJson)
         } catch (e: Exception){
             throw VcRendererExceptions.QRCodeGenerationFailureException(traceabilityId, e.message ?: UNKNOWN_ERROR,  className)
         }
@@ -17,7 +17,7 @@ class QrCodeGenerator(private val traceabilityId: String) {
 
     fun generateFromQrData(qrData: String): String {
         try {
-            return generateQrFromQrData(qrData)
+            return generateQrCodeFromQrData(qrData)
         } catch (e: Exception) {
             throw VcRendererExceptions.QRCodeGenerationFailureException(traceabilityId, e.message ?: UNKNOWN_ERROR,  className)
         }
