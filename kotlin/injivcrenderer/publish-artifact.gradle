@@ -1,4 +1,4 @@
-group = "io.mosip"
+group = "io.inji"
 version = "0.2.0-SNAPSHOT"
 
 publishing {
@@ -26,7 +26,7 @@ publishing {
             pom {
                 withXml {
                     asNode().appendNode('name', "Inji-Vc-Renderer")
-                    asNode().appendNode('url', "https://github.com/mosip/inji-vc-renderer")
+                    asNode().appendNode('url', "https://github.com/inji/inji-vc-renderer")
                     asNode().appendNode('description', "Android Library to transform SVG Template into SVG Image by replacing the placeholders with VC data")
 
                     asNode().appendNode('licenses').appendNode('license').with {
@@ -35,9 +35,9 @@ publishing {
                     }
 
                     asNode().appendNode('scm').with {
-                        appendNode('connection', 'scm:git:git://github.com/mosip/inji-vc-renderer.git')
-                        appendNode('developerConnection', 'scm:git:ssh://github.com:mosip/inji-vc-renderer.git')
-                        appendNode('url', "https://github.com/mosip/inji-vc-renderer")
+                        appendNode('connection', 'scm:git:git://github.com/inji/inji-vc-renderer.git')
+                        appendNode('developerConnection', 'scm:git:ssh://github.com:inji/inji-vc-renderer.git')
+                        appendNode('url', "https://github.com/inji/inji-vc-renderer")
                         appendNode('tag', "HEAD")
                     }
 
@@ -45,8 +45,8 @@ publishing {
                         appendNode('id', 'Your developer ID')
                         appendNode('name', 'Mosip')
                         appendNode('email', 'mosip.emailnotifier@gmail.com')
-                        appendNode('organization', 'io.mosip')
-                        appendNode("organizationUrl", "https://github.com/mosip/inji-vc-renderer")
+                        appendNode('organization', 'io.inji')
+                        appendNode("organizationUrl", "https://inji.io")
                     }
 
                     def dependenciesNode = asNode().appendNode('dependencies')
@@ -124,7 +124,7 @@ publishing {
             pom {
                 withXml {
                     asNode().appendNode('name', "Inji-Vc-Renderer")
-                    asNode().appendNode('url', "https://github.com/mosip/inji-vc-renderer")
+                    asNode().appendNode('url', "https://github.com/inji/inji-vc-renderer")
                     asNode().appendNode('description', "Java library to transform SVG Template into SVG Image by replacing the placeholders with VC data")
 
                     asNode().appendNode('licenses').appendNode('license').with {
@@ -136,8 +136,8 @@ publishing {
                         appendNode('id', 'Your developer ID')
                         appendNode('name', 'Mosip')
                         appendNode('email', 'mosip.emailnotifier@gmail.com')
-                        appendNode('organization', 'io.mosip')
-                        appendNode('organizationUrl', 'https://github.com/mosip/inji-vc-renderer')
+                        appendNode('organization', 'io.inji')
+                        appendNode('organizationUrl', 'https://inji.io')
                     }
 
                     def dependenciesNode = asNode().appendNode('dependencies')
@@ -160,9 +160,9 @@ publishing {
                     pluginNode.appendNode('version', '3.0.1')
 
                     asNode().appendNode('scm').with {
-                        appendNode('connection', 'scm:git:git://github.com/mosip/inji-vc-renderer.git')
-                        appendNode('developerConnection', 'scm:git:ssh://github.com:mosip/inji-vc-renderer.git')
-                        appendNode('url', "https://github.com/mosip/inji-vc-renderer")
+                        appendNode('connection', 'scm:git:git://github.com/inji/inji-vc-renderer.git')
+                        appendNode('developerConnection', 'scm:git:ssh://github.com:inji/inji-vc-renderer.git')
+                        appendNode('url', "https://github.com/inji/inji-vc-renderer")
                         appendNode('tag', "HEAD")
                     }
 
