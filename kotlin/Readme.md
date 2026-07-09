@@ -6,6 +6,51 @@
 - Replace the placeholders in the SVG template with actual VC Json Data.
 - Generates aar and jar from the library .
 
+### Installation
+
+The library is implemented in Kotlin and is compatible with both **Kotlin** and **Java** projects. It is published to Maven Central as two artifacts:
+
+* **`injivcrenderer-aar`** – Android library (AAR)
+* **`injivcrenderer-jar`** – JVM library (JAR)
+
+Choose the artifact that best fits your project.
+
+#### Gradle
+
+**Android (AAR)**
+
+```gradle
+implementation("io.inji:injivcrenderer-aar:1.0.0-alpha.1")
+```
+
+**JVM (JAR)**
+
+```gradle
+implementation("io.inji:injivcrenderer-jar:1.0.0-alpha.1")
+```
+
+#### Maven
+
+**Android (AAR)**
+
+```xml
+<dependency>
+    <groupId>io.inji</groupId>
+    <artifactId>injivcrenderer-aar</artifactId>
+    <version>1.0.0-alpha.1</version>
+</dependency>
+```
+
+**JVM (JAR)**
+
+```xml
+<dependency>
+    <groupId>io.inji</groupId>
+    <artifactId>injivcrenderer-jar</artifactId>
+    <version>1.0.0-alpha.1</version>
+</dependency>
+```
+
 ### Build
 - Modules in the Kotlin Project
 1. example-android-app
