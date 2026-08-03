@@ -2,3 +2,4 @@
 .DS_Store
 .gradle
 local.properties
+.github/keys/
