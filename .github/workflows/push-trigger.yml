@@ -27,7 +27,7 @@ jobs:
   sonar_analysis:
     needs: build-kotlin
     if: "${{  github.event_name != 'pull_request' }}"
-    uses: mosip/kattu/.github/workflows/gradlew-sonar-analysis.yml@gpgupdate-masterj21
+    uses: Mahesh-Binayak/kattu/.github/workflows/gradlew-sonar-analysis.yml@sonartest
     with:
       SERVICE_LOCATION: kotlin/injivcrenderer
     secrets:
