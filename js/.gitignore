@@ -1,7 +1,0 @@
-*.iml
-/node_modules/
-.idea
-/.idea/
-/.idea/
-/dist
-/coverage
